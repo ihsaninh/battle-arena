@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { FaCopy } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { FaCopy } from 'react-icons/fa';
 
-import { useBattleStore } from "@/src/lib/battle-store";
-import { getRoomStatusColor } from "@/src/lib/formatters";
+import { useBattleStore } from '@/src/lib/battle-store';
+import { getRoomStatusColor } from '@/src/lib/formatters';
 
 interface RoomHeaderProps {
   roomId: string;
@@ -18,12 +18,12 @@ export function RoomHeader({
   roomId,
   roomCode,
   onCopyRoomLink,
-  roomStatus = "waiting",
+  roomStatus = 'waiting',
 }: RoomHeaderProps) {
   const { copied, connectionState } = useBattleStore();
-  const rawCode = roomCode ?? roomId ?? "";
-  const displayCode = rawCode ? rawCode.toUpperCase() : "UNKNOWN";
-  const codeLabel = roomCode ? "Room Code" : "ID";
+  const rawCode = roomCode ?? roomId ?? '';
+  const displayCode = rawCode ? rawCode.toUpperCase() : 'UNKNOWN';
+  const codeLabel = roomCode ? 'Room Code' : 'ID';
 
   return (
     <motion.div
@@ -64,20 +64,20 @@ export function RoomHeader({
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-start sm:justify-end">
           <div
             className={`inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold uppercase tracking-wide ${
-              connectionState === "connected"
-                ? "bg-green-500/20 text-green-300 border-green-500/30"
-                : connectionState === "reconnecting"
-                ? "bg-yellow-500/20 text-yellow-300 border-yellow-500/30"
-                : "bg-red-500/20 text-red-300 border-red-500/30"
+              connectionState === 'connected'
+                ? 'bg-green-500/20 text-green-300 border-green-500/30'
+                : connectionState === 'reconnecting'
+                  ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                  : 'bg-red-500/20 text-red-300 border-red-500/30'
             }`}
           >
             <div
               className={`w-2.5 h-2.5 rounded-full ${
-                connectionState === "connected"
-                  ? "bg-green-400 animate-pulse"
-                  : connectionState === "reconnecting"
-                  ? "bg-yellow-400 animate-pulse"
-                  : "bg-red-400"
+                connectionState === 'connected'
+                  ? 'bg-green-400 animate-pulse'
+                  : connectionState === 'reconnecting'
+                    ? 'bg-yellow-400 animate-pulse'
+                    : 'bg-red-400'
               }`}
             />
             <span className="capitalize">{connectionState}</span>
@@ -88,7 +88,7 @@ export function RoomHeader({
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-600/20 px-4 py-2 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-600/30"
           >
             <FaCopy className="h-4 w-4" />
-            {copied ? "Copied!" : "Share Room"}
+            {copied ? 'Copied!' : 'Share Room'}
           </button>
         </div>
       </div>

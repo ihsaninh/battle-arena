@@ -1,7 +1,7 @@
-type BattleRequestParseMode = "json" | "void";
+type BattleRequestParseMode = 'json' | 'void';
 
 export interface BattleRequestOptions
-  extends Omit<RequestInit, "body" | "headers" | "method"> {
+  extends Omit<RequestInit, 'body' | 'headers' | 'method'> {
   method?: string;
   body?: unknown;
   headers?: Record<string, string>;
@@ -14,30 +14,30 @@ function toRequestBody(body: unknown): BodyInit | null {
     return null;
   }
 
-  if (typeof body === "string" || body instanceof FormData) {
+  if (typeof body === 'string' || body instanceof FormData) {
     return body;
   }
 
   return JSON.stringify(body);
 }
 
-const API_BASE = "/api/battle";
+const API_BASE = '/api/battle';
 
 export async function battleRequest<TResponse = void>(
   path: string,
   options: BattleRequestOptions = {}
 ): Promise<TResponse> {
   const {
-    method = "GET",
+    method = 'GET',
     body,
     headers,
-    parseAs = "json",
+    parseAs = 'json',
     fallbackMessage,
-    credentials = "include",
+    credentials = 'include',
     ...rest
   } = options;
 
-  const parseMode: BattleRequestParseMode = parseAs ?? "json";
+  const parseMode: BattleRequestParseMode = parseAs ?? 'json';
 
   const hasJsonBody =
     body !== undefined && body !== null && !(body instanceof FormData);
@@ -47,18 +47,18 @@ export async function battleRequest<TResponse = void>(
     credentials,
     ...rest,
     headers: {
-      ...(hasJsonBody ? { "Content-Type": "application/json" } : {}),
+      ...(hasJsonBody ? { 'Content-Type': 'application/json' } : {}),
       ...headers,
     },
     body: toRequestBody(body) ?? undefined,
   });
 
-  const contentType = response.headers.get("content-type") ?? "";
+  const contentType = response.headers.get('content-type') ?? '';
   const shouldParseJson =
-    contentType.includes("application/json") || contentType.includes("json");
+    contentType.includes('application/json') || contentType.includes('json');
 
   let parsedBody: unknown = null;
-  if (!response.ok || (parseMode === "json" && shouldParseJson)) {
+  if (!response.ok || (parseMode === 'json' && shouldParseJson)) {
     try {
       parsedBody = await response.json();
     } catch {
@@ -67,7 +67,7 @@ export async function battleRequest<TResponse = void>(
   }
 
   if (!response.ok) {
-    if (parsedBody && typeof parsedBody === "object" && "error" in parsedBody) {
+    if (parsedBody && typeof parsedBody === 'object' && 'error' in parsedBody) {
       throw parsedBody;
     }
 
@@ -86,9 +86,9 @@ export async function battleRequest<TResponse = void>(
 
     if (
       parsedBody &&
-      typeof parsedBody === "object" &&
-      "code" in parsedBody &&
-      typeof (parsedBody as { code?: string }).code === "string"
+      typeof parsedBody === 'object' &&
+      'code' in parsedBody &&
+      typeof (parsedBody as { code?: string }).code === 'string'
     ) {
       error.code = (parsedBody as { code: string }).code;
     }
@@ -98,7 +98,7 @@ export async function battleRequest<TResponse = void>(
     throw error;
   }
 
-  if (parseMode === "void") {
+  if (parseMode === 'void') {
     return undefined as TResponse;
   }
 

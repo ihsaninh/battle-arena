@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import {
   BattleConnectionError,
@@ -13,11 +13,11 @@ import {
   QuickSubmitButton,
   RoomHeader,
   RoomInfo,
-} from "@/src/components";
-import { useBattleLogic } from "@/src/hooks/useBattleLogic";
-import { useBattleStore } from "@/src/lib/battle-store";
-import { SharedAnimatedBackground } from "@/src/components/SharedAnimatedBackground";
-import { useViewport } from "@/src/hooks/useViewport";
+} from '@/src/components';
+import { useBattleLogic } from '@/src/hooks/useBattleLogic';
+import { useBattleStore } from '@/src/lib/battle-store';
+import { SharedAnimatedBackground } from '@/src/components/SharedAnimatedBackground';
+import { useViewport } from '@/src/hooks/useViewport';
 
 export default function BattleRoom() {
   const [mounted, setMounted] = useState(false);
@@ -54,7 +54,7 @@ export default function BattleRoom() {
   useEffect(() => setMounted(true), []);
 
   // Show connection error message
-  if (connectionState === "disconnected" && connectionError) {
+  if (connectionState === 'disconnected' && connectionError) {
     return (
       <BattleConnectionError
         connectionError={connectionError}
@@ -71,7 +71,7 @@ export default function BattleRoom() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/80 to-slate-900 relative overflow-hidden">
       {/* Connection Status Indicator */}
       <ConnectionStatusIndicator
-        status={connectionState as "connected" | "disconnected"}
+        status={connectionState as 'connected' | 'disconnected'}
       />
 
       {/* Animated Background */}
@@ -100,7 +100,7 @@ export default function BattleRoom() {
               roomId={roomId}
               roomCode={state?.room?.room_code}
               onCopyRoomLink={copyRoomLink}
-              roomStatus={state?.room?.status || "waiting"}
+              roomStatus={state?.room?.status || 'waiting'}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

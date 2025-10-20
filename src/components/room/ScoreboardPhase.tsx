@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { animate, LayoutGroup, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { animate, LayoutGroup, motion } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   FaArrowRight,
   FaCheckCircle,
   FaCrown,
   FaInfoCircle,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
-import { useBattleStore } from "@/src/lib/battle-store";
+import { useBattleStore } from '@/src/lib/battle-store';
 import type {
   RoundScoreboardEntry,
   ScoreboardPhaseProps,
-} from "@/src/types/battle";
+} from '@/src/types/battle';
 
 type ScoreboardEntryWithMeta = RoundScoreboardEntry & {
   hadExplicitRoundScore: boolean;
@@ -36,7 +36,7 @@ function AnimatedNumber({
 }: AnimatedNumberProps) {
   const targetValue = useMemo(() => {
     const numeric =
-      typeof value === "number" ? value : Number.parseFloat(String(value ?? 0));
+      typeof value === 'number' ? value : Number.parseFloat(String(value ?? 0));
     return Number.isFinite(numeric) ? numeric : 0;
   }, [value]);
 
@@ -51,8 +51,8 @@ function AnimatedNumber({
 
     const controls = animate(previousValueRef.current, targetValue, {
       duration,
-      ease: "easeOut",
-      onUpdate: (latest) => setDisplayValue(latest),
+      ease: 'easeOut',
+      onUpdate: latest => setDisplayValue(latest),
       onComplete: () => setDisplayValue(targetValue),
     });
 
@@ -106,7 +106,7 @@ function sanitizeEntries(
   entries: RoundScoreboardEntry[],
   totalOverrides?: Map<string, number>
 ): ScoreboardEntryWithMeta[] {
-  return entries.map((entry) => {
+  return entries.map(entry => {
     const hasRoundScore =
       entry.roundScore !== null && entry.roundScore !== undefined;
 
@@ -129,15 +129,11 @@ export function ScoreboardPhase({
   currentSessionId,
   totalRounds,
 }: ScoreboardPhaseProps) {
-  const previousScoreboard = useBattleStore(
-    (state) => state.previousScoreboard
-  );
-  const participants = useBattleStore(
-    (state) => state.state?.participants ?? []
-  );
+  const previousScoreboard = useBattleStore(state => state.previousScoreboard);
+  const participants = useBattleStore(state => state.state?.participants ?? []);
   const participantTotalsMap = useMemo(() => {
     const map = new Map<string, number>();
-    participants.forEach((participant) => {
+    participants.forEach(participant => {
       map.set(participant.session_id, toNumber(participant.total_score));
     });
     return map;
@@ -157,7 +153,7 @@ export function ScoreboardPhase({
 
   const previousEntryMap = useMemo(() => {
     const map = new Map<string, ScoreboardEntryWithMeta>();
-    sanitizedPreviousEntries?.forEach((entry) => {
+    sanitizedPreviousEntries?.forEach(entry => {
       map.set(entry.sessionId, entry);
     });
     return map;
@@ -172,15 +168,15 @@ export function ScoreboardPhase({
         ? sanitizedPreviousEntries
         : sanitizedCurrentEntries;
 
-    return sourceEntries.map((entry) => ({ ...entry }));
+    return sourceEntries.map(entry => ({ ...entry }));
   });
 
   const isFinalRound = !scoreboard.hasMoreRounds;
   const title = isFinalRound
-    ? "Final Standings"
+    ? 'Final Standings'
     : `Round ${scoreboard.roundNo} Scoreboard`;
   const subtitle = isFinalRound
-    ? "Great job! These are the final results."
+    ? 'Great job! These are the final results.'
     : "Here's how everyone did this round.";
 
   const questionSummary = scoreboard.question ?? null;
@@ -191,15 +187,14 @@ export function ScoreboardPhase({
   const myAnswerSummary = useMemo(() => {
     if (!currentSessionId) return null;
     return (
-      answersSummary.find((entry) => entry.sessionId === currentSessionId) ??
-      null
+      answersSummary.find(entry => entry.sessionId === currentSessionId) ?? null
     );
   }, [answersSummary, currentSessionId]);
 
   const myChoice = useMemo(() => {
     if (!questionSummary?.choices || !myAnswerSummary?.choiceId) return null;
     return questionSummary.choices.find(
-      (choice) => choice.id === myAnswerSummary.choiceId
+      choice => choice.id === myAnswerSummary.choiceId
     );
   }, [questionSummary?.choices, myAnswerSummary?.choiceId]);
 
@@ -213,9 +208,7 @@ export function ScoreboardPhase({
     }
 
     const frame = requestAnimationFrame(() => {
-      setAnimatedEntries(
-        sanitizedCurrentEntries.map((entry) => ({ ...entry }))
-      );
+      setAnimatedEntries(sanitizedCurrentEntries.map(entry => ({ ...entry })));
     });
 
     return () => cancelAnimationFrame(frame);
@@ -231,7 +224,7 @@ export function ScoreboardPhase({
       >
         <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/30 bg-yellow-500/10 px-4 py-1 text-sm font-semibold text-yellow-200">
           <FaCrown className="h-4 w-4" />
-          {isFinalRound ? "Finale" : `Round ${scoreboard.roundNo}`}
+          {isFinalRound ? 'Finale' : `Round ${scoreboard.roundNo}`}
         </div>
         <h3 className="text-2xl font-bold text-white md:text-3xl">{title}</h3>
         <p className="mt-2 text-base text-white/70 md:text-lg">{subtitle}</p>
@@ -244,19 +237,19 @@ export function ScoreboardPhase({
             const rank = index + 1;
             const tierColor =
               rank === 1
-                ? "from-yellow-500/20 to-amber-500/20 border-yellow-400/30"
+                ? 'from-yellow-500/20 to-amber-500/20 border-yellow-400/30'
                 : rank === 2
-                ? "from-slate-500/30 to-indigo-500/20 border-slate-300/30"
-                : rank === 3
-                ? "from-amber-500/15 to-orange-500/15 border-amber-400/30"
-                : "from-slate-800/40 to-slate-700/30 border-white/10";
+                  ? 'from-slate-500/30 to-indigo-500/20 border-slate-300/30'
+                  : rank === 3
+                    ? 'from-amber-500/15 to-orange-500/15 border-amber-400/30'
+                    : 'from-slate-800/40 to-slate-700/30 border-white/10';
 
             const previousEntry = previousEntryMap.get(entry.sessionId);
 
             const displayRoundScore =
               scoreboard.roundNo === 1
                 ? entry.totalScore
-                : entry.roundScore ?? 0;
+                : (entry.roundScore ?? 0);
             const initialRoundScore = scoreboard.roundNo === 1 ? 0 : undefined;
 
             const initialTotalPoints =
@@ -270,12 +263,12 @@ export function ScoreboardPhase({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  layout: { type: "spring", stiffness: 600, damping: 45 },
+                  layout: { type: 'spring', stiffness: 600, damping: 45 },
                   opacity: { duration: 0.25 },
                   y: { duration: 0.25 },
                 }}
                 className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br ${tierColor} px-5 py-4 shadow-lg transition-transform md:px-6 md:py-5 ${
-                  isSelf ? "ring-2 ring-cyan-400/60" : ""
+                  isSelf ? 'ring-2 ring-cyan-400/60' : ''
                 }`}
               >
                 <div className="flex items-center justify-between gap-4">
@@ -288,7 +281,7 @@ export function ScoreboardPhase({
                         {entry.displayName}
                       </p>
                       <p className="text-sm text-white/60">
-                        {isSelf ? "You" : "Participant"}
+                        {isSelf ? 'You' : 'Participant'}
                       </p>
                     </div>
                   </div>
@@ -301,7 +294,7 @@ export function ScoreboardPhase({
                         key={`${entry.sessionId}-round-score-${scoreboard.roundNo}`}
                         value={displayRoundScore}
                         className="text-lg font-semibold text-emerald-300 md:text-xl"
-                        format={(val) => `${val >= 0 ? "+" : ""}${val}`}
+                        format={val => `${val >= 0 ? '+' : ''}${val}`}
                         initialValue={initialRoundScore}
                       />
                     </div>
@@ -312,7 +305,7 @@ export function ScoreboardPhase({
                       <AnimatedNumber
                         value={entry.totalScore}
                         className="text-2xl font-bold text-white md:text-3xl"
-                        format={(val) => val.toLocaleString()}
+                        format={val => val.toLocaleString()}
                         initialValue={initialTotalPoints}
                       />
                     </div>
@@ -336,28 +329,31 @@ export function ScoreboardPhase({
               {questionSummary.prompt}
             </p>
 
-            {questionSummary.type === "multiple-choice" &&
+            {questionSummary.type === 'multiple-choice' &&
               questionSummary.choices &&
               questionSummary.choices.length > 0 && (
                 <div className="mt-4 space-y-2 text-sm">
-                  {questionSummary.choices.map((choice) => {
+                  {questionSummary.choices.map(choice => {
                     const isCorrectChoice = choice.isCorrect;
                     const isMySelection = choice.id === myChoice?.id;
                     const baseClass =
-                      "flex items-center gap-3 rounded-xl border px-4 py-2 transition-colors";
+                      'flex items-center gap-3 rounded-xl border px-4 py-2 transition-colors';
                     const stateClass = isCorrectChoice
-                      ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-100"
+                      ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-100'
                       : isMySelection
-                      ? "border-red-400/40 bg-red-500/10 text-red-100"
-                      : "border-white/10 bg-white/5 text-white/80";
+                        ? 'border-red-400/40 bg-red-500/10 text-red-100'
+                        : 'border-white/10 bg-white/5 text-white/80';
 
                     return (
-                      <div key={choice.id} className={`${baseClass} ${stateClass}`}>
+                      <div
+                        key={choice.id}
+                        className={`${baseClass} ${stateClass}`}
+                      >
                         <div
                           className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
                             isMySelection
-                              ? "border-white bg-white"
-                              : "border-white/40"
+                              ? 'border-white bg-white'
+                              : 'border-white/40'
                           }`}
                         >
                           {isMySelection && (
@@ -379,7 +375,7 @@ export function ScoreboardPhase({
                 </div>
               )}
 
-            {questionSummary.type !== "multiple-choice" &&
+            {questionSummary.type !== 'multiple-choice' &&
               questionSummary.rubricNotes && (
                 <p className="mt-4 text-sm text-white/70">
                   Tip: {questionSummary.rubricNotes}
@@ -403,17 +399,17 @@ export function ScoreboardPhase({
           >
             <FaArrowRight className="h-5 w-5" />
             {loading
-              ? "Processing..."
+              ? 'Processing...'
               : scoreboard.hasMoreRounds
-              ? "Start Next Round"
-              : "Finish Battle"}
+                ? 'Start Next Round'
+                : 'Finish Battle'}
           </button>
         ) : (
           <p className="text-center text-sm text-white/60">
-            Waiting for the host to{" "}
+            Waiting for the host to{' '}
             {scoreboard.hasMoreRounds
-              ? "start the next round"
-              : "finish the battle"}
+              ? 'start the next round'
+              : 'finish the battle'}
             ...
           </p>
         )}

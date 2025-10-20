@@ -3,7 +3,7 @@ import {
   type UseMutationOptions,
   useQuery,
   useQueryClient,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
 
 import {
   battleApi,
@@ -14,30 +14,30 @@ import {
   type StartBattlePayload,
   type SubmitAnswerPayload,
   type SubmitAnswerResponse,
-} from "@/src/lib/api";
-import { ensureSession } from "@/src/lib/session";
-import { handleApiError } from "@/src/lib/client-error-handler";
+} from '@/src/lib/api';
+import { ensureSession } from '@/src/lib/session';
+import { handleApiError } from '@/src/lib/client-error-handler';
 
 // Query Keys
 export const battleQueryKeys = {
-  all: ["battle"] as const,
-  rooms: () => [...battleQueryKeys.all, "rooms"] as const,
+  all: ['battle'] as const,
+  rooms: () => [...battleQueryKeys.all, 'rooms'] as const,
   room: (roomId: string) => [...battleQueryKeys.rooms(), roomId] as const,
   roomState: (roomId: string) =>
-    [...battleQueryKeys.room(roomId), "state"] as const,
+    [...battleQueryKeys.room(roomId), 'state'] as const,
   answerStatus: (roomId: string) =>
-    [...battleQueryKeys.room(roomId), "answer-status"] as const,
+    [...battleQueryKeys.room(roomId), 'answer-status'] as const,
   userAnswers: (roomId: string) =>
-    [...battleQueryKeys.room(roomId), "user-answers"] as const,
+    [...battleQueryKeys.room(roomId), 'user-answers'] as const,
   scoreboard: (roomId: string) =>
-    [...battleQueryKeys.room(roomId), "scoreboard"] as const,
+    [...battleQueryKeys.room(roomId), 'scoreboard'] as const,
 };
 
 const showBattleNotification = (
   message: string,
-  type?: "error" | "warning" | "info"
+  type?: 'error' | 'warning' | 'info'
 ) => {
-  console.log(`[${type?.toUpperCase() || "ERROR"}] ${message}`);
+  console.log(`[${type?.toUpperCase() || 'ERROR'}] ${message}`);
 };
 
 async function runWithBattleErrorHandling<T>(
@@ -64,13 +64,13 @@ type MutationSuccessHandler<TData, TVariables, TContext> = UseMutationOptions<
   unknown,
   TVariables,
   TContext
->["onSuccess"];
+>['onSuccess'];
 type MutationErrorHandler<TData, TVariables, TContext> = UseMutationOptions<
   TData,
   unknown,
   TVariables,
   TContext
->["onError"];
+>['onError'];
 
 interface BattleMutationConfig<TData, TVariables, TContext = unknown> {
   mutationFn: (variables: TVariables) => Promise<TData>;
@@ -86,26 +86,28 @@ function useBattleMutation<TData, TVariables, TContext = unknown>(
   const queryClient = useQueryClient();
 
   return useMutation<TData, unknown, TVariables, TContext>({
-    mutationFn: (variables) =>
+    mutationFn: variables =>
       runWithBattleErrorHandling(() => config.mutationFn(variables)),
     onSuccess: (data, variables, context) => {
-      config.invalidate?.forEach((selector) => {
+      config.invalidate?.forEach(selector => {
         try {
           const queryKey = selector({ data, variables });
           if (queryKey && queryKey.length > 0) {
             queryClient.invalidateQueries({ queryKey });
           }
         } catch (err) {
-          console.error("[Battle Mutation] Failed to invalidate query", err);
+          console.error('[Battle Mutation] Failed to invalidate query', err);
         }
       });
 
       if (config.onSuccess) {
-        (config.onSuccess as (data: TData, variables: TVariables, context: TContext) => void)(
-          data,
-          variables,
-          context
-        );
+        (
+          config.onSuccess as (
+            data: TData,
+            variables: TVariables,
+            context: TContext
+          ) => void
+        )(data, variables, context);
       }
     },
     onError: (error, variables, context) => {
@@ -113,11 +115,13 @@ function useBattleMutation<TData, TVariables, TContext = unknown>(
         console.error(config.errorLabel, error);
       }
       if (config.onError && context !== undefined) {
-        (config.onError as (error: unknown, variables: TVariables, context: TContext) => void)(
-          error,
-          variables,
-          context
-        );
+        (
+          config.onError as (
+            error: unknown,
+            variables: TVariables,
+            context: TContext
+          ) => void
+        )(error, variables, context);
       }
     },
   });
@@ -129,7 +133,7 @@ export const useRoomState = (
   options?: { enabled?: boolean; refetchInterval?: number }
 ) => {
   return useQuery({
-    queryKey: battleQueryKeys.roomState(roomId || ""),
+    queryKey: battleQueryKeys.roomState(roomId || ''),
     queryFn: () => battleApi.getRoomState(roomId!),
     enabled: !!roomId && options?.enabled !== false,
     refetchInterval: options?.refetchInterval,
@@ -144,7 +148,7 @@ export const useAnswerStatus = (
   options?: { enabled?: boolean; refetchInterval?: number }
 ) => {
   return useQuery({
-    queryKey: battleQueryKeys.answerStatus(roomId || ""),
+    queryKey: battleQueryKeys.answerStatus(roomId || ''),
     queryFn: () => battleApi.getAnswerStatus(roomId!),
     enabled: !!roomId && options?.enabled !== false,
     refetchInterval: options?.refetchInterval,
@@ -159,7 +163,7 @@ export const useUserAnswers = (
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
-    queryKey: battleQueryKeys.userAnswers(roomId || ""),
+    queryKey: battleQueryKeys.userAnswers(roomId || ''),
     queryFn: () => battleApi.getUserAnswers(roomId!),
     enabled: !!roomId && options?.enabled !== false,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -172,7 +176,7 @@ export const useScoreboard = (
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
-    queryKey: battleQueryKeys.scoreboard(roomId || ""),
+    queryKey: battleQueryKeys.scoreboard(roomId || ''),
     queryFn: () => battleApi.getScoreboard(roomId!),
     enabled: !!roomId && options?.enabled !== false,
     staleTime: 30 * 1000, // 30 seconds
@@ -185,7 +189,7 @@ export const useRoomStats = (
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
-    queryKey: battleQueryKeys.roomState(roomId || ""),
+    queryKey: battleQueryKeys.roomState(roomId || ''),
     queryFn: () => battleApi.getRoomStats(roomId!),
     enabled: !!roomId && options?.enabled !== false,
     staleTime: 30 * 1000, // 30 seconds
@@ -198,23 +202,23 @@ export const useCreateRoom = () => {
     CreateRoomResponse,
     CreateRoomPayload & { skipSessionCreation?: boolean }
   >({
-    mutationFn: async (payload) => {
+    mutationFn: async payload => {
       const { skipSessionCreation, ...roomPayload } = payload;
 
       if (!skipSessionCreation) {
         const sessionCreated = await ensureSession(roomPayload.hostDisplayName);
         if (!sessionCreated) {
-          throw new Error("Failed to create session");
+          throw new Error('Failed to create session');
         }
 
         // Small delay to ensure cookie is set
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       return battleApi.createRoom(roomPayload);
     },
     invalidate: [() => battleQueryKeys.rooms()],
-    errorLabel: "Create room failed:",
+    errorLabel: 'Create room failed:',
   });
 };
 
@@ -233,13 +237,13 @@ export const useJoinRoom = () => {
       if (!availability.joinable) {
         const message =
           availability.message ||
-          (availability.status === "finished"
-            ? "Battle ini sudah selesai."
-            : "Room ini tidak menerima peserta baru saat ini.");
+          (availability.status === 'finished'
+            ? 'Battle ini sudah selesai.'
+            : 'Room ini tidak menerima peserta baru saat ini.');
 
         throw {
           error: {
-            code: "ROOM_NOT_JOINABLE",
+            code: 'ROOM_NOT_JOINABLE',
             message,
             retryable: false,
           },
@@ -251,9 +255,9 @@ export const useJoinRoom = () => {
       if (!skipSessionCreation) {
         const sessionCreated = await ensureSession(payload.displayName);
         if (!sessionCreated) {
-          throw new Error("Failed to create session");
+          throw new Error('Failed to create session');
         }
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       const joinResponse = await battleApi.joinRoom(resolvedRoomId, payload);
@@ -267,7 +271,7 @@ export const useJoinRoom = () => {
       ({ data, variables }) =>
         battleQueryKeys.roomState(data?.roomId || variables.roomId),
     ],
-    errorLabel: "Join room failed:",
+    errorLabel: 'Join room failed:',
   });
 };
 
@@ -286,7 +290,7 @@ export const useStartBattle = () => {
     invalidate: [
       ({ variables }) => battleQueryKeys.roomState(variables.roomId),
     ],
-    errorLabel: "Start battle failed:",
+    errorLabel: 'Start battle failed:',
   });
 };
 
@@ -298,7 +302,7 @@ export const useUpdateReadyStatus = () => {
       ({ variables }) => battleQueryKeys.roomState(variables.roomId),
       ({ variables }) => battleQueryKeys.answerStatus(variables.roomId),
     ],
-    errorLabel: "Update ready status failed:",
+    errorLabel: 'Update ready status failed:',
   });
 };
 
@@ -314,7 +318,7 @@ export const useSubmitAnswer = () => {
       ({ variables }) => battleQueryKeys.answerStatus(variables.roomId),
       ({ variables }) => battleQueryKeys.roomState(variables.roomId),
     ],
-    errorLabel: "Submit answer failed:",
+    errorLabel: 'Submit answer failed:',
   });
 };
 
@@ -326,7 +330,7 @@ export const useCloseRound = () => {
       ({ variables }) => battleQueryKeys.roomState(variables.roomId),
       ({ variables }) => battleQueryKeys.answerStatus(variables.roomId),
     ],
-    errorLabel: "Close round failed:",
+    errorLabel: 'Close round failed:',
   });
 };
 
@@ -338,7 +342,7 @@ export const useRevealNextRound = () => {
     invalidate: [
       ({ variables }) => battleQueryKeys.roomState(variables.roomId),
     ],
-    errorLabel: "Reveal next round failed:",
+    errorLabel: 'Reveal next round failed:',
   });
 };
 
@@ -353,7 +357,7 @@ export const useAdvanceFromScoreboard = () => {
       ({ variables }) => battleQueryKeys.roomState(variables.roomId),
       ({ variables }) => battleQueryKeys.answerStatus(variables.roomId),
     ],
-    errorLabel: "Advance from scoreboard failed:",
+    errorLabel: 'Advance from scoreboard failed:',
   });
 };
 

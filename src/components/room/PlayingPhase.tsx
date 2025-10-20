@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { FaClock, FaGamepad, FaStar } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import { FaClock, FaGamepad, FaStar } from 'react-icons/fa';
 
-import { useBattleStore } from "@/src/lib/battle-store";
+import { useBattleStore } from '@/src/lib/battle-store';
 
 export function PlayingPhase() {
   const { isProgressing, state } = useBattleStore();
 
   const isCalculatingFinal =
     state?.room?.num_questions &&
-    state?.room?.status === "active" &&
+    state?.room?.status === 'active' &&
     !state.activeRound;
 
   return (
@@ -24,7 +24,7 @@ export function PlayingPhase() {
               transition={{
                 duration: isCalculatingFinal ? 3 : 2,
                 repeat: Infinity,
-                ease: "linear",
+                ease: 'linear',
               }}
               className="relative mx-auto"
             >
@@ -48,19 +48,19 @@ export function PlayingPhase() {
               transition={{
                 duration: 2,
                 repeat: Infinity,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
               className={`absolute inset-0 rounded-full ${
                 isCalculatingFinal
-                  ? "bg-gradient-to-r from-yellow-500 to-orange-500"
-                  : "bg-gradient-to-r from-purple-500 to-pink-500"
+                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500'
               }`}
             />
           </div>
 
           {/* Progress dots */}
           <div className="flex justify-center space-x-2">
-            {[0, 1, 2].map((i) => (
+            {[0, 1, 2].map(i => (
               <motion.div
                 key={i}
                 animate={{
@@ -71,10 +71,10 @@ export function PlayingPhase() {
                   duration: 1.5,
                   repeat: Infinity,
                   delay: i * 0.2,
-                  ease: "easeInOut",
+                  ease: 'easeInOut',
                 }}
                 className={`w-3 h-3 rounded-full ${
-                  isCalculatingFinal ? "bg-yellow-400" : "bg-purple-400"
+                  isCalculatingFinal ? 'bg-yellow-400' : 'bg-purple-400'
                 }`}
               />
             ))}
@@ -87,28 +87,28 @@ export function PlayingPhase() {
           >
             <h3 className="text-xl font-semibold text-white mb-2">
               {isCalculatingFinal
-                ? "🏆 Calculating Final Results..."
-                : "⚡ Preparing Next Round..."}
+                ? '🏆 Calculating Final Results...'
+                : '⚡ Preparing Next Round...'}
             </h3>
             <p className="text-gray-300 max-w-md mx-auto">
               {isCalculatingFinal
-                ? "The battle is finishing up. Final scores are being calculated and the winner will be announced soon!"
-                : "The next question is being prepared automatically. Get ready for another exciting round!"}
+                ? 'The battle is finishing up. Final scores are being calculated and the winner will be announced soon!'
+                : 'The next question is being prepared automatically. Get ready for another exciting round!'}
             </p>
           </motion.div>
 
           {/* Additional loading indicator */}
           <motion.div
-            animate={{ width: ["0%", "100%", "0%"] }}
+            animate={{ width: ['0%', '100%', '0%'] }}
             transition={{
               duration: 2.5,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }}
             className={`h-1 rounded-full mx-auto max-w-xs ${
               isCalculatingFinal
-                ? "bg-gradient-to-r from-yellow-500 to-orange-500"
-                : "bg-gradient-to-r from-purple-500 to-pink-500"
+                ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
+                : 'bg-gradient-to-r from-purple-500 to-pink-500'
             }`}
           />
         </>
@@ -125,7 +125,7 @@ export function PlayingPhase() {
               rotate: {
                 duration: 0.5,
                 repeat: Infinity,
-                repeatType: "reverse",
+                repeatType: 'reverse',
               },
             }}
             className="w-20 h-20 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center mx-auto"
@@ -157,7 +157,7 @@ export function PlayingPhase() {
                   duration: 1,
                   repeat: Infinity,
                   delay: i * 0.3,
-                  ease: "easeInOut",
+                  ease: 'easeInOut',
                 }}
                 className="w-8 h-8 rounded-full bg-cyan-500/30 border border-cyan-400/50 flex items-center justify-center"
               >

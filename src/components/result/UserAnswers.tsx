@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 import {
   FaChevronDown,
   FaChevronUp,
   FaQuestionCircle,
   FaStar,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
-import type { UserAnswersProps } from "@/src/types/battle";
+import type { UserAnswersProps } from '@/src/types/battle';
 
 export function UserAnswers({
   userAnswers,
@@ -19,7 +19,7 @@ export function UserAnswers({
   if (userAnswers.length === 0) return null;
 
   const totalQuestions = totalAnswers || userAnswers.length;
-  const answeredCount = userAnswers.filter((a) => a.wasAnswered).length;
+  const answeredCount = userAnswers.filter(a => a.wasAnswered).length;
   const totalScore = userAnswers.reduce((sum, a) => sum + a.score, 0);
   const avgScore =
     totalQuestions > 0 ? Math.round(totalScore / totalQuestions) : 0;
@@ -52,7 +52,7 @@ export function UserAnswers({
       {showAnswers && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
+          animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           className="space-y-4"
         >
@@ -100,15 +100,15 @@ export function UserAnswers({
                   <div
                     className={`rounded-lg border p-3 ${
                       answer.wasAnswered
-                        ? "bg-cyan-500/10 border-cyan-500/20"
-                        : "bg-gray-500/10 border-gray-500/20"
+                        ? 'bg-cyan-500/10 border-cyan-500/20'
+                        : 'bg-gray-500/10 border-gray-500/20'
                     }`}
                   >
                     <p
                       className={
                         answer.wasAnswered
-                          ? "text-cyan-100"
-                          : "text-gray-300 italic"
+                          ? 'text-cyan-100'
+                          : 'text-gray-300 italic'
                       }
                     >
                       {answer.answer}
@@ -124,19 +124,19 @@ export function UserAnswers({
                     <div
                       className={`rounded-lg p-3 border ${
                         answer.isCorrect
-                          ? "bg-green-500/10 border-green-500/20"
-                          : "bg-red-500/10 border-red-500/20"
+                          ? 'bg-green-500/10 border-green-500/20'
+                          : 'bg-red-500/10 border-red-500/20'
                       }`}
                     >
                       <p className="text-white">
                         {answer.correctAnswer}
                         {answer.isCorrect === true
-                          ? " ✅"
+                          ? ' ✅'
                           : answer.wasAnswered
-                          ? " ❌"
-                          : ""}
+                            ? ' ❌'
+                            : ''}
                       </p>
-                      {typeof answer.timeMs === "number" && (
+                      {typeof answer.timeMs === 'number' && (
                         <p className="text-xs text-gray-300 mt-1">
                           Time: {Math.round(answer.timeMs / 100) / 10}s
                         </p>

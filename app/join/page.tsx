@@ -1,14 +1,10 @@
-"use client";
+'use client';
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect } from 'react';
 
-import {
-  BattleHeader,
-  BattlePageShell,
-  JoinRoomForm,
-} from "@/src/components";
-import { useBattleLanding } from "@/src/hooks/useBattleLanding";
+import { BattleHeader, BattlePageShell, JoinRoomForm } from '@/src/components';
+import { useBattleLanding } from '@/src/hooks/useBattleLanding';
 
 export default function BattleJoinPage() {
   return (
@@ -32,12 +28,12 @@ function BattleJoinContent() {
   } = useBattleLanding();
 
   useEffect(() => {
-    setGameMode("join");
+    setGameMode('join');
   }, [setGameMode]);
 
   useEffect(() => {
     const urlRoomCode =
-      searchParams?.get("roomCode") || searchParams?.get("roomId");
+      searchParams?.get('roomCode') || searchParams?.get('roomId');
 
     if (urlRoomCode && joinRoomId !== urlRoomCode) {
       setJoinRoomId(urlRoomCode);
@@ -45,8 +41,8 @@ function BattleJoinContent() {
   }, [searchParams, joinRoomId, setJoinRoomId]);
 
   const handleNavigateToLanding = useCallback(
-    (mode: "create" | "join" | null) => {
-      router.push(mode ? `/${mode}` : "/");
+    (mode: 'create' | 'join' | null) => {
+      router.push(mode ? `/${mode}` : '/');
     },
     [router]
   );

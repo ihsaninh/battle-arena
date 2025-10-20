@@ -9,25 +9,25 @@ import type {
   StartBattlePayload,
   SubmitAnswerPayload,
   SubmitAnswerResponse,
-} from "@/src/types/api";
+} from '@/src/types/api';
 import type {
   AnswerStatus,
   RoomStats,
   ScoreboardEntry,
   StateResp,
   UserAnswersResponse,
-} from "@/src/types/battle";
+} from '@/src/types/battle';
 
-import { battleRequest } from "./api-request";
+import { battleRequest } from './api-request';
 
 export const battleApi = {
   createSession: async (
     payload: BattleSessionRequest
   ): Promise<BattleSessionResponse> => {
-    return battleRequest<BattleSessionResponse>("/sessions", {
-      method: "POST",
+    return battleRequest<BattleSessionResponse>('/sessions', {
+      method: 'POST',
       body: payload,
-      fallbackMessage: "Failed to create battle session",
+      fallbackMessage: 'Failed to create battle session',
     });
   },
 
@@ -35,10 +35,10 @@ export const battleApi = {
   createRoom: async (
     payload: CreateRoomPayload
   ): Promise<CreateRoomResponse> => {
-    return battleRequest<CreateRoomResponse>("/rooms", {
-      method: "POST",
+    return battleRequest<CreateRoomResponse>('/rooms', {
+      method: 'POST',
       body: payload,
-      fallbackMessage: "Failed to create room",
+      fallbackMessage: 'Failed to create room',
     });
   },
 
@@ -48,9 +48,9 @@ export const battleApi = {
     payload: JoinRoomPayload
   ): Promise<JoinRoomResponse> => {
     return battleRequest<JoinRoomResponse>(`/rooms/${roomId}/join`, {
-      method: "POST",
+      method: 'POST',
       body: payload,
-      fallbackMessage: "Failed to join room",
+      fallbackMessage: 'Failed to join room',
     });
   },
 
@@ -60,7 +60,7 @@ export const battleApi = {
     return battleRequest<RoomAvailabilityResponse>(
       `/rooms/${roomId}/availability`,
       {
-        fallbackMessage: "Failed to check room status",
+        fallbackMessage: 'Failed to check room status',
       }
     );
   },
@@ -68,14 +68,14 @@ export const battleApi = {
   // Get room state
   getRoomState: async (roomId: string): Promise<StateResp> => {
     return battleRequest<StateResp>(`/rooms/${roomId}/state`, {
-      fallbackMessage: "Failed to fetch room state",
+      fallbackMessage: 'Failed to fetch room state',
     });
   },
 
   // Get answer status for current round
   getAnswerStatus: async (roomId: string): Promise<AnswerStatus> => {
     return battleRequest<AnswerStatus>(`/rooms/${roomId}/answer-status`, {
-      fallbackMessage: "Failed to fetch answer status",
+      fallbackMessage: 'Failed to fetch answer status',
     });
   },
 
@@ -86,23 +86,20 @@ export const battleApi = {
     headers?: Record<string, string>
   ): Promise<void> => {
     await battleRequest(`/rooms/${roomId}/start`, {
-      method: "POST",
+      method: 'POST',
       headers,
       body: payload,
-      parseAs: "void",
-      fallbackMessage: "Failed to start battle",
+      parseAs: 'void',
+      fallbackMessage: 'Failed to start battle',
     });
   },
 
-  setReadyStatus: async (
-    roomId: string,
-    ready: boolean
-  ): Promise<void> => {
+  setReadyStatus: async (roomId: string, ready: boolean): Promise<void> => {
     await battleRequest(`/rooms/${roomId}/ready`, {
-      method: "POST",
+      method: 'POST',
       body: { ready },
-      parseAs: "void",
-      fallbackMessage: "Failed to update ready status",
+      parseAs: 'void',
+      fallbackMessage: 'Failed to update ready status',
     });
   },
 
@@ -115,9 +112,9 @@ export const battleApi = {
     return battleRequest<SubmitAnswerResponse>(
       `/rooms/${roomId}/rounds/${roundNo}/answer`,
       {
-        method: "POST",
+        method: 'POST',
         body: payload,
-        fallbackMessage: "Failed to submit answer",
+        fallbackMessage: 'Failed to submit answer',
       }
     );
   },
@@ -125,18 +122,18 @@ export const battleApi = {
   // Close current round (host only)
   closeRound: async (roomId: string, roundNo: number): Promise<void> => {
     await battleRequest(`/rooms/${roomId}/rounds/${roundNo}/close`, {
-      method: "POST",
-      parseAs: "void",
-      fallbackMessage: "Failed to close round",
+      method: 'POST',
+      parseAs: 'void',
+      fallbackMessage: 'Failed to close round',
     });
   },
 
   // Reveal next round (host only)
   revealNextRound: async (roomId: string, roundNo: number): Promise<void> => {
     await battleRequest(`/rooms/${roomId}/rounds/${roundNo}/reveal`, {
-      method: "POST",
-      parseAs: "void",
-      fallbackMessage: "Failed to reveal next round",
+      method: 'POST',
+      parseAs: 'void',
+      fallbackMessage: 'Failed to reveal next round',
     });
   },
 
@@ -146,8 +143,8 @@ export const battleApi = {
     return battleRequest<{ action: string; roundNo?: number }>(
       `/rooms/${roomId}/advance`,
       {
-        method: "POST",
-        fallbackMessage: "Failed to advance round",
+        method: 'POST',
+        fallbackMessage: 'Failed to advance round',
       }
     );
   },
@@ -155,8 +152,8 @@ export const battleApi = {
   // Get user's answers for completed battle
   getUserAnswers: async (roomId: string): Promise<UserAnswersResponse> => {
     return battleRequest<UserAnswersResponse>(`/rooms/${roomId}/my-answers`, {
-      cache: "no-store",
-      fallbackMessage: "Failed to fetch user answers",
+      cache: 'no-store',
+      fallbackMessage: 'Failed to fetch user answers',
     });
   },
 
@@ -167,8 +164,8 @@ export const battleApi = {
     return battleRequest<{ scoreboard: ScoreboardEntry[] }>(
       `/rooms/${roomId}/scoreboard`,
       {
-        cache: "no-store",
-        fallbackMessage: "Failed to fetch scoreboard",
+        cache: 'no-store',
+        fallbackMessage: 'Failed to fetch scoreboard',
       }
     );
   },
@@ -176,8 +173,8 @@ export const battleApi = {
   // Get room statistics (for results page)
   getRoomStats: async (roomId: string): Promise<RoomStats> => {
     return battleRequest<RoomStats>(`/rooms/${roomId}/state`, {
-      cache: "no-store",
-      fallbackMessage: "Failed to fetch room statistics",
+      cache: 'no-store',
+      fallbackMessage: 'Failed to fetch room statistics',
     });
   },
 };
@@ -193,4 +190,4 @@ export type {
   StartBattlePayload,
   SubmitAnswerPayload,
   SubmitAnswerResponse,
-} from "@/src/types/api";
+} from '@/src/types/api';

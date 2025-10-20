@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { FaCrown } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import { FaCrown } from 'react-icons/fa';
 
 interface WinnerSpotlightProps {
   winnerName?: string;

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   ActionButtons,
@@ -8,8 +8,8 @@ import {
   ResultHeader,
   UserAnswers,
   WinnerSpotlight,
-} from "@/src/components";
-import { useBattleResult } from "@/src/hooks/useBattleResult";
+} from '@/src/components';
+import { useBattleResult } from '@/src/hooks/useBattleResult';
 
 export default function BattleResultPage() {
   const {

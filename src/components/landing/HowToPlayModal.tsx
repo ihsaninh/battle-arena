@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { FaChevronLeft, FaChevronRight, FaTimes } from "react-icons/fa";
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { FaChevronLeft, FaChevronRight, FaTimes } from 'react-icons/fa';
 
 interface HowToPlayModalProps {
   isOpen: boolean;
@@ -11,7 +11,7 @@ interface HowToPlayModalProps {
 
 const tutorialSteps = [
   {
-    title: "Welcome to Battle Arena! ⚔️",
+    title: 'Welcome to Battle Arena! ⚔️',
     content: (
       <div className="space-y-4 text-center">
         <div className="text-4xl md:text-6xl mb-2 md:mb-4">🎮</div>
@@ -29,7 +29,7 @@ const tutorialSteps = [
     ),
   },
   {
-    title: "Step 1: Create Room 🏠",
+    title: 'Step 1: Create Room 🏠',
     content: (
       <div className="space-y-4">
         <div className="text-center mb-3">
@@ -84,7 +84,7 @@ const tutorialSteps = [
     ),
   },
   {
-    title: "Step 2: Share Room Code 📤",
+    title: 'Step 2: Share Room Code 📤',
     content: (
       <div className="space-y-4">
         <div className="text-center mb-3">
@@ -126,7 +126,7 @@ const tutorialSteps = [
     ),
   },
   {
-    title: "Step 3: Join Room 🚪",
+    title: 'Step 3: Join Room 🚪',
     content: (
       <div className="space-y-4">
         <div className="text-center mb-3">
@@ -185,7 +185,7 @@ const tutorialSteps = [
     ),
   },
   {
-    title: "Step 4: Battle Time! ⚔️",
+    title: 'Step 4: Battle Time! ⚔️',
     content: (
       <div className="space-y-4">
         <div className="text-center mb-3">
@@ -244,7 +244,7 @@ const tutorialSteps = [
     ),
   },
   {
-    title: "Step 5: Scoring System 🏆",
+    title: 'Step 5: Scoring System 🏆',
     content: (
       <div className="space-y-4">
         <div className="text-center mb-3">
@@ -351,7 +351,7 @@ const tutorialSteps = [
     ),
   },
   {
-    title: "Step 6: Final Leaderboard 🏅",
+    title: 'Step 6: Final Leaderboard 🏅',
     content: (
       <div className="space-y-4">
         <div className="text-center mb-3">
@@ -441,7 +441,7 @@ const tutorialSteps = [
     ),
   },
   {
-    title: "Ready to Battle! 🚀",
+    title: 'Ready to Battle! 🚀',
     content: (
       <div className="text-center space-y-4">
         <div className="text-4xl md:text-6xl mb-2 md:mb-4">⚔️</div>
@@ -484,13 +484,13 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
   useEffect(() => {
     if (isOpen) {
       setCurrentStep(0);
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
 
@@ -507,19 +507,19 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       onClose();
-    } else if (e.key === "ArrowLeft") {
+    } else if (e.key === 'ArrowLeft') {
       handlePrev();
-    } else if (e.key === "ArrowRight") {
+    } else if (e.key === 'ArrowRight') {
       handleNext();
     }
   };
 
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown);
-      return () => document.removeEventListener("keydown", handleKeyDown);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, currentStep]);
@@ -542,9 +542,9 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative w-full max-w-lg md:max-w-2xl max-h-[85vh] md:max-h-[90vh] bg-slate-900/95 backdrop-blur-xl rounded-xl md:rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           >
             {/* Header */}
             <div className="relative bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-white/10 p-4 md:p-6">
@@ -595,8 +595,8 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
                     key={index}
                     className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-colors duration-200 ${
                       index <= currentStep
-                        ? "bg-gradient-to-r from-purple-400 to-pink-400"
-                        : "bg-gray-600"
+                        ? 'bg-gradient-to-r from-purple-400 to-pink-400'
+                        : 'bg-gray-600'
                     }`}
                   />
                 ))}

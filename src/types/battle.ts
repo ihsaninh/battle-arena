@@ -1,18 +1,18 @@
 export type GamePhase =
-  | "waiting"
-  | "playing"
-  | "answering"
-  | "scoreboard"
-  | "finished";
+  | 'waiting'
+  | 'playing'
+  | 'answering'
+  | 'scoreboard'
+  | 'finished';
 
 export type RoomStatus =
-  | "waiting"
-  | "starting"
-  | "active"
-  | "finished"
-  | "cancelled";
+  | 'waiting'
+  | 'starting'
+  | 'active'
+  | 'finished'
+  | 'cancelled';
 
-export type ConnectionState = "connected" | "disconnected" | "reconnecting";
+export type ConnectionState = 'connected' | 'disconnected' | 'reconnecting';
 
 export interface BattleRoom {
   id: string;
@@ -151,7 +151,7 @@ export interface RoundScoreboardSnapshot {
 
 export interface RoundQuestionSummary {
   prompt: string;
-  type: "multiple-choice" | "open-ended" | "unknown";
+  type: 'multiple-choice' | 'open-ended' | 'unknown';
   correctAnswer?: string | null;
   choices?: Array<{ id: string; text: string; isCorrect?: boolean }>;
   rubricNotes?: string | null;

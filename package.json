@@ -7,6 +7,10 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "test": "bun test",
+    "audit": "bun audit --severity high",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "husky"
   },
   "dependencies": {
@@ -39,6 +43,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.6",
     "husky": "^9.1.7",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

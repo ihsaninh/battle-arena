@@ -1,4 +1,4 @@
-import type { RealtimeChannel } from "@supabase/realtime-js";
+import type { RealtimeChannel } from '@supabase/realtime-js';
 
 interface ReconnectionConfig {
   maxReconnectAttempts: number;
@@ -84,15 +84,15 @@ export class ReconnectionStrategy {
         `🔄 Attempting reconnection ${reconnectAttempts}/${this.config.maxReconnectAttempts} for room:${roomId}`
       );
 
-      channel.subscribe((status) => {
-        if (status === "SUBSCRIBED") {
+      channel.subscribe(status => {
+        if (status === 'SUBSCRIBED') {
           console.log(
             `✅ Reconnected to room:${roomId} on attempt ${reconnectAttempts}`
           );
           reconnectAttempts = 0;
           isReconnecting = false;
           onReconnect?.();
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           console.error(
             `❌ Reconnection attempt ${reconnectAttempts} failed for room:${roomId}`
           );
@@ -116,7 +116,7 @@ export class ReconnectionStrategy {
     }, this.config.connectionTimeoutMs);
 
     // Set up reconnection event handlers
-    channel.on("system", { event: "CHANNEL_ERROR" }, () => {
+    channel.on('system', { event: 'CHANNEL_ERROR' }, () => {
       if (isDestroyed) return;
 
       console.warn(
@@ -126,7 +126,7 @@ export class ReconnectionStrategy {
       attemptReconnection();
     });
 
-    channel.on("system", { event: "CLOSED" }, () => {
+    channel.on('system', { event: 'CLOSED' }, () => {
       if (isDestroyed) return;
       console.log(`🔌 Connection closed for room:${roomId}`);
       if (connectionTimeout) {
@@ -135,7 +135,7 @@ export class ReconnectionStrategy {
       }
     });
 
-    channel.on("system", { event: "SUBSCRIBED" }, () => {
+    channel.on('system', { event: 'SUBSCRIBED' }, () => {
       if (connectionTimeout) {
         clearTimeout(connectionTimeout);
         connectionTimeout = null;

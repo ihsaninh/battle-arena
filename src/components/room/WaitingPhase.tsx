@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 import {
   FaCheckCircle,
   FaClock,
@@ -9,9 +9,9 @@ import {
   FaRocket,
   FaTimesCircle,
   FaUsers,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
-import type { WaitingPhaseProps } from "@/src/types/battle";
+import type { WaitingPhaseProps } from '@/src/types/battle';
 
 export function WaitingPhase({
   onStartBattle,
@@ -26,19 +26,19 @@ export function WaitingPhase({
 }: WaitingPhaseProps) {
   const capacity = roomCapacity || 2;
   const activeParticipants = participants.filter(
-    (p) => p.connection_status !== "offline"
+    p => p.connection_status !== 'offline'
   );
-  const nonHostActive = activeParticipants.filter((p) => !p.is_host);
-  const readyParticipants = nonHostActive.filter((p) => p.is_ready);
-  const pendingParticipants = nonHostActive.filter((p) => !p.is_ready);
+  const nonHostActive = activeParticipants.filter(p => !p.is_host);
+  const readyParticipants = nonHostActive.filter(p => p.is_ready);
+  const pendingParticipants = nonHostActive.filter(p => !p.is_ready);
   const minParticipants = Math.min(2, capacity);
   const canStart =
     activeParticipants.length >= minParticipants &&
     pendingParticipants.length === 0;
 
   const pendingNames = pendingParticipants
-    .map((p) => p.display_name || "Peserta")
-    .join(", ");
+    .map(p => p.display_name || 'Peserta')
+    .join(', ');
 
   const statusMessage = (() => {
     if (isHost) {
@@ -48,7 +48,7 @@ export function WaitingPhase({
       if (pendingParticipants.length > 0) {
         return `Waiting for players to ready up: ${pendingNames}.`;
       }
-      return "Everyone is ready. You can start the battle!";
+      return 'Everyone is ready. You can start the battle!';
     }
 
     if (activeParticipants.length < minParticipants) {
@@ -63,7 +63,7 @@ export function WaitingPhase({
   const totalPlayersLabel = `${activeParticipants.length}/${capacity} active`;
   const readySummary = nonHostActive.length
     ? `${readyParticipants.length}/${nonHostActive.length} players ready`
-    : "No other participants yet";
+    : 'No other participants yet';
 
   const startButtonDisabled = loading || !canStart;
   const readyButtonDisabled = readyLoading || loading;
@@ -75,7 +75,7 @@ export function WaitingPhase({
         transition={{
           duration: 3,
           repeat: Infinity,
-          ease: "linear",
+          ease: 'linear',
         }}
         className="w-20 h-20 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/40"
       >
@@ -99,30 +99,30 @@ export function WaitingPhase({
 
         <div className="grid gap-3">
           {participants.map((participant, index) => {
-            const isOffline = participant.connection_status === "offline";
+            const isOffline = participant.connection_status === 'offline';
             const participantReady = participant.is_ready && !isOffline;
             const isSelf = participant.session_id === currentSessionId;
 
             let statusBadgeClass =
-              "border border-yellow-400/30 text-yellow-300 bg-yellow-500/10";
+              'border border-yellow-400/30 text-yellow-300 bg-yellow-500/10';
             let statusIcon = <FaClock className="w-3 h-3" />;
-            let statusLabel = "WAITING";
+            let statusLabel = 'WAITING';
 
             if (participant.is_host) {
               statusBadgeClass =
-                "border border-yellow-400/30 text-yellow-200 bg-yellow-500/15";
+                'border border-yellow-400/30 text-yellow-200 bg-yellow-500/15';
               statusIcon = <FaCrown className="w-3 h-3" />;
-              statusLabel = "HOST";
+              statusLabel = 'HOST';
             } else if (participantReady) {
               statusBadgeClass =
-                "border border-emerald-400/40 text-emerald-200 bg-emerald-500/10";
+                'border border-emerald-400/40 text-emerald-200 bg-emerald-500/10';
               statusIcon = <FaCheckCircle className="w-3 h-3" />;
-              statusLabel = "READY";
+              statusLabel = 'READY';
             } else if (isOffline) {
               statusBadgeClass =
-                "border border-red-400/30 text-red-200 bg-red-500/10";
+                'border border-red-400/30 text-red-200 bg-red-500/10';
               statusIcon = <FaTimesCircle className="w-3 h-3" />;
-              statusLabel = "OFFLINE";
+              statusLabel = 'OFFLINE';
             }
 
             return (
@@ -137,8 +137,8 @@ export function WaitingPhase({
                   <div
                     className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
                       participant.is_host
-                        ? "border-yellow-400/40 bg-yellow-500/10 text-yellow-300"
-                        : "border-purple-400/20 bg-purple-500/10 text-purple-200"
+                        ? 'border-yellow-400/40 bg-yellow-500/10 text-yellow-300'
+                        : 'border-purple-400/20 bg-purple-500/10 text-purple-200'
                     }`}
                   >
                     {participant.is_host ? (
@@ -149,7 +149,7 @@ export function WaitingPhase({
                   </div>
                   <div>
                     <p className="text-white font-semibold">
-                      {participant.display_name || "Anonymous Player"}
+                      {participant.display_name || 'Anonymous Player'}
                       {isSelf ? (
                         <span className="ml-2 text-xs font-medium text-cyan-300">
                           (You)
@@ -157,7 +157,7 @@ export function WaitingPhase({
                       ) : null}
                     </p>
                     <p className="text-xs text-gray-400">
-                      {participant.is_host ? "Host" : "Peserta"}
+                      {participant.is_host ? 'Host' : 'Peserta'}
                     </p>
                   </div>
                 </div>
@@ -180,16 +180,16 @@ export function WaitingPhase({
               disabled={readyButtonDisabled}
               className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
                 isReady
-                  ? "bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 hover:bg-emerald-500/30"
-                  : "bg-blue-500/20 text-blue-200 border border-blue-400/40 hover:bg-blue-500/30"
-              } ${readyButtonDisabled ? "opacity-60 cursor-not-allowed" : ""}`}
+                  ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 hover:bg-emerald-500/30'
+                  : 'bg-blue-500/20 text-blue-200 border border-blue-400/40 hover:bg-blue-500/30'
+              } ${readyButtonDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
               {readyLoading ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <FaCheckCircle className="w-4 h-4" />
               )}
-              {isReady ? "Cancel Ready" : "I'm Ready"}
+              {isReady ? 'Cancel Ready' : "I'm Ready"}
             </motion.button>
           )}
 
@@ -200,8 +200,8 @@ export function WaitingPhase({
               disabled={startButtonDisabled}
               className={`px-7 py-3 font-semibold rounded-xl transition-all flex items-center gap-2 ${
                 canStart
-                  ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-500/40"
-                  : "bg-gray-700/60 text-gray-400 cursor-not-allowed border border-gray-600/50"
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-500/40'
+                  : 'bg-gray-700/60 text-gray-400 cursor-not-allowed border border-gray-600/50'
               }`}
             >
               {loading ? (
@@ -210,10 +210,10 @@ export function WaitingPhase({
                 <FaPlay className="w-5 h-5" />
               )}
               {loading
-                ? "Starting..."
+                ? 'Starting...'
                 : canStart
-                ? "Start Battle"
-                : "Waiting for Players"}
+                  ? 'Start Battle'
+                  : 'Waiting for Players'}
             </motion.button>
           )}
         </div>

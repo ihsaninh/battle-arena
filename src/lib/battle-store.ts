@@ -1,21 +1,21 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-import type { BattleState } from "@/src/types/battle";
+import type { BattleState } from '@/src/types/battle';
 
 export const useBattleStore = create<BattleState>()(
   persist(
-    (set) => ({
+    set => ({
       // Initial state
-      gamePhase: "waiting",
-      answer: "",
+      gamePhase: 'waiting',
+      answer: '',
       timeLeft: null,
       hasSubmitted: false,
       selectedChoiceId: null,
       loading: false,
       copied: false,
       isProgressing: false,
-      connectionState: "disconnected",
+      connectionState: 'disconnected',
       connectionError: null,
       lastEventTime: Date.now(),
       isHostCache: null,
@@ -32,24 +32,24 @@ export const useBattleStore = create<BattleState>()(
       refreshDebounceTimerId: null,
 
       // Actions
-      setGamePhase: (phase) => set({ gamePhase: phase }),
-      setAnswer: (answer) => set({ answer }),
-      setTimeLeft: (timeLeft) => set({ timeLeft }),
-      setHasSubmitted: (hasSubmitted) => set({ hasSubmitted }),
-      setSelectedChoiceId: (id) => set({ selectedChoiceId: id }),
-      setLoading: (loading) => set({ loading }),
-      setCopied: (copied) => set({ copied }),
-      setIsProgressing: (isProgressing) => set({ isProgressing }),
-      setConnectionState: (connectionState) => set({ connectionState }),
-      setConnectionError: (connectionError) => set({ connectionError }),
-      setLastEventTime: (lastEventTime) => set({ lastEventTime }),
-      setIsHostCache: (isHostCache) => set({ isHostCache }),
-      setState: (state) => set({ state }),
-      setNotifications: (notifications) => set({ notifications }),
-      setAnsweredCount: (answeredCount) => set({ answeredCount }),
-      setAnswerStatus: (answerStatus) => set({ answerStatus }),
-      setCurrentScoreboard: (currentScoreboard) =>
-        set((state) => {
+      setGamePhase: phase => set({ gamePhase: phase }),
+      setAnswer: answer => set({ answer }),
+      setTimeLeft: timeLeft => set({ timeLeft }),
+      setHasSubmitted: hasSubmitted => set({ hasSubmitted }),
+      setSelectedChoiceId: id => set({ selectedChoiceId: id }),
+      setLoading: loading => set({ loading }),
+      setCopied: copied => set({ copied }),
+      setIsProgressing: isProgressing => set({ isProgressing }),
+      setConnectionState: connectionState => set({ connectionState }),
+      setConnectionError: connectionError => set({ connectionError }),
+      setLastEventTime: lastEventTime => set({ lastEventTime }),
+      setIsHostCache: isHostCache => set({ isHostCache }),
+      setState: state => set({ state }),
+      setNotifications: notifications => set({ notifications }),
+      setAnsweredCount: answeredCount => set({ answeredCount }),
+      setAnswerStatus: answerStatus => set({ answerStatus }),
+      setCurrentScoreboard: currentScoreboard =>
+        set(state => {
           const hasExisting = !!state.currentScoreboard;
           const nextPrevious = hasExisting
             ? state.currentScoreboard
@@ -58,7 +58,7 @@ export const useBattleStore = create<BattleState>()(
           return {
             previousScoreboard: currentScoreboard
               ? nextPrevious
-              : state.currentScoreboard ?? state.previousScoreboard,
+              : (state.currentScoreboard ?? state.previousScoreboard),
             currentScoreboard,
           };
         }),
@@ -67,8 +67,8 @@ export const useBattleStore = create<BattleState>()(
           currentScoreboard: null,
           previousScoreboard: null,
         }),
-      addNotification: (message) =>
-        set((state) => {
+      addNotification: message =>
+        set(state => {
           // Prevent duplicate notifications (check last 3 notifications)
           const recentNotifications = state.notifications.slice(0, 3);
           if (recentNotifications.includes(message)) {
@@ -80,7 +80,7 @@ export const useBattleStore = create<BattleState>()(
           };
         }),
       clearTimers: () =>
-        set((state) => {
+        set(state => {
           // Clear existing timers
           if (state.stuckDetectionTimerId) {
             clearTimeout(state.stuckDetectionTimerId);
@@ -102,11 +102,11 @@ export const useBattleStore = create<BattleState>()(
           };
         }),
       setParticipantReady: (sessionId, isReady) =>
-        set((state) => {
+        set(state => {
           const nextState = state.state
             ? {
                 ...state.state,
-                participants: state.state.participants?.map((participant) =>
+                participants: state.state.participants?.map(participant =>
                   participant.session_id === sessionId
                     ? { ...participant, is_ready: isReady }
                     : participant
@@ -117,10 +117,11 @@ export const useBattleStore = create<BattleState>()(
           const nextAnswerStatus = state.answerStatus
             ? {
                 ...state.answerStatus,
-                participants: state.answerStatus.participants.map((participant) =>
-                  participant.session_id === sessionId
-                    ? { ...participant, is_ready: isReady }
-                    : participant
+                participants: state.answerStatus.participants.map(
+                  participant =>
+                    participant.session_id === sessionId
+                      ? { ...participant, is_ready: isReady }
+                      : participant
                 ),
               }
             : state.answerStatus;
@@ -131,11 +132,11 @@ export const useBattleStore = create<BattleState>()(
           };
         }),
       resetParticipantReadyStates: () =>
-        set((state) => {
+        set(state => {
           const nextState = state.state
             ? {
                 ...state.state,
-                participants: state.state.participants?.map((participant) => ({
+                participants: state.state.participants?.map(participant => ({
                   ...participant,
                   is_ready: false,
                 })),
@@ -145,10 +146,12 @@ export const useBattleStore = create<BattleState>()(
           const nextAnswerStatus = state.answerStatus
             ? {
                 ...state.answerStatus,
-                participants: state.answerStatus.participants.map((participant) => ({
-                  ...participant,
-                  is_ready: false,
-                })),
+                participants: state.answerStatus.participants.map(
+                  participant => ({
+                    ...participant,
+                    is_ready: false,
+                  })
+                ),
               }
             : state.answerStatus;
 
@@ -157,11 +160,11 @@ export const useBattleStore = create<BattleState>()(
             answerStatus: nextAnswerStatus,
           };
         }),
-      setTimerIds: (timerIds) => set(timerIds),
+      setTimerIds: timerIds => set(timerIds),
     }),
     {
-      name: "battle-storage",
-      partialize: (state) => ({
+      name: 'battle-storage',
+      partialize: state => ({
         isHostCache: state.isHostCache,
         tabId: state.tabId,
       }),

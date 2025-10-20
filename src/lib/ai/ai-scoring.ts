@@ -1,7 +1,7 @@
-import { google } from "@ai-sdk/google";
-import { generateObject } from "ai";
-import crypto from "crypto";
-import { z } from "zod";
+import { google } from '@ai-sdk/google';
+import { generateObject } from 'ai';
+import crypto from 'crypto';
+import { z } from 'zod';
 
 // Simple in-memory cache for consistent scoring of identical inputs
 const scoreCache = new Map<string, AIScoreResult>();
@@ -15,7 +15,7 @@ function cleanCacheIfNeeded() {
       0,
       scoreCache.size - MAX_CACHE_SIZE + 100
     );
-    keysToDelete.forEach((key) => scoreCache.delete(key));
+    keysToDelete.forEach(key => scoreCache.delete(key));
   }
 }
 
@@ -27,20 +27,20 @@ function generateCacheKey(params: {
   difficulty: number;
   language?: string;
 }): string {
-  const { question, answer, category, difficulty, language = "en" } = params;
+  const { question, answer, category, difficulty, language = 'en' } = params;
   const content = `${question}|${answer}|${category}|${difficulty}|${language}`;
-  return crypto.createHash("sha256").update(content).digest("hex");
+  return crypto.createHash('sha256').update(content).digest('hex');
 }
 
 // Define the scoring schema for structured output
 const ScoringSchema = z.object({
-  score: z.number().min(0).max(100).describe("Score between 0-100"),
-  feedback: z.string().describe("Detailed feedback explaining the score"),
-  strengths: z.array(z.string()).describe("Key strengths in the answer"),
-  improvements: z.array(z.string()).describe("Areas for improvement"),
+  score: z.number().min(0).max(100).describe('Score between 0-100'),
+  feedback: z.string().describe('Detailed feedback explaining the score'),
+  strengths: z.array(z.string()).describe('Key strengths in the answer'),
+  improvements: z.array(z.string()).describe('Areas for improvement'),
   category: z
-    .enum(["excellent", "good", "average", "poor"])
-    .describe("Overall performance category"),
+    .enum(['excellent', 'good', 'average', 'poor'])
+    .describe('Overall performance category'),
 });
 
 export type AIScoreResult = z.infer<typeof ScoringSchema>;
@@ -56,38 +56,38 @@ const DIFFICULTY_MULTIPLIERS = {
 const CATEGORY_CRITERIA = {
   tech: {
     focus:
-      "technical accuracy, depth of understanding, practical examples, and industry best practices",
+      'technical accuracy, depth of understanding, practical examples, and industry best practices',
     keywords: [
-      "implementation",
-      "architecture",
-      "performance",
-      "scalability",
-      "security",
-      "best practices",
+      'implementation',
+      'architecture',
+      'performance',
+      'scalability',
+      'security',
+      'best practices',
     ],
   },
   career: {
     focus:
-      "professional insight, practical experience, leadership qualities, and problem-solving approach",
+      'professional insight, practical experience, leadership qualities, and problem-solving approach',
     keywords: [
-      "leadership",
-      "collaboration",
-      "problem-solving",
-      "growth",
-      "experience",
-      "teamwork",
+      'leadership',
+      'collaboration',
+      'problem-solving',
+      'growth',
+      'experience',
+      'teamwork',
     ],
   },
   fun: {
     focus:
-      "creativity, thoughtfulness, personality expression, and engaging storytelling",
+      'creativity, thoughtfulness, personality expression, and engaging storytelling',
     keywords: [
-      "creativity",
-      "personality",
-      "storytelling",
-      "uniqueness",
-      "engagement",
-      "authenticity",
+      'creativity',
+      'personality',
+      'storytelling',
+      'uniqueness',
+      'engagement',
+      'authenticity',
     ],
   },
 } as const;
@@ -105,7 +105,7 @@ export async function evaluateAnswer(params: {
     answer,
     category,
     difficulty,
-    language = "en",
+    language = 'en',
     rubric,
   } = params;
 
@@ -128,26 +128,26 @@ export async function evaluateAnswer(params: {
     const trimmed = answer.trim();
     const lower = trimmed.toLowerCase();
     const unknownPatterns = [
-      "gak tau",
-      "ga tau",
-      "nggak tau",
-      "ngga tau",
-      "tidak tahu",
-      "gak tahu",
-      "entahlah",
-      "idk",
+      'gak tau',
+      'ga tau',
+      'nggak tau',
+      'ngga tau',
+      'tidak tahu',
+      'gak tahu',
+      'entahlah',
+      'idk',
       "i don't know",
-      "dont know",
-      "no idea",
-      "not sure",
-      "dunno",
-      "skip",
-      "pass",
+      'dont know',
+      'no idea',
+      'not sure',
+      'dunno',
+      'skip',
+      'pass',
     ];
 
     // Check for explicit "unknown" patterns first
     const isUnknown = unknownPatterns.some(
-      (p) => lower === p || lower.includes(p)
+      p => lower === p || lower.includes(p)
     );
 
     // For short answers, be more lenient - only penalize if BOTH short AND clearly inadequate
@@ -161,18 +161,18 @@ export async function evaluateAnswer(params: {
       return {
         score: 0,
         feedback:
-          language === "id"
-            ? "Belum kejawab nih. Coba tulis jawaban singkat yang langsung ke poinnya ya."
-            : "No worries — try a short, direct answer to the question next time.",
+          language === 'id'
+            ? 'Belum kejawab nih. Coba tulis jawaban singkat yang langsung ke poinnya ya.'
+            : 'No worries — try a short, direct answer to the question next time.',
         strengths: [],
         improvements:
-          language === "id"
+          language === 'id'
             ? [
-                "Jawab lebih spesifik ke pertanyaan",
-                "Tambahkan 1–2 contoh kalau bisa",
+                'Jawab lebih spesifik ke pertanyaan',
+                'Tambahkan 1–2 contoh kalau bisa',
               ]
-            : ["Answer more specifically", "Add 1–2 examples if possible"],
-        category: "poor",
+            : ['Answer more specifically', 'Add 1–2 examples if possible'],
+        category: 'poor',
       };
     }
     // Get category-specific criteria
@@ -181,7 +181,7 @@ export async function evaluateAnswer(params: {
     const criteria = CATEGORY_CRITERIA[categoryKey] || CATEGORY_CRITERIA.tech;
 
     // Build the evaluation prompt based on language
-    const isIndonesian = language === "id";
+    const isIndonesian = language === 'id';
     const prompt = isIndonesian
       ? `Kamu adalah evaluator AI yang santai dan suportif untuk kuis fun. Skornya harus objektif (jangan dilembekin), tapi feedback tetap santai.
 
@@ -189,7 +189,7 @@ export async function evaluateAnswer(params: {
 
 **Kategori:** ${category} (${getDifficultyLabel(difficulty, language)})
 **Area Fokus:** ${criteria.focus}
-**Area Penilaian Utama:** ${criteria.keywords.join(", ")}
+**Area Penilaian Utama:** ${criteria.keywords.join(', ')}
 
 **Jawaban Siswa:**
 ${answer}
@@ -207,7 +207,7 @@ ${answer}
 - 60-69: Perlu Latihan — masih agak tipis/kurang jelas
 - <60: Belum pas — perlu lebih fokus ke pertanyaannya
 
-${rubric ? `**Rubrik Tambahan:** ${JSON.stringify(rubric)}` : ""}
+${rubric ? `**Rubrik Tambahan:** ${JSON.stringify(rubric)}` : ''}
 
 **Aturan Ketat (objektif):**
 - Kalau jawabannya jelas bilang tidak tahu/"gak tau"/"idk"/"no idea" ATAU panjangnya < 5 kata ATAU off-topic, beri skor 0–10 (utamakan 0).
@@ -224,7 +224,7 @@ Ikuti schema output.`
 
 **Category:** ${category} (${getDifficultyLabel(difficulty, language)})
 **Focus Areas:** ${criteria.focus}
-**Key Areas to Assess:** ${criteria.keywords.join(", ")}
+**Key Areas to Assess:** ${criteria.keywords.join(', ')}
 
 **Student's Answer:**
 ${answer}
@@ -242,7 +242,7 @@ ${answer}
 - 60-69: Fair — a bit shallow/unclear
 - <60: Needs work — not focused enough
 
-${rubric ? `**Additional Rubric:** ${JSON.stringify(rubric)}` : ""}
+${rubric ? `**Additional Rubric:** ${JSON.stringify(rubric)}` : ''}
 
 Hard rules (objective):
 - If the answer explicitly says "I don't know"/"idk"/"no idea" OR has < 5 words OR is clearly off-topic → score 0–10 (prefer 0).
@@ -253,7 +253,7 @@ Hard rules (objective):
 Tone: friendly, supportive, slightly playful. 2–4 sentences. Avoid overly formal language. Follow the schema.`;
 
     const result = await generateObject({
-      model: google("gemini-2.5-flash-lite"),
+      model: google('gemini-2.5-flash-lite'),
       schema: ScoringSchema,
       prompt,
       temperature: 0.1, // Very low temperature for maximum consistency
@@ -287,19 +287,19 @@ Tone: friendly, supportive, slightly playful. 2–4 sentences. Avoid overly form
 
 function getDifficultyLabel(
   difficulty: number,
-  language: string = "en"
+  language: string = 'en'
 ): string {
-  const isIndonesian = language === "id";
+  const isIndonesian = language === 'id';
 
   switch (difficulty) {
     case 1:
-      return isIndonesian ? "Mudah" : "Easy";
+      return isIndonesian ? 'Mudah' : 'Easy';
     case 2:
-      return isIndonesian ? "Sedang" : "Medium";
+      return isIndonesian ? 'Sedang' : 'Medium';
     case 3:
-      return isIndonesian ? "Sulit" : "Hard";
+      return isIndonesian ? 'Sulit' : 'Hard';
     default:
-      return isIndonesian ? "Sedang" : "Medium";
+      return isIndonesian ? 'Sedang' : 'Medium';
   }
 }
 
@@ -307,18 +307,18 @@ function generateFallbackScore(
   answer: string,
   category: string,
   difficulty: number,
-  language: string = "en"
+  language: string = 'en'
 ): AIScoreResult {
-  const isIndonesian = language === "id";
+  const isIndonesian = language === 'id';
   const wordCount = answer.trim().split(/\s+/).length;
   const sentences = answer
     .split(/[.!?]+/)
-    .filter((s) => s.trim().length > 0).length;
+    .filter(s => s.trim().length > 0).length;
 
   // Category-specific keyword analysis
   const categoryKey = category.toLowerCase() as keyof typeof CATEGORY_CRITERIA;
   const criteria = CATEGORY_CRITERIA[categoryKey] || CATEGORY_CRITERIA.tech;
-  const keywordMatches = criteria.keywords.filter((keyword) =>
+  const keywordMatches = criteria.keywords.filter(keyword =>
     answer.toLowerCase().includes(keyword.toLowerCase())
   ).length;
 
@@ -334,26 +334,26 @@ function generateFallbackScore(
   // Early low-effort handling in fallback
   const ansLower = answer.trim().toLowerCase();
   const unknowns = [
-    "gak tau",
-    "ga tau",
-    "nggak tau",
-    "ngga tau",
-    "tidak tahu",
-    "gak tahu",
-    "entahlah",
-    "idk",
+    'gak tau',
+    'ga tau',
+    'nggak tau',
+    'ngga tau',
+    'tidak tahu',
+    'gak tahu',
+    'entahlah',
+    'idk',
     "i don't know",
-    "dont know",
-    "no idea",
-    "not sure",
-    "dunno",
-    "skip",
-    "pass",
+    'dont know',
+    'no idea',
+    'not sure',
+    'dunno',
+    'skip',
+    'pass',
   ];
 
   // Check for explicit unknowns first
   const isExplicitUnknown = unknowns.some(
-    (p) => ansLower === p || ansLower.includes(p)
+    p => ansLower === p || ansLower.includes(p)
   );
 
   // For short answers, be more lenient - only penalize if BOTH very short AND meaningless
@@ -365,13 +365,13 @@ function generateFallbackScore(
     return {
       score: 0,
       feedback: isIndonesian
-        ? "Belum kejawab nih. Coba jawab lebih spesifik dan langsung ke pertanyaan."
-        : "Not answered yet. Try a more specific, direct response to the question.",
+        ? 'Belum kejawab nih. Coba jawab lebih spesifik dan langsung ke pertanyaan.'
+        : 'Not answered yet. Try a more specific, direct response to the question.',
       strengths: [],
       improvements: isIndonesian
-        ? ["Jawab lebih spesifik", "Tambahkan 1–2 contoh"]
-        : ["Answer more specifically", "Add 1–2 examples"],
-      category: "poor",
+        ? ['Jawab lebih spesifik', 'Tambahkan 1–2 contoh']
+        : ['Answer more specifically', 'Add 1–2 examples'],
+      category: 'poor',
     };
   }
 
@@ -402,60 +402,60 @@ function generateFallbackScore(
   score = Math.min(100, score + difficultyBonus);
 
   // Determine category and feedback based on language
-  let category_result: "excellent" | "good" | "average" | "poor";
+  let category_result: 'excellent' | 'good' | 'average' | 'poor';
   let feedback: string;
   let strengths: string[] = [];
   let improvements: string[] = [];
 
   if (score >= 85) {
-    category_result = "excellent";
+    category_result = 'excellent';
     feedback = isIndonesian
-      ? "Mantap! Jawabanmu lengkap, jelas, dan ngena. Teruskan gaya ini!"
-      : "Awesome! Clear, complete, and on point. Keep it up!";
+      ? 'Mantap! Jawabanmu lengkap, jelas, dan ngena. Teruskan gaya ini!'
+      : 'Awesome! Clear, complete, and on point. Keep it up!';
     strengths = isIndonesian
-      ? ["Isinya lengkap", "Penyampaian jelas", "Contoh relevan"]
-      : ["Complete content", "Clear delivery", "Relevant examples"];
+      ? ['Isinya lengkap', 'Penyampaian jelas', 'Contoh relevan']
+      : ['Complete content', 'Clear delivery', 'Relevant examples'];
     improvements = isIndonesian
-      ? ["Bisa tambah contoh spesifik biar makin kuat"]
-      : ["Add a specific example to make it even stronger"];
+      ? ['Bisa tambah contoh spesifik biar makin kuat']
+      : ['Add a specific example to make it even stronger'];
   } else if (score >= 75) {
-    category_result = "good";
+    category_result = 'good';
     feedback = isIndonesian
-      ? "Keren! Pemahamanmu udah dapet, tinggal tambahin contoh/detail dikit lagi."
-      : "Nice! Solid understanding — add a bit more detail/examples.";
+      ? 'Keren! Pemahamanmu udah dapet, tinggal tambahin contoh/detail dikit lagi.'
+      : 'Nice! Solid understanding — add a bit more detail/examples.';
     strengths = isIndonesian
-      ? ["Pemahaman oke", "Penjelasan cukup jelas"]
-      : ["Good understanding", "Clear enough explanation"];
+      ? ['Pemahaman oke', 'Penjelasan cukup jelas']
+      : ['Good understanding', 'Clear enough explanation'];
     improvements = isIndonesian
-      ? ["Tambah contoh", "Rapiin alur biar makin enak dibaca"]
-      : ["Add examples", "Tighten structure for flow"];
+      ? ['Tambah contoh', 'Rapiin alur biar makin enak dibaca']
+      : ['Add examples', 'Tighten structure for flow'];
   } else if (score >= 60) {
-    category_result = "average";
+    category_result = 'average';
     feedback = isIndonesian
-      ? "Lumayan! Dasarnya udah ada, coba tambah detail dan contoh ya."
-      : "Not bad! Basics are there — add some detail and examples.";
-    strengths = isIndonesian ? ["Dasar sudah ada"] : ["Basics present"];
+      ? 'Lumayan! Dasarnya udah ada, coba tambah detail dan contoh ya.'
+      : 'Not bad! Basics are there — add some detail and examples.';
+    strengths = isIndonesian ? ['Dasar sudah ada'] : ['Basics present'];
     improvements = isIndonesian
-      ? ["Tambah detail", "Kasih contoh", "Bikin alur lebih rapi"]
-      : ["More detail", "Add examples", "Improve structure/flow"];
+      ? ['Tambah detail', 'Kasih contoh', 'Bikin alur lebih rapi']
+      : ['More detail', 'Add examples', 'Improve structure/flow'];
   } else {
-    category_result = "poor";
+    category_result = 'poor';
     feedback = isIndonesian
-      ? "Belum pas. Coba jawab lebih langsung, tambahin detail + contoh ya. Semangat! 💪"
-      : "Not quite there. Try to be more direct, add detail + examples. You got this! 💪";
-    strengths = isIndonesian ? ["Sudah mencoba"] : ["Attempt made"];
+      ? 'Belum pas. Coba jawab lebih langsung, tambahin detail + contoh ya. Semangat! 💪'
+      : 'Not quite there. Try to be more direct, add detail + examples. You got this! 💪';
+    strengths = isIndonesian ? ['Sudah mencoba'] : ['Attempt made'];
     improvements = isIndonesian
       ? [
-          "Lebih detail",
-          "Kasih contoh",
-          "Bikin lebih jelas",
-          "Fokus ke pertanyaan",
+          'Lebih detail',
+          'Kasih contoh',
+          'Bikin lebih jelas',
+          'Fokus ke pertanyaan',
         ]
       : [
-          "More detail",
-          "Add examples",
-          "Improve clarity",
-          "Focus on the question",
+          'More detail',
+          'Add examples',
+          'Improve clarity',
+          'Focus on the question',
         ];
   }
 

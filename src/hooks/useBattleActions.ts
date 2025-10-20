@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 
 import {
   useAdvanceFromScoreboard,
@@ -6,15 +6,15 @@ import {
   useStartBattle,
   useSubmitAnswer,
   useUpdateReadyStatus,
-} from "@/src/hooks/useBattleQueries";
-import { useBattleStore } from "@/src/lib/battle-store";
+} from '@/src/hooks/useBattleQueries';
+import { useBattleStore } from '@/src/lib/battle-store';
 import {
   formatBattleTime,
   getDifficultyColor,
   getDifficultyLabel,
   getRoomStatusColor,
-} from "@/src/lib/formatters";
-import type { StateResp } from "@/src/types/battle";
+} from '@/src/lib/formatters';
+import type { StateResp } from '@/src/types/battle';
 
 export function useBattleActions(
   roomId: string | undefined,
@@ -51,13 +51,13 @@ export function useBattleActions(
 
   const copyRoomLink = () => {
     if (!roomId) {
-      addNotification("Room is still loading – try again in a moment.");
+      addNotification('Room is still loading – try again in a moment.');
       return;
     }
 
     const roomCode = state?.room?.room_code;
     if (!roomCode) {
-      addNotification("Room code belum tersedia. Coba lagi sebentar lagi.");
+      addNotification('Room code belum tersedia. Coba lagi sebentar lagi.');
       return;
     }
 
@@ -69,22 +69,22 @@ export function useBattleActions(
       .writeText(link)
       .then(() => {
         useBattleStore.getState().setCopied(true);
-        addNotification("Room link copied to clipboard!");
+        addNotification('Room link copied to clipboard!');
       })
       .catch(() => {
-        addNotification("Failed to copy link. Please copy it manually.");
+        addNotification('Failed to copy link. Please copy it manually.');
       });
   };
 
   const startBattle = async () => {
     const isHost = useBattleStore.getState().isHostCache;
     if (!isHost) {
-      addNotification("Only the host can start the battle!");
+      addNotification('Only the host can start the battle!');
       return;
     }
 
     // Check if battle is already started to prevent duplicate notifications
-    if (state?.room?.status === "active" || gamePhase === "playing") {
+    if (state?.room?.status === 'active' || gamePhase === 'playing') {
       return;
     }
 
@@ -92,12 +92,12 @@ export function useBattleActions(
     const participants =
       snapshot.state?.participants ?? state?.participants ?? [];
     const pendingParticipants = participants.filter(
-      (p) => !p.is_host && p.connection_status !== "offline" && !p.is_ready
+      p => !p.is_host && p.connection_status !== 'offline' && !p.is_ready
     );
     if (pendingParticipants.length > 0) {
       const names = pendingParticipants
-        .map((p) => p.display_name || "Participant")
-        .join(", ");
+        .map(p => p.display_name || 'Participant')
+        .join(', ');
       addNotification(`Still waiting for everyone to be ready: ${names}.`);
       return;
     }
@@ -107,25 +107,25 @@ export function useBattleActions(
         roomId: roomId!,
         payload: { useAI: true },
         headers: {
-          "X-Battle-Host-Tab": tabId,
-          "X-Battle-Host-Session":
-            localStorage.getItem(`battle_host_session_${roomId}`) || "",
+          'X-Battle-Host-Tab': tabId,
+          'X-Battle-Host-Session':
+            localStorage.getItem(`battle_host_session_${roomId}`) || '',
         },
       });
 
       // Ensure phase is set to playing after successful start
-      setGamePhase("playing");
+      setGamePhase('playing');
       resetParticipantReadyStates();
       await refresh();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message = err instanceof Error ? err.message : 'Unknown error';
       addNotification(`Start error: ${message}`);
     }
   };
 
   const setReadyStatus = async (ready: boolean) => {
     if (!roomId) {
-      addNotification("Room is not ready yet.");
+      addNotification('Room is not ready yet.');
       return;
     }
 
@@ -138,7 +138,7 @@ export function useBattleActions(
       snapshot.state?.currentUser?.session_id || state?.currentUser?.session_id;
 
     if (!sessionId) {
-      addNotification("Your session is not available yet.");
+      addNotification('Your session is not available yet.');
       return;
     }
 
@@ -146,7 +146,7 @@ export function useBattleActions(
       await updateReadyMutation.mutateAsync({ roomId, ready });
       setParticipantReady(sessionId, ready);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message = err instanceof Error ? err.message : 'Unknown error';
       addNotification(`Failed to update ready status: ${message}`);
     }
   };
@@ -157,13 +157,13 @@ export function useBattleActions(
       snapshot.state?.currentUser?.session_id || state?.currentUser?.session_id;
 
     if (!sessionId) {
-      addNotification("Your session is not available yet.");
+      addNotification('Your session is not available yet.');
       return;
     }
 
     const participants =
       snapshot.state?.participants ?? state?.participants ?? [];
-    const me = participants.find((p) => p.session_id === sessionId);
+    const me = participants.find(p => p.session_id === sessionId);
 
     const nextReady = !(me?.is_ready ?? false);
     await setReadyStatus(nextReady);
@@ -173,12 +173,12 @@ export function useBattleActions(
     const hasChoices = !!state?.activeRound?.question?.choices?.length;
     if (hasChoices) {
       if (!selectedChoiceId) {
-        addNotification("Please select an option first!");
+        addNotification('Please select an option first!');
         return;
       }
     } else {
       if (!answer.trim()) {
-        addNotification("Please enter an answer first!");
+        addNotification('Please enter an answer first!');
         return;
       }
     }
@@ -190,15 +190,15 @@ export function useBattleActions(
 
     // Prevent multiple simultaneous submissions
     if (submitInProgress.current) {
-      console.log("[SUBMIT] Submission already in progress, skipping");
+      console.log('[SUBMIT] Submission already in progress, skipping');
       return;
     }
 
     // Throttle submissions to prevent spam (increased from 1s to 3s)
     const now = Date.now();
     if (now - lastSubmitTime.current < 3000) {
-      console.log("[SUBMIT] Submission throttled, too frequent");
-      addNotification("Please wait before submitting again");
+      console.log('[SUBMIT] Submission throttled, too frequent');
+      addNotification('Please wait before submitting again');
       return;
     }
 
@@ -212,7 +212,7 @@ export function useBattleActions(
 
     // Optimistic update - immediately show as submitted
     setHasSubmitted(true);
-    setAnswer(""); // Clear input
+    setAnswer(''); // Clear input
     setSelectedChoiceId(null); // Clear selection
 
     // Add loading indicator
@@ -234,18 +234,18 @@ export function useBattleActions(
       await refresh();
     } catch (err) {
       // Rollback optimistic updates on failure
-      console.error("[SUBMIT] Answer submission failed, rolling back:", err);
+      console.error('[SUBMIT] Answer submission failed, rolling back:', err);
       setHasSubmitted(originalHasSubmitted);
       setAnswer(originalAnswer);
       setSelectedChoiceId(originalSelectedChoiceId);
 
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message = err instanceof Error ? err.message : 'Unknown error';
       addNotification(`Failed to submit answer: ${message}`);
 
       // Add retry option for network errors
-      if (message.includes("network") || message.includes("timeout")) {
+      if (message.includes('network') || message.includes('timeout')) {
         setTimeout(() => {
-          addNotification("Network error - you can try submitting again");
+          addNotification('Network error - you can try submitting again');
         }, 3000);
       }
     } finally {
@@ -262,7 +262,7 @@ export function useBattleActions(
       return;
     }
 
-    if (latestState.activeRound.status !== "active") {
+    if (latestState.activeRound.status !== 'active') {
       return;
     }
 
@@ -311,7 +311,7 @@ export function useBattleActions(
     try {
       await advanceFromScoreboardMutation.mutateAsync({ roomId });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message = err instanceof Error ? err.message : 'Unknown error';
       addNotification(`Advance error: ${message}`);
     } finally {
       setIsProgressing(false);

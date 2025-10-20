@@ -1,12 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import {
-  createErrorResponse,
-  ERROR_TYPES,
-} from "@/src/lib/api-errors";
-import { supabaseAdmin } from "@/src/lib/supabase";
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
+import { supabaseAdmin } from '@/src/lib/supabase';
 
-type RoomStatus = "waiting" | "active" | "finished" | string;
+type RoomStatus = 'waiting' | 'active' | 'finished' | string;
 
 export async function GET(
   _req: NextRequest,
@@ -22,22 +19,22 @@ export async function GET(
 
     const supabase = supabaseAdmin();
     const baseSelect =
-      "id, status, capacity, room_code, topic, language, num_questions, difficulty, round_time_sec";
+      'id, status, capacity, room_code, topic, language, num_questions, difficulty, round_time_sec';
 
     // Try to resolve by room ID first
     let roomQuery = supabase
-      .from("battle_rooms")
+      .from('battle_rooms')
       .select(baseSelect)
-      .eq("id", roomIdentifier);
+      .eq('id', roomIdentifier);
 
     let { data: room, error: roomErr } = await roomQuery.single();
 
     // If not found, try resolving by room code (normalized to uppercase)
-    if (roomErr && roomErr.code === "PGRST116") {
+    if (roomErr && roomErr.code === 'PGRST116') {
       roomQuery = supabase
-        .from("battle_rooms")
+        .from('battle_rooms')
         .select(baseSelect)
-        .eq("room_code", roomIdentifier.toUpperCase());
+        .eq('room_code', roomIdentifier.toUpperCase());
 
       const retry = await roomQuery.single();
       room = retry.data;
@@ -48,21 +45,21 @@ export async function GET(
       return createErrorResponse(ERROR_TYPES.ROOM_NOT_FOUND);
     }
 
-    const status = (room.status || "waiting") as RoomStatus;
+    const status = (room.status || 'waiting') as RoomStatus;
 
     let currentParticipants: number | null = null;
     if (room.capacity) {
       const { count, error: countErr } = await supabase
-        .from("battle_room_participants")
-        .select("id", { count: "exact", head: true })
-        .eq("room_id", room.id);
+        .from('battle_room_participants')
+        .select('id', { count: 'exact', head: true })
+        .eq('room_id', room.id);
 
       if (!countErr) {
         currentParticipants = count ?? null;
       }
     }
 
-    let joinable = status === "waiting";
+    let joinable = status === 'waiting';
 
     if (joinable && room.capacity && currentParticipants !== null) {
       if (currentParticipants >= room.capacity) {
@@ -73,25 +70,25 @@ export async function GET(
     let message: string | undefined;
     if (!joinable) {
       switch (status) {
-        case "active":
+        case 'active':
           message =
-            "This battle is currently in progress. Please wait for the next session.";
+            'This battle is currently in progress. Please wait for the next session.';
           break;
-        case "finished":
+        case 'finished':
           message =
-            "This battle has already finished. Ask the host to open a new room.";
+            'This battle has already finished. Ask the host to open a new room.';
           break;
         default:
           message =
             room.capacity && currentParticipants !== null
-              ? "This room has reached its maximum capacity."
-              : "This room is not accepting new participants right now.";
+              ? 'This room has reached its maximum capacity.'
+              : 'This room is not accepting new participants right now.';
       }
     } else if (room.capacity && currentParticipants !== null) {
       const slotsLeft = room.capacity - currentParticipants;
       if (slotsLeft <= 0) {
         joinable = false;
-        message = "This room has reached its maximum capacity.";
+        message = 'This room has reached its maximum capacity.';
       }
     }
 
@@ -112,7 +109,7 @@ export async function GET(
       },
     });
   } catch (e: unknown) {
-    console.error("Room availability exception", e);
+    console.error('Room availability exception', e);
     return createErrorResponse(e);
   }
 }

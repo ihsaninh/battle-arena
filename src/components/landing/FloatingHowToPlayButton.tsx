@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { useState } from "react";
-import { FaQuestionCircle } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { FaQuestionCircle } from 'react-icons/fa';
 
-import { HowToPlayModal } from "./HowToPlayModal";
+import { HowToPlayModal } from './HowToPlayModal';
 
 export function FloatingHowToPlayButton() {
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
@@ -15,7 +15,7 @@ export function FloatingHowToPlayButton() {
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 1, type: "spring", stiffness: 300 }}
+        transition={{ delay: 1, type: 'spring', stiffness: 300 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsHowToPlayOpen(true)}

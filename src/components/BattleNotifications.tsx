@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { AnimatePresence, motion } from "framer-motion";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
-import { useBattleStore } from "@/src/lib/battle-store";
+import { useBattleStore } from '@/src/lib/battle-store';
 
 interface BattleNotificationsProps {
   mobileBreakpoint?: number;
@@ -22,8 +22,8 @@ const DEFAULT_TOP_OFFSET = {
 };
 
 const DEFAULT_MOBILE_POSITION =
-  "left-1/2 w-[calc(100%-2.5rem)] max-w-sm -translate-x-1/2";
-const DEFAULT_DESKTOP_POSITION = "right-4 min-w-[18rem] max-w-sm";
+  'left-1/2 w-[calc(100%-2.5rem)] max-w-sm -translate-x-1/2';
+const DEFAULT_DESKTOP_POSITION = 'right-4 min-w-[18rem] max-w-sm';
 
 export function BattleNotifications({
   mobileBreakpoint = 768,
@@ -31,8 +31,8 @@ export function BattleNotifications({
   mobilePositionClass = DEFAULT_MOBILE_POSITION,
   desktopPositionClass = DEFAULT_DESKTOP_POSITION,
 }: BattleNotificationsProps) {
-  const notifications = useBattleStore((state) => state.notifications);
-  const setNotifications = useBattleStore((state) => state.setNotifications);
+  const notifications = useBattleStore(state => state.notifications);
+  const setNotifications = useBattleStore(state => state.setNotifications);
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
@@ -50,9 +50,9 @@ export function BattleNotifications({
     };
 
     updateViewport();
-    window.addEventListener("resize", updateViewport);
+    window.addEventListener('resize', updateViewport);
 
-    return () => window.removeEventListener("resize", updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);
   }, [mounted, mobileBreakpoint]);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export function BattleNotifications({
         const offset =
           (isMobile ? topOffset.mobile : topOffset.desktop) + index * 4;
         const baseClasses =
-          "fixed z-50 bg-purple-600/90 backdrop-blur-xl border border-purple-500/30 rounded-xl px-4 py-3 text-white text-sm shadow-lg";
+          'fixed z-50 bg-purple-600/90 backdrop-blur-xl border border-purple-500/30 rounded-xl px-4 py-3 text-white text-sm shadow-lg';
         const positionClasses = isMobile
           ? mobilePositionClass
           : desktopPositionClass;

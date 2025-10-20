@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 import {
   FaBolt,
   FaCog,
@@ -9,10 +9,10 @@ import {
   FaStar,
   FaTrophy,
   FaUsers,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
 interface GameModeSelectionProps {
-  onSetGameMode: (mode: "create" | "join" | null) => void;
+  onSetGameMode: (mode: 'create' | 'join' | null) => void;
 }
 
 export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
@@ -26,7 +26,7 @@ export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
       <div className="md:hidden space-y-3">
         <button
           type="button"
-          onClick={() => onSetGameMode("create")}
+          onClick={() => onSetGameMode('create')}
           className="w-full rounded-2xl bg-white/10 border border-white/10 px-5 py-4 text-left text-white shadow-lg shadow-purple-900/20 transition hover:bg-white/15"
         >
           <div className="flex items-center gap-3">
@@ -43,7 +43,7 @@ export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
         </button>
         <button
           type="button"
-          onClick={() => onSetGameMode("join")}
+          onClick={() => onSetGameMode('join')}
           className="w-full rounded-2xl bg-white/10 border border-white/10 px-5 py-4 text-left text-white shadow-lg shadow-cyan-900/20 transition hover:bg-white/15"
         >
           <div className="flex items-center gap-3">
@@ -52,7 +52,9 @@ export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
             </span>
             <div className="flex-1">
               <div className="text-lg font-semibold">Join a room</div>
-              <p className="text-sm text-cyan-100/80">Enter a code and play instantly.</p>
+              <p className="text-sm text-cyan-100/80">
+                Enter a code and play instantly.
+              </p>
             </div>
           </div>
         </button>
@@ -62,7 +64,7 @@ export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
         <motion.div
           whileHover={{ scale: 1.02, y: -5 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => onSetGameMode("create")}
+          onClick={() => onSetGameMode('create')}
           className="group cursor-pointer relative overflow-hidden rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-900/50 via-purple-800/30 to-pink-900/50 p-8 backdrop-blur-xl transition-all duration-300 hover:border-purple-400/50 hover:shadow-2xl hover:shadow-purple-500/20"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -75,7 +77,9 @@ export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
                 <h3 className="text-2xl font-bold text-white mb-1">
                   Host Battle
                 </h3>
-                <p className="text-purple-200">Create and lead your own arena</p>
+                <p className="text-purple-200">
+                  Create and lead your own arena
+                </p>
               </div>
             </div>
             <ul className="space-y-2 text-gray-300">
@@ -107,7 +111,7 @@ export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
         <motion.div
           whileHover={{ scale: 1.02, y: -5 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => onSetGameMode("join")}
+          onClick={() => onSetGameMode('join')}
           className="group cursor-pointer relative overflow-hidden rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-cyan-900/50 via-blue-800/30 to-teal-900/50 p-8 backdrop-blur-xl transition-all duration-300 hover:border-cyan-400/50 hover:shadow-2xl hover:shadow-cyan-500/20"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-teal-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -129,11 +133,12 @@ export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
                 instantly
               </li>
               <li className="flex items-center gap-2">
-                <FaTrophy className="w-4 h-4 text-cyan-400" /> Compete for the top
-                spot
+                <FaTrophy className="w-4 h-4 text-cyan-400" /> Compete for the
+                top spot
               </li>
               <li className="flex items-center gap-2">
-                <FaStar className="w-4 h-4 text-cyan-400" /> Earn points and glory
+                <FaStar className="w-4 h-4 text-cyan-400" /> Earn points and
+                glory
               </li>
             </ul>
             <div className="mt-6 flex items-center gap-2 text-cyan-300 font-semibold">

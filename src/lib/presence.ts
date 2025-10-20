@@ -1,10 +1,10 @@
-import { publishBattleEvent } from "@/src/lib/realtime";
-import { buildScoreboardDetails } from "@/src/lib/scoreboard-utils";
-import { supabaseAdmin } from "@/src/lib/supabase";
+import { publishBattleEvent } from '@/src/lib/realtime';
+import { buildScoreboardDetails } from '@/src/lib/scoreboard-utils';
+import { supabaseAdmin } from '@/src/lib/supabase';
 
 interface StatusChange {
   sessionId: string;
-  status: "online" | "offline";
+  status: 'online' | 'offline';
 }
 
 interface PresenceUpdateResult {
@@ -46,12 +46,12 @@ async function closeRoundAndAdvance(params: {
   const { supabase, roomId, roundId, roundNo } = params;
 
   const { data: roundStatus } = await supabase
-    .from("battle_room_rounds")
-    .select("status")
-    .eq("id", roundId)
+    .from('battle_room_rounds')
+    .select('status')
+    .eq('id', roundId)
     .single();
 
-  if (!roundStatus || roundStatus.status === "closed") {
+  if (!roundStatus || roundStatus.status === 'closed') {
     return null;
   }
 
@@ -59,7 +59,7 @@ async function closeRoundAndAdvance(params: {
   let usedFallback = false;
 
   const { data: rpcResult, error: rpcError } = await supabase.rpc(
-    "close_round_and_update_scores",
+    'close_round_and_update_scores',
     {
       p_round_id: roundId,
       p_room_id: roomId,
@@ -68,7 +68,7 @@ async function closeRoundAndAdvance(params: {
 
   if (rpcError) {
     console.error(
-      "[PRESENCE] close_round_and_update_scores RPC failed",
+      '[PRESENCE] close_round_and_update_scores RPC failed',
       rpcError
     );
   }
@@ -77,11 +77,11 @@ async function closeRoundAndAdvance(params: {
     roundJustClosed = true;
   } else {
     const { data: closedRows, error: closeErr } = await supabase
-      .from("battle_room_rounds")
-      .update({ status: "scoreboard" })
-      .eq("id", roundId)
-      .eq("status", "active")
-      .select("id");
+      .from('battle_room_rounds')
+      .update({ status: 'scoreboard' })
+      .eq('id', roundId)
+      .eq('status', 'active')
+      .select('id');
 
     if (closeErr) {
       throw closeErr;
@@ -96,48 +96,45 @@ async function closeRoundAndAdvance(params: {
   }
 
   const { data: answers } = await supabase
-    .from("battle_room_answers")
-    .select("session_id, score_final")
-    .eq("round_id", roundId);
+    .from('battle_room_answers')
+    .select('session_id, score_final')
+    .eq('round_id', roundId);
 
   if (usedFallback && answers && answers.length > 0) {
     for (const answer of answers) {
       const { data: existing } = await supabase
-        .from("battle_room_participants")
-        .select("total_score")
-        .eq("room_id", roomId)
-        .eq("session_id", answer.session_id)
+        .from('battle_room_participants')
+        .select('total_score')
+        .eq('room_id', roomId)
+        .eq('session_id', answer.session_id)
         .single();
 
       const updatedScore =
         (existing?.total_score || 0) + (answer.score_final || 0);
 
       await supabase
-        .from("battle_room_participants")
+        .from('battle_room_participants')
         .update({ total_score: updatedScore })
-        .eq("room_id", roomId)
-        .eq("session_id", answer.session_id);
+        .eq('room_id', roomId)
+        .eq('session_id', answer.session_id);
     }
   }
 
   const { data: participantsForMap } = await supabase
-    .from("battle_room_participants")
-    .select("session_id, display_name, id, total_score")
-    .eq("room_id", roomId);
+    .from('battle_room_participants')
+    .select('session_id, display_name, id, total_score')
+    .eq('room_id', roomId);
 
   const roundScores = new Map(
-    (answers || []).map((answer) => [
-      answer.session_id,
-      answer.score_final || 0,
-    ])
+    (answers || []).map(answer => [answer.session_id, answer.score_final || 0])
   );
 
   const scoreboard = (participantsForMap || [])
-    .map((participant) => {
+    .map(participant => {
       const roundScore = roundScores.get(participant.session_id) || 0;
       return {
         sessionId: participant.session_id,
-        displayName: participant.display_name || "Player",
+        displayName: participant.display_name || 'Player',
         participantId: participant.id,
         roundScore,
         totalScore: participant.total_score || roundScore,
@@ -153,18 +150,18 @@ async function closeRoundAndAdvance(params: {
     });
 
   const { count: remainingRounds } = await supabase
-    .from("battle_room_rounds")
-    .select("id", { count: "exact", head: true })
-    .eq("room_id", roomId)
-    .in("status", ["pending", "active"]);
+    .from('battle_room_rounds')
+    .select('id', { count: 'exact', head: true })
+    .eq('room_id', roomId)
+    .in('status', ['pending', 'active']);
 
   await publishBattleEvent({
     roomId,
-    event: "round_closed",
+    event: 'round_closed',
     payload: {
       roundNo,
       scoreboard,
-      stage: "scoreboard",
+      stage: 'scoreboard',
       generatedAt: new Date().toISOString(),
       hasMoreRounds: !!remainingRounds && remainingRounds > 0,
       question: questionSummary,
@@ -178,38 +175,38 @@ async function closeRoundAndAdvance(params: {
 export async function handlePresenceUpdate(params: {
   roomId: string;
   sessionId: string;
-  status: "online" | "offline";
+  status: 'online' | 'offline';
 }): Promise<PresenceUpdateResult> {
   const supabase = supabaseAdmin();
   const now = new Date();
   const nowIso = now.toISOString();
 
   const { data: currentParticipant, error: currentErr } = await supabase
-    .from("battle_room_participants")
-    .select("connection_status")
-    .eq("room_id", params.roomId)
-    .eq("session_id", params.sessionId)
+    .from('battle_room_participants')
+    .select('connection_status')
+    .eq('room_id', params.roomId)
+    .eq('session_id', params.sessionId)
     .maybeSingle();
 
   if (currentErr) {
     throw currentErr;
   }
 
-  const statusChanges = new Map<string, "online" | "offline">();
+  const statusChanges = new Map<string, 'online' | 'offline'>();
 
   const updatePayload: Record<string, unknown> = {
     connection_status: params.status,
     last_seen_at: nowIso,
   };
-  if (params.status === "offline") {
+  if (params.status === 'offline') {
     updatePayload.is_ready = false;
   }
 
   const { error: updateErr } = await supabase
-    .from("battle_room_participants")
+    .from('battle_room_participants')
     .update(updatePayload)
-    .eq("room_id", params.roomId)
-    .eq("session_id", params.sessionId);
+    .eq('room_id', params.roomId)
+    .eq('session_id', params.sessionId);
 
   if (updateErr) {
     throw updateErr;
@@ -223,26 +220,26 @@ export async function handlePresenceUpdate(params: {
   }
 
   const { data: room, error: roomErr } = await supabase
-    .from("battle_rooms")
+    .from('battle_rooms')
     .select(
-      "id, status, host_session_id, finished_reason, winner_session_id, round_time_sec"
+      'id, status, host_session_id, finished_reason, winner_session_id, round_time_sec'
     )
-    .eq("id", params.roomId)
+    .eq('id', params.roomId)
     .single();
 
   if (roomErr || !room) {
-    throw roomErr || new Error("ROOM_NOT_FOUND");
+    throw roomErr || new Error('ROOM_NOT_FOUND');
   }
 
   const { data: participantRows, error: participantsErr } = await supabase
-    .from("battle_room_participants")
+    .from('battle_room_participants')
     .select(
-      "id, session_id, display_name, is_host, connection_status, total_score, joined_at, last_seen_at, is_ready"
+      'id, session_id, display_name, is_host, connection_status, total_score, joined_at, last_seen_at, is_ready'
     )
-    .eq("room_id", params.roomId);
+    .eq('room_id', params.roomId);
 
   if (participantsErr || !participantRows) {
-    throw participantsErr || new Error("PARTICIPANTS_NOT_FOUND");
+    throw participantsErr || new Error('PARTICIPANTS_NOT_FOUND');
   }
 
   const participants = participantRows as ParticipantRecord[];
@@ -251,29 +248,29 @@ export async function handlePresenceUpdate(params: {
   const thresholdTime = new Date(now.getTime() - OFFLINE_THRESHOLD_MS);
 
   const staleSessions = participants
-    .filter((p) => {
-      if (p.connection_status !== "online") return false;
+    .filter(p => {
+      if (p.connection_status !== 'online') return false;
       if (!p.last_seen_at) return true;
       const seen = new Date(p.last_seen_at);
       return seen < thresholdTime;
     })
-    .map((p) => p.session_id);
+    .map(p => p.session_id);
 
   if (staleSessions.length > 0) {
     const { error: staleUpdateErr } = await supabase
-      .from("battle_room_participants")
-      .update({ connection_status: "offline", is_ready: false })
-      .eq("room_id", params.roomId)
-      .in("session_id", staleSessions);
+      .from('battle_room_participants')
+      .update({ connection_status: 'offline', is_ready: false })
+      .eq('room_id', params.roomId)
+      .in('session_id', staleSessions);
 
     if (!staleUpdateErr) {
       markedOffline.push(...staleSessions);
-      staleSessions.forEach((sessionId) => {
-        statusChanges.set(sessionId, "offline");
+      staleSessions.forEach(sessionId => {
+        statusChanges.set(sessionId, 'offline');
       });
-      participants.forEach((p) => {
+      participants.forEach(p => {
         if (staleSessions.includes(p.session_id)) {
-          p.connection_status = "offline";
+          p.connection_status = 'offline';
         }
       });
     }
@@ -282,38 +279,38 @@ export async function handlePresenceUpdate(params: {
   const result: PresenceUpdateResult = {};
 
   const onlineParticipants = participants.filter(
-    (p) => p.connection_status === "online"
+    p => p.connection_status === 'online'
   );
 
   const { data: activeRound } = await supabase
-    .from("battle_room_rounds")
-    .select("id, round_no")
-    .eq("room_id", params.roomId)
-    .eq("status", "active")
-    .order("round_no", { ascending: false })
+    .from('battle_room_rounds')
+    .select('id, round_no')
+    .eq('room_id', params.roomId)
+    .eq('status', 'active')
+    .order('round_no', { ascending: false })
     .limit(1)
     .maybeSingle();
 
   if (activeRound && onlineParticipants.length > 0) {
     const { data: answers } = await supabase
-      .from("battle_room_answers")
-      .select("session_id")
-      .eq("round_id", activeRound.id);
+      .from('battle_room_answers')
+      .select('session_id')
+      .eq('round_id', activeRound.id);
 
-    const answeredSet = new Set((answers || []).map((a) => a.session_id));
-    const answeredCount = onlineParticipants.filter((p) =>
+    const answeredSet = new Set((answers || []).map(a => a.session_id));
+    const answeredCount = onlineParticipants.filter(p =>
       answeredSet.has(p.session_id)
     ).length;
 
     if (answeredCount === onlineParticipants.length) {
       await publishBattleEvent({
         roomId: params.roomId,
-        event: "all_participants_answered",
+        event: 'all_participants_answered',
         payload: {
           roundNo: activeRound.round_no,
           totalAnswered: answeredCount,
           totalParticipants: onlineParticipants.length,
-          reason: "presence_sync",
+          reason: 'presence_sync',
         },
       });
 
@@ -334,10 +331,10 @@ export async function handlePresenceUpdate(params: {
   }
 
   const hostParticipant = participants.find(
-    (p) => p.session_id === room.host_session_id
+    p => p.session_id === room.host_session_id
   );
   const shouldReassignHost =
-    !!hostParticipant && hostParticipant.connection_status !== "online";
+    !!hostParticipant && hostParticipant.connection_status !== 'online';
 
   if (shouldReassignHost && onlineParticipants.length > 0) {
     const sortedByJoin = [...onlineParticipants].sort((a, b) => {
@@ -353,25 +350,25 @@ export async function handlePresenceUpdate(params: {
 
     if (newHost && newHost.session_id !== room.host_session_id) {
       await supabase
-        .from("battle_room_participants")
+        .from('battle_room_participants')
         .update({ is_host: false })
-        .eq("room_id", params.roomId)
-        .eq("is_host", true);
+        .eq('room_id', params.roomId)
+        .eq('is_host', true);
 
       await supabase
-        .from("battle_room_participants")
+        .from('battle_room_participants')
         .update({ is_host: true })
-        .eq("room_id", params.roomId)
-        .eq("session_id", newHost.session_id);
+        .eq('room_id', params.roomId)
+        .eq('session_id', newHost.session_id);
 
       await supabase
-        .from("battle_rooms")
+        .from('battle_rooms')
         .update({ host_session_id: newHost.session_id })
-        .eq("id", params.roomId);
+        .eq('id', params.roomId);
 
       await publishBattleEvent({
         roomId: params.roomId,
-        event: "host_changed",
+        event: 'host_changed',
         payload: {
           sessionId: newHost.session_id,
           displayName: newHost.display_name,
@@ -385,37 +382,37 @@ export async function handlePresenceUpdate(params: {
     }
   }
 
-  if (room.status === "active" && onlineParticipants.length <= 1) {
+  if (room.status === 'active' && onlineParticipants.length <= 1) {
     const winnerSessionId =
       onlineParticipants.length === 1 ? onlineParticipants[0].session_id : null;
 
     await supabase
-      .from("battle_rooms")
+      .from('battle_rooms')
       .update({
-        status: "finished",
-        finished_reason: "opponent_disconnected",
+        status: 'finished',
+        finished_reason: 'opponent_disconnected',
         winner_session_id: winnerSessionId,
       })
-      .eq("id", params.roomId);
+      .eq('id', params.roomId);
 
     const { data: standings } = await supabase
-      .from("battle_room_participants")
-      .select("session_id, display_name, total_score, is_host")
-      .eq("room_id", params.roomId);
+      .from('battle_room_participants')
+      .select('session_id, display_name, total_score, is_host')
+      .eq('room_id', params.roomId);
 
     await publishBattleEvent({
       roomId: params.roomId,
-      event: "match_finished",
+      event: 'match_finished',
       payload: {
         roomId: params.roomId,
-        reason: "opponent_disconnected",
+        reason: 'opponent_disconnected',
         winnerSessionId,
         standings,
       },
     });
 
     result.battleFinished = {
-      reason: "opponent_disconnected",
+      reason: 'opponent_disconnected',
       winnerSessionId,
     };
   }
@@ -426,14 +423,14 @@ export async function handlePresenceUpdate(params: {
 
   if (statusChanges.size > 0) {
     const participantsBySession = new Map(
-      participants.map((p) => [p.session_id, p])
+      participants.map(p => [p.session_id, p])
     );
 
     const readinessResets = Array.from(statusChanges.entries())
-      .filter(([, status]) => status === "offline")
+      .filter(([, status]) => status === 'offline')
       .map(([sessionId]) => participantsBySession.get(sessionId))
       .filter((p): p is ParticipantRecord => Boolean(p))
-      .map((p) => ({
+      .map(p => ({
         sessionId: p.session_id,
         participantId: p.id,
         displayName: p.display_name,
@@ -442,17 +439,17 @@ export async function handlePresenceUpdate(params: {
 
     if (readinessResets.length > 0) {
       await Promise.all(
-        readinessResets.map((update) =>
+        readinessResets.map(update =>
           publishBattleEvent({
             roomId: params.roomId,
-            event: "participant_ready",
+            event: 'participant_ready',
             payload: {
               sessionId: update.sessionId,
               participantId: update.participantId,
               displayName: update.displayName,
               isHost: update.isHost,
               isReady: false,
-              reason: "offline",
+              reason: 'offline',
             },
           })
         )
@@ -470,7 +467,7 @@ export async function handlePresenceUpdate(params: {
 
     await publishBattleEvent({
       roomId: params.roomId,
-      event: "participant_status",
+      event: 'participant_status',
       payload: { changes },
     });
 

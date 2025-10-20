@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from 'react';
 
-import { SharedAnimatedBackground } from "../SharedAnimatedBackground";
-import { useViewport } from "@/src/hooks/useViewport";
+import { SharedAnimatedBackground } from '../SharedAnimatedBackground';
+import { useViewport } from '@/src/hooks/useViewport';
 
-import { BattleNotifications } from "../BattleNotifications";
+import { BattleNotifications } from '../BattleNotifications';
 
 interface BattlePageShellProps {
   children: ReactNode;

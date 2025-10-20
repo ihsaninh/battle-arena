@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactNode, useState } from "react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactNode, useState } from 'react';
 
 interface QueryProviderProps {
   children: ReactNode;
@@ -17,11 +17,11 @@ export default function Providers({ children }: QueryProviderProps) {
             gcTime: 5 * 60 * 1000, // 5 minutes
             retry: (failureCount, error): boolean => {
               // Don't retry on 4xx errors except 408 (timeout)
-              if (error instanceof Error && "status" in error) {
+              if (error instanceof Error && 'status' in error) {
                 const errorWithStatus = error as Error & { status: unknown };
                 const status = errorWithStatus.status;
                 if (
-                  typeof status === "number" &&
+                  typeof status === 'number' &&
                   status >= 400 &&
                   status < 500 &&
                   status !== 408

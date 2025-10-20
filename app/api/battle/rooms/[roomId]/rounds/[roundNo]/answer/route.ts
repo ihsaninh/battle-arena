@@ -1,19 +1,13 @@
-import { after, NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { after, NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { publishBattleEvent } from "@/src/lib/realtime";
-import { buildScoreboardDetails } from "@/src/lib/scoreboard-utils";
-import { evaluateAnswer } from "@/src/lib/ai/ai-scoring";
-import {
-  createErrorResponse,
-  ERROR_TYPES,
-} from "@/src/lib/api-errors";
-import {
-  answerSubmitLimiter,
-  checkRateLimit,
-} from "@/src/lib/rate-limit";
-import { getBattleSessionIdFromCookies } from "@/src/lib/session";
-import { supabaseAdmin } from "@/src/lib/supabase";
+import { publishBattleEvent } from '@/src/lib/realtime';
+import { buildScoreboardDetails } from '@/src/lib/scoreboard-utils';
+import { evaluateAnswer } from '@/src/lib/ai/ai-scoring';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
+import { answerSubmitLimiter, checkRateLimit } from '@/src/lib/rate-limit';
+import { getBattleSessionIdFromCookies } from '@/src/lib/session';
+import { supabaseAdmin } from '@/src/lib/supabase';
 
 const AnswerSchema = z.object({ answer_text: z.string().min(1).max(5000) });
 const McqAnswerSchema = z.object({ choice_id: z.string().min(1) });
@@ -41,14 +35,14 @@ export async function POST(
 
     // Load round and check status/deadline
     const { data: round, error: roundErr } = await supabase
-      .from("battle_room_rounds")
-      .select("id, status, deadline_at, question_id, question_json")
-      .eq("room_id", roomId)
-      .eq("round_no", Number(roundNo))
+      .from('battle_room_rounds')
+      .select('id, status, deadline_at, question_id, question_json')
+      .eq('room_id', roomId)
+      .eq('round_no', Number(roundNo))
       .single();
     if (roundErr || !round)
       return createErrorResponse(ERROR_TYPES.ROUND_NOT_FOUND);
-    if (round.status !== "active")
+    if (round.status !== 'active')
       return createErrorResponse(ERROR_TYPES.ROUND_NOT_ACTIVE);
     if (
       round.deadline_at &&
@@ -64,21 +58,21 @@ export async function POST(
 
     // Ensure participant is in room
     const { data: part, error: partErr } = await supabase
-      .from("battle_room_participants")
-      .select("id")
-      .eq("room_id", roomId)
-      .eq("session_id", sessionId)
+      .from('battle_room_participants')
+      .select('id')
+      .eq('room_id', roomId)
+      .eq('session_id', sessionId)
       .single();
     if (partErr || !part)
       return createErrorResponse(ERROR_TYPES.NOT_PARTICIPANT);
 
     // Determine question type for this room
     const { data: room } = await supabase
-      .from("battle_rooms")
-      .select("question_type, round_time_sec")
-      .eq("id", roomId)
+      .from('battle_rooms')
+      .select('question_type, round_time_sec')
+      .eq('id', roomId)
       .single();
-    const isMcq = (room?.question_type || "open-ended") === "multiple-choice";
+    const isMcq = (room?.question_type || 'open-ended') === 'multiple-choice';
 
     if (isMcq) {
       // MCQ submission path
@@ -92,7 +86,7 @@ export async function POST(
         | null;
       if (!qJson || !qJson.choices || !qJson.correctChoiceId) {
         return NextResponse.json(
-          { error: "MCQ data not available for this round" },
+          { error: 'MCQ data not available for this round' },
           { status: 400 }
         );
       }
@@ -101,9 +95,9 @@ export async function POST(
 
       // Compute time elapsed from reveal
       const { data: reveal } = await supabase
-        .from("battle_room_rounds")
-        .select("revealed_at")
-        .eq("id", round.id)
+        .from('battle_room_rounds')
+        .select('revealed_at')
+        .eq('id', round.id)
         .single();
       const revealedAt = reveal?.revealed_at
         ? new Date(reveal.revealed_at).getTime()
@@ -125,13 +119,13 @@ export async function POST(
 
       const id = `ans-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const { error: ansErr } = await supabase
-        .from("battle_room_answers")
+        .from('battle_room_answers')
         .insert({
           id,
           room_id: roomId,
           round_id: round.id,
           session_id: sessionId,
-          answer_text: "",
+          answer_text: '',
           choice_id: body.choice_id,
           is_correct: correct,
           time_ms: timeMs,
@@ -141,15 +135,15 @@ export async function POST(
           feedback: null,
         });
       if (ansErr) {
-        if ((ansErr as Error & { code?: string }).code === "23505") {
+        if ((ansErr as Error & { code?: string }).code === '23505') {
           return NextResponse.json(
-            { error: "Already answered" },
+            { error: 'Already answered' },
             { status: 409 }
           );
         }
-        console.error("Answer insert error:", ansErr);
+        console.error('Answer insert error:', ansErr);
         return NextResponse.json(
-          { error: "Failed to store answer" },
+          { error: 'Failed to store answer' },
           { status: 500 }
         );
       }
@@ -158,12 +152,12 @@ export async function POST(
       after(async () => {
         await publishBattleEvent({
           roomId,
-          event: "answer_received",
+          event: 'answer_received',
           payload: { roundNo: Number(roundNo), participantId: part.id },
         });
       });
 
-      const autoAdvanceEnabled = process.env.BATTLE_AUTO_ADVANCE !== "false";
+      const autoAdvanceEnabled = process.env.BATTLE_AUTO_ADVANCE !== 'false';
       if (autoAdvanceEnabled) {
         after(() =>
           checkAndAutoAdvanceRound(roomId, round.id, Number(roundNo))
@@ -182,38 +176,38 @@ export async function POST(
       language: string;
       category: string;
     } = {
-      prompt: "",
+      prompt: '',
       difficulty: 2,
       rubric_json: null,
-      language: "en",
-      category: "tech",
+      language: 'en',
+      category: 'tech',
     };
     if (round.question_id) {
       const { data: q, error: qErr } = await supabase
-        .from("quiz_questions")
-        .select("prompt, difficulty, rubric_json, language, category_id")
-        .eq("id", round.question_id)
+        .from('quiz_questions')
+        .select('prompt, difficulty, rubric_json, language, category_id')
+        .eq('id', round.question_id)
         .single();
       if (qErr || !q)
         return NextResponse.json(
-          { error: "Question missing" },
+          { error: 'Question missing' },
           { status: 500 }
         );
       question = {
         prompt: q.prompt,
         difficulty: q.difficulty ?? 2,
         rubric_json: q.rubric_json,
-        language: q.language ?? "en",
-        category: q.category_id ?? "tech",
+        language: q.language ?? 'en',
+        category: q.category_id ?? 'tech',
       };
     } else if (round.question_json) {
       const q = round.question_json as Record<string, unknown>;
       question = {
-        prompt: (q.prompt as string) ?? "",
+        prompt: (q.prompt as string) ?? '',
         difficulty: (q.difficulty as number) ?? 2,
         rubric_json: (q.rubric_json as Record<string, unknown>) ?? null,
-        language: (q.language as string) ?? "en",
-        category: (q.category as string) ?? "tech",
+        language: (q.language as string) ?? 'en',
+        category: (q.category as string) ?? 'tech',
       };
     }
 
@@ -231,7 +225,7 @@ export async function POST(
     const id = `ans-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     const { error: ansErr } = await supabase
-      .from("battle_room_answers")
+      .from('battle_room_answers')
       .insert({
         id,
         room_id: roomId,
@@ -244,14 +238,14 @@ export async function POST(
         feedback: ai.feedback,
       });
     if (ansErr) {
-      if ((ansErr as Error & { code?: string }).code === "23505") {
+      if ((ansErr as Error & { code?: string }).code === '23505') {
         return NextResponse.json(
-          { error: "Already answered" },
+          { error: 'Already answered' },
           { status: 409 }
         );
       }
       return NextResponse.json(
-        { error: "Failed to store answer" },
+        { error: 'Failed to store answer' },
         { status: 500 }
       );
     }
@@ -260,13 +254,13 @@ export async function POST(
     after(async () => {
       await publishBattleEvent({
         roomId,
-        event: "answer_received",
+        event: 'answer_received',
         payload: { roundNo: Number(roundNo), participantId: part.id },
       });
     });
 
     // Check if all participants have answered for auto-advance
-    const autoAdvanceEnabled = process.env.BATTLE_AUTO_ADVANCE !== "false";
+    const autoAdvanceEnabled = process.env.BATTLE_AUTO_ADVANCE !== 'false';
     if (autoAdvanceEnabled) {
       // Run auto-advance in the background so the response isn't delayed
       after(() => checkAndAutoAdvanceRound(roomId, round.id, Number(roundNo)));
@@ -292,7 +286,7 @@ async function checkAndAutoAdvanceRound(
   try {
     // Use RPC function for atomic round closure and score updates
     const { data: result, error: rpcError } = await supabase.rpc(
-      "close_round_and_update_scores",
+      'close_round_and_update_scores',
       {
         p_round_id: roundId,
         p_room_id: roomId,
@@ -300,7 +294,7 @@ async function checkAndAutoAdvanceRound(
     );
 
     if (rpcError) {
-      console.error("[DEBUG] RPC error in auto-advance:", rpcError);
+      console.error('[DEBUG] RPC error in auto-advance:', rpcError);
       // Fallback to original logic if RPC fails
       return await checkAndAutoAdvanceRoundFallback(roomId, roundId, roundNo);
     }
@@ -310,25 +304,25 @@ async function checkAndAutoAdvanceRound(
     }
 
     const { data: answers } = await supabase
-      .from("battle_room_answers")
-      .select("session_id, score_final")
-      .eq("round_id", roundId);
+      .from('battle_room_answers')
+      .select('session_id, score_final')
+      .eq('round_id', roundId);
 
     const { data: participants } = await supabase
-      .from("battle_room_participants")
-      .select("id, session_id, display_name, total_score")
-      .eq("room_id", roomId);
+      .from('battle_room_participants')
+      .select('id, session_id, display_name, total_score')
+      .eq('room_id', roomId);
 
     const roundScores = new Map(
-      (answers || []).map((a) => [a.session_id, a.score_final || 0])
+      (answers || []).map(a => [a.session_id, a.score_final || 0])
     );
 
     const roundScoreboard = (participants || [])
-      .map((participant) => {
+      .map(participant => {
         const roundScore = roundScores.get(participant.session_id) || 0;
         return {
           sessionId: participant.session_id,
-          displayName: participant.display_name || "Player",
+          displayName: participant.display_name || 'Player',
           participantId: participant.id,
           roundScore,
           totalScore: participant.total_score || roundScore,
@@ -337,33 +331,35 @@ async function checkAndAutoAdvanceRound(
       .sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
 
     const { count: remainingRounds } = await supabase
-      .from("battle_room_rounds")
-      .select("*", { count: "exact", head: true })
-      .eq("room_id", roomId)
-      .in("status", ["pending", "active"]);
+      .from('battle_room_rounds')
+      .select('*', { count: 'exact', head: true })
+      .eq('room_id', roomId)
+      .in('status', ['pending', 'active']);
 
-      const { question, answers: detailedAnswers } = await buildScoreboardDetails({
+    const { question, answers: detailedAnswers } = await buildScoreboardDetails(
+      {
         supabase,
         roomId,
         roundId,
-      });
+      }
+    );
 
-      await publishBattleEvent({
-        roomId,
-        event: "round_closed",
-        payload: {
-          roundNo,
-          scoreboard: roundScoreboard,
-          stage: "scoreboard",
-          generatedAt: new Date().toISOString(),
-          reason: "all_answered",
-          hasMoreRounds: !!remainingRounds && remainingRounds > 0,
-          question,
-          answers: detailedAnswers,
-        },
-      });
+    await publishBattleEvent({
+      roomId,
+      event: 'round_closed',
+      payload: {
+        roundNo,
+        scoreboard: roundScoreboard,
+        stage: 'scoreboard',
+        generatedAt: new Date().toISOString(),
+        reason: 'all_answered',
+        hasMoreRounds: !!remainingRounds && remainingRounds > 0,
+        question,
+        answers: detailedAnswers,
+      },
+    });
   } catch (error) {
-    console.error("[DEBUG] Error in checkAndAutoAdvanceRound:", error);
+    console.error('[DEBUG] Error in checkAndAutoAdvanceRound:', error);
   }
 }
 
@@ -380,26 +376,26 @@ async function checkAndAutoAdvanceRoundFallback(
   try {
     // First, check if the round is still active (not already closed by another request)
     const { data: currentRound } = await supabase
-      .from("battle_room_rounds")
-      .select("status")
-      .eq("id", roundId)
+      .from('battle_room_rounds')
+      .select('status')
+      .eq('id', roundId)
       .single();
 
-    if (!currentRound || currentRound.status !== "active") {
+    if (!currentRound || currentRound.status !== 'active') {
       return;
     }
 
     // Get total participants in the room
     const { count: totalParticipants } = await supabase
-      .from("battle_room_participants")
-      .select("*", { count: "exact", head: true })
-      .eq("room_id", roomId);
+      .from('battle_room_participants')
+      .select('*', { count: 'exact', head: true })
+      .eq('room_id', roomId);
 
     // Get total answers for this round
     const { count: totalAnswers } = await supabase
-      .from("battle_room_answers")
-      .select("*", { count: "exact", head: true })
-      .eq("round_id", roundId);
+      .from('battle_room_answers')
+      .select('*', { count: 'exact', head: true })
+      .eq('round_id', roundId);
 
     // If everyone has answered, auto-close the round
     if (
@@ -409,11 +405,11 @@ async function checkAndAutoAdvanceRoundFallback(
     ) {
       // Close the current round atomically
       const { data: closedRound, error: closeError } = await supabase
-        .from("battle_room_rounds")
-        .update({ status: "scoreboard" })
-        .eq("id", roundId)
-        .eq("status", "active") // Only close if still active
-        .select("status")
+        .from('battle_room_rounds')
+        .update({ status: 'scoreboard' })
+        .eq('id', roundId)
+        .eq('status', 'active') // Only close if still active
+        .select('status')
         .single();
 
       if (closeError || !closedRound) {
@@ -422,9 +418,9 @@ async function checkAndAutoAdvanceRoundFallback(
 
       // Get answers for scoreboard
       const { data: answers } = await supabase
-        .from("battle_room_answers")
-        .select("session_id, score_final")
-        .eq("round_id", roundId);
+        .from('battle_room_answers')
+        .select('session_id, score_final')
+        .eq('round_id', roundId);
 
       // Update participant totals with atomic increments
       if (answers && answers.length > 0) {
@@ -443,20 +439,20 @@ async function checkAndAutoAdvanceRoundFallback(
 
       // Prepare scoreboard for broadcast
       const { data: participants } = await supabase
-        .from("battle_room_participants")
-        .select("id, session_id, display_name, total_score")
-        .eq("room_id", roomId);
+        .from('battle_room_participants')
+        .select('id, session_id, display_name, total_score')
+        .eq('room_id', roomId);
 
       const roundScores = new Map(
-        (answers || []).map((a) => [a.session_id, a.score_final || 0])
+        (answers || []).map(a => [a.session_id, a.score_final || 0])
       );
 
       const roundScoreboard = (participants || [])
-        .map((participant) => {
+        .map(participant => {
           const roundScore = roundScores.get(participant.session_id) || 0;
           return {
             sessionId: participant.session_id,
-            displayName: participant.display_name || "Player",
+            displayName: participant.display_name || 'Player',
             participantId: participant.id,
             roundScore,
             totalScore: participant.total_score || roundScore,
@@ -465,25 +461,26 @@ async function checkAndAutoAdvanceRoundFallback(
         .sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
 
       const { count: remainingRounds } = await supabase
-        .from("battle_room_rounds")
-        .select("*", { count: "exact", head: true })
-        .eq("room_id", roomId)
-        .in("status", ["pending", "active"]);
+        .from('battle_room_rounds')
+        .select('*', { count: 'exact', head: true })
+        .eq('room_id', roomId)
+        .in('status', ['pending', 'active']);
 
-      const { question, answers: detailedAnswers } = await buildScoreboardDetails({
-        supabase,
-        roomId,
-        roundId,
-      });
+      const { question, answers: detailedAnswers } =
+        await buildScoreboardDetails({
+          supabase,
+          roomId,
+          roundId,
+        });
 
       await publishBattleEvent({
         roomId,
-        event: "round_closed",
+        event: 'round_closed',
         payload: {
           roundNo,
           scoreboard: roundScoreboard,
-          reason: "all_answered",
-          stage: "scoreboard",
+          reason: 'all_answered',
+          stage: 'scoreboard',
           generatedAt: new Date().toISOString(),
           hasMoreRounds: !!remainingRounds && remainingRounds > 0,
           question,
@@ -507,7 +504,7 @@ async function updateParticipantScoreAtomic(
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       // Use raw SQL for atomic increment
-      const { error } = await supabase.rpc("increment_participant_score", {
+      const { error } = await supabase.rpc('increment_participant_score', {
         p_room_id: roomId,
         p_session_id: sessionId,
         p_score_increment: scoreIncrement,
@@ -519,20 +516,20 @@ async function updateParticipantScoreAtomic(
 
       // If RPC doesn't exist, fallback to conditional update
       const { data: current } = await supabase
-        .from("battle_room_participants")
-        .select("total_score")
-        .eq("room_id", roomId)
-        .eq("session_id", sessionId)
+        .from('battle_room_participants')
+        .select('total_score')
+        .eq('room_id', roomId)
+        .eq('session_id', sessionId)
         .single();
 
       if (current) {
         const newScore = (current.total_score || 0) + scoreIncrement;
         const { error: updateError } = await supabase
-          .from("battle_room_participants")
+          .from('battle_room_participants')
           .update({ total_score: newScore })
-          .eq("room_id", roomId)
-          .eq("session_id", sessionId)
-          .eq("total_score", current.total_score); // Optimistic locking
+          .eq('room_id', roomId)
+          .eq('session_id', sessionId)
+          .eq('total_score', current.total_score); // Optimistic locking
 
         if (!updateError) {
           return; // Success
@@ -541,7 +538,7 @@ async function updateParticipantScoreAtomic(
 
       // If we get here, there was a conflict, retry after a short delay
       if (attempt < maxRetries - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 50 * (attempt + 1)));
+        await new Promise(resolve => setTimeout(resolve, 50 * (attempt + 1)));
       }
     } catch (error) {
       console.error(
@@ -549,7 +546,7 @@ async function updateParticipantScoreAtomic(
         error
       );
       if (attempt < maxRetries - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 50 * (attempt + 1)));
+        await new Promise(resolve => setTimeout(resolve, 50 * (attempt + 1)));
       }
     }
   }

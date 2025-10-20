@@ -1,12 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import type { ApiParticipant } from "@/src/types/battle";
-import {
-  createErrorResponse,
-  ERROR_TYPES,
-} from "@/src/lib/api-errors";
-import { getBattleSessionIdFromCookies } from "@/src/lib/session";
-import { supabaseAdmin } from "@/src/lib/supabase";
+import type { ApiParticipant } from '@/src/types/battle';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
+import { getBattleSessionIdFromCookies } from '@/src/lib/session';
+import { supabaseAdmin } from '@/src/lib/supabase';
 
 type QuestionSummary = {
   prompt: string;
@@ -32,25 +29,25 @@ export async function GET(
 
     // Get room info with capacity
     const { data: room, error: roomErr } = await supabase
-      .from("battle_rooms")
+      .from('battle_rooms')
       .select(
-        "id, topic, category_id, language, num_questions, round_time_sec, status, start_time, capacity, question_type, room_code, host_session_id, difficulty"
+        'id, topic, category_id, language, num_questions, round_time_sec, status, start_time, capacity, question_type, room_code, host_session_id, difficulty'
       )
-      .eq("id", roomId)
+      .eq('id', roomId)
       .single();
     if (roomErr || !room)
       return createErrorResponse(ERROR_TYPES.ROOM_NOT_FOUND);
 
     const { data: membership, error: membershipErr } = await supabase
-      .from("battle_room_participants")
+      .from('battle_room_participants')
       .select(
-        "id, session_id, display_name, is_host, connection_status, total_score"
+        'id, session_id, display_name, is_host, connection_status, total_score'
       )
-      .eq("room_id", roomId)
-      .eq("session_id", sessionId)
+      .eq('room_id', roomId)
+      .eq('session_id', sessionId)
       .maybeSingle();
 
-    if (membershipErr && membershipErr.code !== "PGRST116") {
+    if (membershipErr && membershipErr.code !== 'PGRST116') {
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -63,9 +60,9 @@ export async function GET(
     let hostDisplayName: string | null = null;
     if (isHostSession && !membership) {
       const { data: hostSession } = await supabase
-        .from("battle_sessions")
-        .select("display_name")
-        .eq("id", sessionId)
+        .from('battle_sessions')
+        .select('display_name')
+        .eq('id', sessionId)
         .maybeSingle();
       hostDisplayName = hostSession?.display_name ?? null;
     }
@@ -73,12 +70,12 @@ export async function GET(
     // Get participants with session_id for proper mapping
     // Order by participant ID to maintain consistent ordering
     const { data: participants } = await supabase
-      .from("battle_room_participants")
+      .from('battle_room_participants')
       .select(
-        "id, session_id, display_name, is_host, connection_status, total_score, joined_at, last_seen_at, is_ready"
+        'id, session_id, display_name, is_host, connection_status, total_score, joined_at, last_seen_at, is_ready'
       )
-      .eq("room_id", roomId)
-      .order("id", { ascending: true }); // Use participant ID for consistent ordering
+      .eq('room_id', roomId)
+      .order('id', { ascending: true }); // Use participant ID for consistent ordering
     // Build current user response from membership or host session
     let currentUser = null;
     if (membership) {
@@ -99,13 +96,13 @@ export async function GET(
 
     // Active round snapshot (if any)
     const { data: round } = await supabase
-      .from("battle_room_rounds")
+      .from('battle_room_rounds')
       .select(
-        "round_no, revealed_at, deadline_at, status, question_id, question_json"
+        'round_no, revealed_at, deadline_at, status, question_id, question_json'
       )
-      .eq("room_id", roomId)
-      .in("status", ["active", "scoreboard"])
-      .order("round_no", { ascending: false })
+      .eq('room_id', roomId)
+      .in('status', ['active', 'scoreboard'])
+      .order('round_no', { ascending: false })
       .limit(1)
       .maybeSingle();
 
@@ -113,9 +110,9 @@ export async function GET(
     if (round && round.revealed_at) {
       if (round.question_id) {
         const { data: q } = await supabase
-          .from("quiz_questions")
-          .select("prompt, difficulty, language, category_id")
-          .eq("id", round.question_id)
+          .from('quiz_questions')
+          .select('prompt, difficulty, language, category_id')
+          .eq('id', round.question_id)
           .single();
         if (q)
           questionSummary = {
@@ -138,7 +135,7 @@ export async function GET(
           difficulty: q.difficulty,
           language: q.language,
           category: q.category,
-          choices: q.choices?.map((c) => ({ id: c.id, text: c.text })),
+          choices: q.choices?.map(c => ({ id: c.id, text: c.text })),
         };
       }
     }

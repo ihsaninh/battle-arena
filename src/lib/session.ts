@@ -1,8 +1,8 @@
-import type { NextRequest } from "next/server";
-import { battleApi, BattleSessionRequest } from "./api";
+import type { NextRequest } from 'next/server';
+import { battleApi, BattleSessionRequest } from './api';
 
-export const SESSION_COOKIE = "quiz_session_id";
-export const BATTLE_SESSION_COOKIE = "battle_session_id";
+export const SESSION_COOKIE = 'quiz_session_id';
+export const BATTLE_SESSION_COOKIE = 'battle_session_id';
 
 export function getSessionIdFromCookies(req: NextRequest): string | null {
   try {
@@ -29,28 +29,28 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
       return false;
     }
 
-    const storageKey = "battle_session_fp";
-    const cookieKey = "battle_session_fp";
+    const storageKey = 'battle_session_fp';
+    const cookieKey = 'battle_session_fp';
     let fingerprint: string | null = null;
 
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       try {
         fingerprint = window.localStorage.getItem(storageKey);
       } catch (err) {
-        console.warn("[ensureSession] Unable to access localStorage", err);
+        console.warn('[ensureSession] Unable to access localStorage', err);
       }
 
-      if (!fingerprint && typeof document !== "undefined") {
+      if (!fingerprint && typeof document !== 'undefined') {
         const cookieMatch = document.cookie
-          .split("; ")
-          .find((cookie) => cookie.startsWith(`${cookieKey}=`));
-        fingerprint = cookieMatch ? cookieMatch.split("=")[1] : null;
+          .split('; ')
+          .find(cookie => cookie.startsWith(`${cookieKey}=`));
+        fingerprint = cookieMatch ? cookieMatch.split('=')[1] : null;
       }
 
       if (!fingerprint) {
         const random =
-          typeof window !== "undefined" &&
-          "crypto" in window &&
+          typeof window !== 'undefined' &&
+          'crypto' in window &&
           window.crypto?.randomUUID
             ? window.crypto.randomUUID()
             : `gen-${Math.random().toString(36).slice(2)}`;
@@ -60,12 +60,12 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
           window.localStorage.setItem(storageKey, fingerprint);
         } catch (err) {
           console.warn(
-            "[ensureSession] Failed to persist fingerprint to localStorage",
+            '[ensureSession] Failed to persist fingerprint to localStorage',
             err
           );
         }
 
-        if (typeof document !== "undefined") {
+        if (typeof document !== 'undefined') {
           document.cookie = `${cookieKey}=${fingerprint}; path=/; max-age=${
             60 * 60 * 24 * 30
           }`;
@@ -80,17 +80,17 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
 
     await battleApi.createSession(payload);
 
-    if (typeof window !== "undefined" && fingerprint) {
+    if (typeof window !== 'undefined' && fingerprint) {
       try {
         window.localStorage.setItem(storageKey, fingerprint);
       } catch (err) {
         console.warn(
-          "[ensureSession] Failed to persist fingerprint after session creation",
+          '[ensureSession] Failed to persist fingerprint after session creation',
           err
         );
       }
 
-      if (typeof document !== "undefined") {
+      if (typeof document !== 'undefined') {
         document.cookie = `${cookieKey}=${fingerprint}; path=/; max-age=${
           60 * 60 * 24 * 30
         }`;
@@ -99,8 +99,7 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
 
     return true;
   } catch (error) {
-    console.error("[ensureSession] Unexpected error", error);
+    console.error('[ensureSession] Unexpected error', error);
     return false;
   }
 };
-

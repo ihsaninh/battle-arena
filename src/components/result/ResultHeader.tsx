@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { FaTrophy } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import { FaTrophy } from 'react-icons/fa';
 
 interface ResultHeaderProps {
   topic?: string;
@@ -25,7 +25,7 @@ export function ResultHeader({
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ delay: 0.3, type: "spring" }}
+        transition={{ delay: 0.3, type: 'spring' }}
         className="w-24 h-24 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center mx-auto mb-6"
       >
         <FaTrophy className="w-12 h-12 text-white" />
@@ -35,7 +35,7 @@ export function ResultHeader({
         🏆 Battle Complete!
       </h1>
       <p className="text-gray-300 text-lg">
-        {topic || "Quiz"} • {numQuestions} Questions
+        {topic || 'Quiz'} • {numQuestions} Questions
       </p>
 
       {/* User's Performance */}

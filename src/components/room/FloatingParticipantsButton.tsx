@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
-import { FaChevronUp, FaInfo, FaUsers } from "react-icons/fa";
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
+import { FaChevronUp, FaInfo, FaUsers } from 'react-icons/fa';
 
-import { useBattleStore } from "@/src/lib/battle-store";
+import { useBattleStore } from '@/src/lib/battle-store';
 
-import { Participants } from "./Participants";
-import { RoomInfo } from "./RoomInfo";
+import { Participants } from './Participants';
+import { RoomInfo } from './RoomInfo';
 
 interface FloatingParticipantsButtonProps {
   roomId: string;
@@ -20,8 +20,8 @@ export function FloatingParticipantsButton({
 }: FloatingParticipantsButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState<"participants" | "roomInfo">(
-    "participants"
+  const [activeTab, setActiveTab] = useState<'participants' | 'roomInfo'>(
+    'participants'
   );
 
   const { answerStatus } = useBattleStore();
@@ -44,7 +44,7 @@ export function FloatingParticipantsButton({
           y: {
             duration: 1.5,
             repeat: hasActivity ? Infinity : 0,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           },
         }}
         whileTap={{ scale: 0.95 }}
@@ -96,7 +96,7 @@ export function FloatingParticipantsButton({
                 opacity: 1,
                 scale: 1,
                 y: 0,
-                height: isCollapsed ? "auto" : "auto",
+                height: isCollapsed ? 'auto' : 'auto',
               }}
               exit={{ opacity: 0, scale: 0.95, y: 100 }}
               className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-slate-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-3xl max-h-[85vh] overflow-hidden shadow-2xl"
@@ -115,11 +115,11 @@ export function FloatingParticipantsButton({
                   <div className="flex items-center gap-2">
                     <motion.button
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setActiveTab("participants")}
+                      onClick={() => setActiveTab('participants')}
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                        activeTab === "participants"
-                          ? "bg-blue-500/20 text-blue-300 border border-blue-500/30 shadow-lg"
-                          : "text-gray-400 hover:text-white hover:bg-white/5"
+                        activeTab === 'participants'
+                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 shadow-lg'
+                          : 'text-gray-400 hover:text-white hover:bg-white/5'
                       }`}
                     >
                       <FaUsers className="w-4 h-4" />
@@ -134,11 +134,11 @@ export function FloatingParticipantsButton({
                     </motion.button>
                     <motion.button
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setActiveTab("roomInfo")}
+                      onClick={() => setActiveTab('roomInfo')}
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                        activeTab === "roomInfo"
-                          ? "bg-purple-500/20 text-purple-300 border border-purple-500/30 shadow-lg"
-                          : "text-gray-400 hover:text-white hover:bg-white/5"
+                        activeTab === 'roomInfo'
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30 shadow-lg'
+                          : 'text-gray-400 hover:text-white hover:bg-white/5'
                       }`}
                     >
                       <FaInfo className="w-4 h-4" />
@@ -151,7 +151,7 @@ export function FloatingParticipantsButton({
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsCollapsed(!isCollapsed)}
                       className="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5"
-                      aria-label={isCollapsed ? "Expand" : "Collapse"}
+                      aria-label={isCollapsed ? 'Expand' : 'Collapse'}
                     >
                       <motion.div
                         animate={{ rotate: isCollapsed ? 180 : 0 }}
@@ -189,7 +189,7 @@ export function FloatingParticipantsButton({
                 {!isCollapsed && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
+                    animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
@@ -200,7 +200,7 @@ export function FloatingParticipantsButton({
                       exit={{ y: -20 }}
                       className="p-4 overflow-y-auto max-h-[calc(85vh-120px)]"
                     >
-                      {activeTab === "participants" ? (
+                      {activeTab === 'participants' ? (
                         <Participants roomId={roomId} variant="compact" />
                       ) : (
                         <RoomInfo roomId={roomId} variant="compact" />

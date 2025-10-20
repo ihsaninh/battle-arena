@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect } from 'react';
 
 import {
   BattleHeader,
   BattlePageShell,
   CreateRoomForm,
   RoomCreatedSuccess,
-} from "@/src/components";
-import { useBattleLanding } from "@/src/hooks/useBattleLanding";
+} from '@/src/components';
+import { useBattleLanding } from '@/src/hooks/useBattleLanding';
 
 export default function BattleCreatePage() {
   const router = useRouter();
@@ -28,12 +28,12 @@ export default function BattleCreatePage() {
   } = useBattleLanding();
 
   useEffect(() => {
-    setGameMode("create");
+    setGameMode('create');
   }, [setGameMode]);
 
   const handleNavigateToLanding = useCallback(
-    (mode: "create" | "join" | null) => {
-      router.push(mode ? `/${mode}` : "/");
+    (mode: 'create' | 'join' | null) => {
+      router.push(mode ? `/${mode}` : '/');
     },
     [router]
   );

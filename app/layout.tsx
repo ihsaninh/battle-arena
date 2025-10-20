@@ -1,19 +1,28 @@
-import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Outfit } from 'next/font/google';
+import './globals.css';
 
-import { SWRegister } from "@/src/components";
-import Providers from "./providers";
+import { SWRegister } from '@/src/components';
+import Providers from './providers';
 
 const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
+  variable: '--font-outfit',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "Battle Arena | Ihsan Nurul Habib - Portfolio",
+  title: 'Battle Arena | Ihsan Nurul Habib - Portfolio',
   description:
-    "Challenge your friends in real-time knowledge battles! Create or join quiz battles on various topics.",
+    'Challenge your friends in real-time knowledge battles! Create or join quiz battles on various topics.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/images/battle-icon.svg',
+    apple: '/images/battle-icon.svg',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+  },
 };
 
 export default function RootLayout({
@@ -25,7 +34,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${outfit.variable} antialiased`}
-        style={{ fontFamily: "var(--font-outfit)" }}
+        style={{ fontFamily: 'var(--font-outfit)' }}
       >
         <Providers>
           <SWRegister />

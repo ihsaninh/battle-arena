@@ -24,7 +24,7 @@ export class ApiErrorResponse extends Error {
     retryable: boolean = false
   ) {
     super(message);
-    this.name = "ApiErrorResponse";
+    this.name = 'ApiErrorResponse';
     this.code = code;
     this.statusCode = statusCode;
     this.details = details;
@@ -36,24 +36,24 @@ export class ApiErrorResponse extends Error {
 export const ERROR_TYPES = {
   // Authentication & Authorization
   MISSING_SESSION: new ApiErrorResponse(
-    "MISSING_SESSION",
-    "Authentication required. Please refresh the page.",
+    'MISSING_SESSION',
+    'Authentication required. Please refresh the page.',
     401,
     undefined,
     false
   ),
 
   INVALID_SESSION: new ApiErrorResponse(
-    "INVALID_SESSION",
-    "Session expired. Please rejoin the room.",
+    'INVALID_SESSION',
+    'Session expired. Please rejoin the room.',
     401,
     undefined,
     false
   ),
 
   NOT_PARTICIPANT: new ApiErrorResponse(
-    "NOT_PARTICIPANT",
-    "You are not a participant in this room.",
+    'NOT_PARTICIPANT',
+    'You are not a participant in this room.',
     403,
     undefined,
     false
@@ -61,32 +61,32 @@ export const ERROR_TYPES = {
 
   // Room & Round Errors
   ROOM_NOT_FOUND: new ApiErrorResponse(
-    "ROOM_NOT_FOUND",
-    "Room not found or has been deleted.",
+    'ROOM_NOT_FOUND',
+    'Room not found or has been deleted.',
     404,
     undefined,
     false
   ),
 
   ROUND_NOT_FOUND: new ApiErrorResponse(
-    "ROUND_NOT_FOUND",
-    "Round not found.",
+    'ROUND_NOT_FOUND',
+    'Round not found.',
     404,
     undefined,
     false
   ),
 
   ROUND_NOT_ACTIVE: new ApiErrorResponse(
-    "ROUND_NOT_ACTIVE",
-    "This round is not currently active.",
+    'ROUND_NOT_ACTIVE',
+    'This round is not currently active.',
     400,
     undefined,
     false
   ),
 
   ROUND_ALREADY_ANSWERED: new ApiErrorResponse(
-    "ROUND_ALREADY_ANSWERED",
-    "You have already answered this round.",
+    'ROUND_ALREADY_ANSWERED',
+    'You have already answered this round.',
     409,
     undefined,
     false
@@ -94,8 +94,8 @@ export const ERROR_TYPES = {
 
   // Time & Deadline Errors
   DEADLINE_PASSED: new ApiErrorResponse(
-    "DEADLINE_PASSED",
-    "The time limit for this round has expired.",
+    'DEADLINE_PASSED',
+    'The time limit for this round has expired.',
     400,
     undefined,
     false
@@ -103,8 +103,8 @@ export const ERROR_TYPES = {
 
   // Rate Limiting
   RATE_LIMIT_EXCEEDED: new ApiErrorResponse(
-    "RATE_LIMIT_EXCEEDED",
-    "Too many requests. Please wait before trying again.",
+    'RATE_LIMIT_EXCEEDED',
+    'Too many requests. Please wait before trying again.',
     429,
     undefined,
     true
@@ -112,16 +112,16 @@ export const ERROR_TYPES = {
 
   // Data Validation
   INVALID_INPUT: new ApiErrorResponse(
-    "INVALID_INPUT",
-    "Invalid input data provided.",
+    'INVALID_INPUT',
+    'Invalid input data provided.',
     400,
     undefined,
     false
   ),
 
   MISSING_QUESTION_DATA: new ApiErrorResponse(
-    "MISSING_QUESTION_DATA",
-    "Question data is not available.",
+    'MISSING_QUESTION_DATA',
+    'Question data is not available.',
     500,
     undefined,
     true
@@ -129,16 +129,16 @@ export const ERROR_TYPES = {
 
   // Database & System Errors
   DATABASE_ERROR: new ApiErrorResponse(
-    "DATABASE_ERROR",
-    "Database operation failed.",
+    'DATABASE_ERROR',
+    'Database operation failed.',
     500,
     undefined,
     true
   ),
 
   PUBLISH_ERROR: new ApiErrorResponse(
-    "PUBLISH_ERROR",
-    "Failed to broadcast event.",
+    'PUBLISH_ERROR',
+    'Failed to broadcast event.',
     500,
     undefined,
     true
@@ -146,16 +146,16 @@ export const ERROR_TYPES = {
 
   // Generic Errors
   INTERNAL_ERROR: new ApiErrorResponse(
-    "INTERNAL_ERROR",
-    "An unexpected error occurred.",
+    'INTERNAL_ERROR',
+    'An unexpected error occurred.',
     500,
     undefined,
     true
   ),
 
   SERVICE_UNAVAILABLE: new ApiErrorResponse(
-    "SERVICE_UNAVAILABLE",
-    "Service temporarily unavailable.",
+    'SERVICE_UNAVAILABLE',
+    'Service temporarily unavailable.',
     503,
     undefined,
     true
@@ -181,9 +181,9 @@ export function createErrorResponse(error: ApiErrorResponse | Error | unknown) {
       {
         status: error.statusCode,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           ...(error.retryable && error.statusCode === 429
-            ? { "Retry-After": "5" }
+            ? { 'Retry-After': '5' }
             : {}),
         },
       }
@@ -191,12 +191,12 @@ export function createErrorResponse(error: ApiErrorResponse | Error | unknown) {
   }
 
   // Handle Zod validation errors
-  if (error && typeof error === "object" && "issues" in error) {
+  if (error && typeof error === 'object' && 'issues' in error) {
     return new Response(
       JSON.stringify({
         error: {
-          code: "VALIDATION_ERROR",
-          message: "Input validation failed",
+          code: 'VALIDATION_ERROR',
+          message: 'Input validation failed',
           details: { issues: (error as { issues: unknown }).issues },
           retryable: false,
           timestamp: new Date().toISOString(),
@@ -204,22 +204,22 @@ export function createErrorResponse(error: ApiErrorResponse | Error | unknown) {
       }),
       {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }
 
   // Handle generic errors
-  const message = error instanceof Error ? error.message : "Unknown error";
-  console.error("Unhandled API error:", error);
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  console.error('Unhandled API error:', error);
 
   return new Response(
     JSON.stringify({
       error: {
-        code: "INTERNAL_ERROR",
-        message: "An unexpected error occurred",
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
         details:
-          process.env.NODE_ENV === "development"
+          process.env.NODE_ENV === 'development'
             ? { originalMessage: message }
             : undefined,
         retryable: true,
@@ -228,7 +228,7 @@ export function createErrorResponse(error: ApiErrorResponse | Error | unknown) {
     }),
     {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     }
   );
 }
@@ -250,5 +250,5 @@ export function getErrorCode(error: unknown): string {
   if (error instanceof ApiErrorResponse) {
     return error.code;
   }
-  return "UNKNOWN_ERROR";
+  return 'UNKNOWN_ERROR';
 }

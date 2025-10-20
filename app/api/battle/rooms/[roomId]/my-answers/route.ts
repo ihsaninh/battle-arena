@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import { createErrorResponse, ERROR_TYPES } from "@/src/lib/api-errors";
-import { getBattleSessionIdFromCookies } from "@/src/lib/session";
-import { supabaseAdmin } from "@/src/lib/supabase";
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
+import { getBattleSessionIdFromCookies } from '@/src/lib/session';
+import { supabaseAdmin } from '@/src/lib/supabase';
 
 // Define types for better type safety
 interface BankQuestion {
@@ -38,7 +38,7 @@ export async function GET(
 
     // Get user's answers for this room with round details
     const { data: answers, error: answersErr } = await supabase
-      .from("battle_room_answers")
+      .from('battle_room_answers')
       .select(
         `
         id,
@@ -56,23 +56,23 @@ export async function GET(
         )
       `
       )
-      .eq("room_id", roomId)
-      .eq("session_id", sessionId);
+      .eq('room_id', roomId)
+      .eq('session_id', sessionId);
 
     if (answersErr) {
-      console.error("Failed to fetch user answers:", answersErr);
+      console.error('Failed to fetch user answers:', answersErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
     // Fetch all rounds for this room to ensure unanswered rounds are included
     const { data: rounds, error: roundsErr } = await supabase
-      .from("battle_room_rounds")
-      .select("id, round_no, question_id, question_json")
-      .eq("room_id", roomId)
-      .order("round_no", { ascending: true });
+      .from('battle_room_rounds')
+      .select('id, round_no, question_id, question_json')
+      .eq('room_id', roomId)
+      .order('round_no', { ascending: true });
 
     if (roundsErr) {
-      console.error("Failed to fetch room rounds:", roundsErr);
+      console.error('Failed to fetch room rounds:', roundsErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -82,7 +82,7 @@ export async function GET(
     const questionIds = Array.from(
       new Set(
         allRounds
-          .map((round) => round.question_id)
+          .map(round => round.question_id)
           .filter((id): id is string => Boolean(id))
       )
     );
@@ -90,27 +90,25 @@ export async function GET(
     let bankQuestions: BankQuestion[] = [];
     if (questionIds.length > 0) {
       const { data: questions } = await supabase
-        .from("quiz_questions")
-        .select("id, prompt, difficulty, language, category_id")
-        .in("id", questionIds);
+        .from('quiz_questions')
+        .select('id, prompt, difficulty, language, category_id')
+        .in('id', questionIds);
 
       bankQuestions = questions || [];
     }
 
-    const bankQuestionMap = new Map(
-      bankQuestions.map((q) => [q.id, q])
-    );
+    const bankQuestionMap = new Map(bankQuestions.map(q => [q.id, q]));
 
     type AnswerRecord = NonNullable<typeof answers>[number];
 
     const answersByRoundId = new Map<string, AnswerRecord>();
-    (answers || []).forEach((answer) => {
+    (answers || []).forEach(answer => {
       if (answer.round_id) {
         answersByRoundId.set(answer.round_id, answer);
       }
     });
 
-    const userAnswers = allRounds.map((round) => {
+    const userAnswers = allRounds.map(round => {
       const answer = round.id ? answersByRoundId.get(round.id) : undefined;
       const wasAnswered = !!answer;
 
@@ -121,8 +119,8 @@ export async function GET(
         category?: string;
       } | null;
 
-      let answerText = "No answer submitted";
-      let feedback = "";
+      let answerText = 'No answer submitted';
+      let feedback = '';
       let correctAnswer: string | undefined;
       let isCorrect: boolean | undefined;
       let timeMs: number | null = null;
@@ -138,8 +136,8 @@ export async function GET(
           };
         }
         if (wasAnswered) {
-          answerText = answer?.answer_text || "";
-          feedback = answer?.feedback || "No feedback available";
+          answerText = answer?.answer_text || '';
+          feedback = answer?.feedback || 'No feedback available';
         }
       } else if (round.question_json) {
         const q = round.question_json as AIQuestion;
@@ -153,30 +151,30 @@ export async function GET(
 
           if (q.choices && Array.isArray(q.choices)) {
             const choices = q.choices;
-            const chosen = choices.find((c) => c.id === answer?.choice_id);
-            const correct = choices.find((c) => c.id === q.correctChoiceId);
+            const chosen = choices.find(c => c.id === answer?.choice_id);
+            const correct = choices.find(c => c.id === q.correctChoiceId);
             answerText = wasAnswered
-              ? chosen?.text || "No answer submitted"
-              : "No answer submitted";
+              ? chosen?.text || 'No answer submitted'
+              : 'No answer submitted';
             const correctText = correct?.text;
             if (correctText !== undefined) {
               correctAnswer = correctText;
             }
             isCorrect = wasAnswered
-              ? answer?.is_correct ??
+              ? (answer?.is_correct ??
                 (answer?.choice_id && q.correctChoiceId
                   ? answer.choice_id === q.correctChoiceId
-                  : false)
+                  : false))
               : false;
             timeMs = wasAnswered ? answer?.time_ms || null : null;
           } else if (wasAnswered) {
-            answerText = answer?.answer_text || "";
-            feedback = answer?.feedback || "No feedback available";
+            answerText = answer?.answer_text || '';
+            feedback = answer?.feedback || 'No feedback available';
           }
         }
       } else if (wasAnswered) {
-        answerText = answer?.answer_text || "";
-        feedback = answer?.feedback || "No feedback available";
+        answerText = answer?.answer_text || '';
+        feedback = answer?.feedback || 'No feedback available';
       }
 
       if (
@@ -186,7 +184,7 @@ export async function GET(
       ) {
         const q = round.question_json as AIQuestion;
         if (q?.choices) {
-          const correct = q.choices.find((c) => c.id === q.correctChoiceId);
+          const correct = q.choices.find(c => c.id === q.correctChoiceId);
           if (correct?.text !== undefined) {
             correctAnswer = correct.text;
           }
@@ -221,7 +219,7 @@ export async function GET(
       answers: userAnswers,
     });
   } catch (error) {
-    console.error("Get user answers exception:", error);
+    console.error('Get user answers exception:', error);
     return createErrorResponse(error);
   }
 }

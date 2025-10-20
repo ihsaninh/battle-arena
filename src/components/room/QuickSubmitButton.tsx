@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { FaBolt } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import { FaBolt } from 'react-icons/fa';
 
-import { StateResp } from "@/src/types";
+import { StateResp } from '@/src/types';
 
 interface QuickSubmitButtonProps {
   timeLeft: number | null;
@@ -21,11 +21,11 @@ export const QuickSubmitButton = ({
   loading,
   state,
   selectedChoiceId,
-  answer = "",
+  answer = '',
   submitAnswer,
 }: QuickSubmitButtonProps) => {
   if (
-    state?.room?.status !== "active" ||
+    state?.room?.status !== 'active' ||
     !state.activeRound ||
     iHaveAnswered ||
     timeLeft === null ||
@@ -49,7 +49,7 @@ export const QuickSubmitButton = ({
       }
       className="fixed bottom-32 right-4 z-30 lg:hidden w-14 h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:from-gray-600 disabled:to-gray-700 disabled:opacity-50 text-white rounded-full flex items-center justify-center shadow-xl border border-green-500/30 backdrop-blur-sm transition-all"
       style={{
-        bottom: "calc(env(safe-area-inset-bottom) + 8rem)",
+        bottom: 'calc(env(safe-area-inset-bottom) + 8rem)',
       }}
       aria-label="Quick submit answer"
     >

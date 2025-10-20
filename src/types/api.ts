@@ -5,8 +5,8 @@ export interface CreateRoomPayload {
   numQuestions: number;
   roundTimeSec: number;
   capacity: number;
-  questionType: "open-ended" | "multiple-choice";
-  difficulty?: "easy" | "medium" | "hard";
+  questionType: 'open-ended' | 'multiple-choice';
+  difficulty?: 'easy' | 'medium' | 'hard';
 }
 
 export interface CreateRoomResponse {

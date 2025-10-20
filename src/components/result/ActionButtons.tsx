@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { FaHome, FaRedo, FaShare } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { FaHome, FaRedo, FaShare } from 'react-icons/fa';
 
 interface ActionButtonsProps {
   onShare: () => void;

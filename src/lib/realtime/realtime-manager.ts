@@ -1,9 +1,9 @@
-import type { RealtimeChannel } from "@supabase/realtime-js";
+import type { RealtimeChannel } from '@supabase/realtime-js';
 
-import type { BattleEventListener } from "@/src/types/realtime";
+import type { BattleEventListener } from '@/src/types/realtime';
 
-import { connectionManager } from "./connection-manager";
-import { battleEventBuffer } from "./event-buffer";
+import { connectionManager } from './connection-manager';
+import { battleEventBuffer } from './event-buffer';
 
 interface RealtimeManagerConfig {
   enableReconnection: boolean;
@@ -85,7 +85,7 @@ export class RealtimeManager {
    * Sets up event buffering for a channel
    */
   private setupEventBuffering(channel: RealtimeChannel, roomId: string): void {
-    channel.on("broadcast", { event: "*" }, (payload) => {
+    channel.on('broadcast', { event: '*' }, payload => {
       const eventType = payload.event as string;
       const sequence = (payload.payload?.sequence as number) || Date.now();
 

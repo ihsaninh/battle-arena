@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
 import {
   FaCheckCircle,
   FaClock,
@@ -13,16 +13,16 @@ import {
   FaTimesCircle,
   FaTrophy,
   FaUsers,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
-import { battleApi } from "@/src/lib/api";
+import { battleApi } from '@/src/lib/api';
 import {
   getDifficultyColor,
   getDifficultyLabel,
   getStatusColor,
   getStatusLabel,
-} from "@/src/lib/formatters";
-import type { RoomAvailabilityResponse } from "@/src/types/api";
+} from '@/src/lib/formatters';
+import type { RoomAvailabilityResponse } from '@/src/types/api';
 
 interface JoinRoomFormProps {
   joinPlayerName: string;
@@ -34,12 +34,12 @@ interface JoinRoomFormProps {
     nameOverride?: string,
     skipSessionCreation?: boolean
   ) => void;
-  onSetGameMode: (mode: "create" | "join" | null) => void;
+  onSetGameMode: (mode: 'create' | 'join' | null) => void;
 }
 
 interface RoomDetails {
   roomId: string;
-  status: "waiting" | "active" | "finished";
+  status: 'waiting' | 'active' | 'finished';
   joinable: boolean;
   capacity: number | null;
   currentParticipants: number | null;
@@ -72,9 +72,9 @@ const normalizeRoomDetails = (
   return {
     roomId,
     status:
-      status === "waiting" || status === "active" || status === "finished"
+      status === 'waiting' || status === 'active' || status === 'finished'
         ? status
-        : "waiting",
+        : 'waiting',
     joinable: Boolean(joinable),
     capacity: capacity ?? null,
     currentParticipants: currentParticipants ?? null,
@@ -82,7 +82,7 @@ const normalizeRoomDetails = (
     roomCode: roomCode ?? requestedRoomId.toUpperCase(),
     meta: {
       topic: meta?.topic ?? null,
-      language: meta?.language ?? "en",
+      language: meta?.language ?? 'en',
       numQuestions: meta?.numQuestions ?? 0,
       difficulty: meta?.difficulty ?? null,
       roundTimeSec: meta?.roundTimeSec ?? null,
@@ -105,7 +105,7 @@ export function JoinRoomForm({
 
   const handleCheckRoom = async () => {
     if (!joinRoomId.trim()) {
-      setCheckError("Please enter a room code first");
+      setCheckError('Please enter a room code first');
       return;
     }
 
@@ -120,9 +120,9 @@ export function JoinRoomForm({
 
       setRoomDetails(normalizeRoomDetails(availability, joinRoomId.trim()));
     } catch (error) {
-      console.error("Error checking room:", error);
+      console.error('Error checking room:', error);
       const err = error as Error & { message?: string };
-      setCheckError(err?.message || "Failed to check room. Please try again.");
+      setCheckError(err?.message || 'Failed to check room. Please try again.');
     } finally {
       setCheckingRoom(false);
     }
@@ -181,7 +181,7 @@ export function JoinRoomForm({
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder-gray-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all"
                 placeholder="Enter your display name"
                 value={joinPlayerName}
-                onChange={(e) => onSetJoinPlayerName(e.target.value)}
+                onChange={e => onSetJoinPlayerName(e.target.value)}
                 required
               />
             </div>
@@ -195,7 +195,7 @@ export function JoinRoomForm({
                   className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder-gray-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-center text-lg tracking-[0.3em] uppercase font-mono"
                   placeholder="ABC123"
                   value={joinRoomId}
-                  onChange={(e) => {
+                  onChange={e => {
                     onSetJoinRoomId(e.target.value.toUpperCase().slice(0, 6));
                     setRoomDetails(null);
                     setCheckError(null);
@@ -243,7 +243,7 @@ export function JoinRoomForm({
               ) : (
                 <FaGamepad className="w-5 h-5" />
               )}
-              {loading ? "Joining..." : "Join Battle"}
+              {loading ? 'Joining...' : 'Join Battle'}
             </button>
           </div>
         </motion.div>
@@ -320,13 +320,13 @@ export function JoinRoomForm({
                           roomDetails.status
                         )}`}
                       >
-                        {roomDetails.status === "waiting" && (
+                        {roomDetails.status === 'waiting' && (
                           <FaClock className="w-2.5 h-2.5" />
                         )}
-                        {roomDetails.status === "active" && (
+                        {roomDetails.status === 'active' && (
                           <FaGamepad className="w-2.5 h-2.5" />
                         )}
-                        {roomDetails.status === "finished" && (
+                        {roomDetails.status === 'finished' && (
                           <FaTrophy className="w-2.5 h-2.5" />
                         )}
                         {getStatusLabel(roomDetails.status)}

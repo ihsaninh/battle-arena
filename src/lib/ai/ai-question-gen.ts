@@ -1,6 +1,6 @@
-import { google } from "@ai-sdk/google";
-import { generateObject } from "ai";
-import { z } from "zod";
+import { google } from '@ai-sdk/google';
+import { generateObject } from 'ai';
+import { z } from 'zod';
 
 // Gemini requires object schemas to have at least one known property.
 // Keep rubric_json lightweight but with defined keys.
@@ -16,14 +16,14 @@ export const GeneratedQuestionSchema = z.object({
     .string()
     .min(10)
     .refine(
-      (value) => value.trim().split(/\s+/).length <= MAX_OPEN_PROMPT_WORDS,
+      value => value.trim().split(/\s+/).length <= MAX_OPEN_PROMPT_WORDS,
       {
         message: `Prompt must be concise (≤ ${MAX_OPEN_PROMPT_WORDS} words)`,
       }
     ),
   difficulty: z.number().int().min(1).max(3).default(2),
   rubric_json: RubricSchema.optional(),
-  language: z.string().min(2).max(5).default("en"),
+  language: z.string().min(2).max(5).default('en'),
   category: z.string().min(1),
 });
 
@@ -42,28 +42,28 @@ export async function generateQuestions(params: {
 }): Promise<GeneratedQuestion[]> {
   const { topic, categoryName, categoryId, language, num, seed, difficulty } =
     params;
-  const categoryLabel = topic || categoryName || categoryId || "general";
+  const categoryLabel = topic || categoryName || categoryId || 'general';
   const today = new Date();
-  const currentDateIso = today.toISOString().split("T")[0];
+  const currentDateIso = today.toISOString().split('T')[0];
   const recencyWindowStartYear = Math.max(today.getFullYear() - 2, 2000);
 
   const difficultyLabel = (() => {
-    if (difficulty === 1) return "Easy";
-    if (difficulty === 2) return "Medium";
-    if (difficulty === 3) return "Hard";
-    return "Mixed (1-3)";
+    if (difficulty === 1) return 'Easy';
+    if (difficulty === 2) return 'Medium';
+    if (difficulty === 3) return 'Hard';
+    return 'Mixed (1-3)';
   })();
 
   const difficultyRules = difficulty
     ? `- Set the "difficulty" number to ${difficulty} for every question (aligned with ${difficultyLabel.toLowerCase()}).\n- Ensure question complexity stays within ${difficultyLabel.toLowerCase()} expectations.\n`
-    : "- Vary \"difficulty\" values across 1 (easy), 2 (medium), and 3 (hard) to keep rounds dynamic.\n";
+    : '- Vary "difficulty" values across 1 (easy), 2 (medium), and 3 (hard) to keep rounds dynamic.\n';
 
   const prompt = `You are generating short, open-ended quiz questions.
 
 Category: ${categoryLabel}
 Language: ${language}
 Count: ${num}
-Seed: ${seed ?? "none"}
+Seed: ${seed ?? 'none'}
 Current date (assume knowledge through this day): ${currentDateIso}
 Recency focus: highlight the latest developments or perspectives from ${recencyWindowStartYear}-${today.getFullYear()} when possible.
 Preferred difficulty: ${difficultyLabel}.
@@ -79,14 +79,14 @@ ${difficultyRules}- Output exactly ${num} items.
 `;
 
   const result = await generateObject({
-    model: google("gemini-2.5-flash-lite"),
+    model: google('gemini-2.5-flash-lite'),
     schema: GeneratedQuestionsSchema,
     prompt,
     temperature: 0.4,
   });
 
   // Stamp language/category and enforce preferred difficulty when provided
-  const items = (result.object || []).map((q) => ({
+  const items = (result.object || []).map(q => ({
     ...q,
     difficulty: difficulty ?? q.difficulty,
     language,
@@ -104,7 +104,7 @@ export const McqChoiceSchema = z.object({
 export const GeneratedMcqQuestionSchema = z.object({
   prompt: z.string().min(10),
   difficulty: z.number().int().min(1).max(3).default(2),
-  language: z.string().min(2).max(5).default("en"),
+  language: z.string().min(2).max(5).default('en'),
   category: z.string().min(1),
   choices: z.array(McqChoiceSchema).min(3).max(6),
   correctChoiceId: z.string().min(1),
@@ -124,32 +124,32 @@ export async function generateMcqQuestions(params: {
 }): Promise<GeneratedMcqQuestion[]> {
   const { topic, categoryName, categoryId, language, num, seed, difficulty } =
     params;
-  const categoryLabel = topic || categoryName || categoryId || "general";
+  const categoryLabel = topic || categoryName || categoryId || 'general';
   const today = new Date();
-  const currentDateIso = today.toISOString().split("T")[0];
+  const currentDateIso = today.toISOString().split('T')[0];
   const recencyWindowStartYear = Math.max(today.getFullYear() - 2, 2000);
 
   const difficultyLabel = (() => {
-    if (difficulty === 1) return "Easy";
-    if (difficulty === 2) return "Medium";
-    if (difficulty === 3) return "Hard";
-    return "Mixed (1-3)";
+    if (difficulty === 1) return 'Easy';
+    if (difficulty === 2) return 'Medium';
+    if (difficulty === 3) return 'Hard';
+    return 'Mixed (1-3)';
   })();
 
   const creativeContexts = [
-    "brief real-world example",
-    "common daily situation",
-    "simple problem-solving case",
-    "quick comparison scenario",
-    "short cause-and-effect case",
+    'brief real-world example',
+    'common daily situation',
+    'simple problem-solving case',
+    'quick comparison scenario',
+    'short cause-and-effect case',
   ];
 
   const questionFormats = [
-    "Which option best explains...",
-    "Why would... be the right step?",
-    "What is the main reason...",
-    "How should someone respond when...",
-    "What happens if...",
+    'Which option best explains...',
+    'Why would... be the right step?',
+    'What is the main reason...',
+    'How should someone respond when...',
+    'What happens if...',
   ];
 
   const prompt = `You are an expert quiz creator generating brief, clear multiple-choice questions that stay focused and readable.
@@ -157,16 +157,16 @@ export async function generateMcqQuestions(params: {
 Topic: ${categoryLabel}
 Language: ${language}
 Count: ${num}
-Seed: ${seed ?? "none"}
+Seed: ${seed ?? 'none'}
 Current date (assume knowledge through this day): ${currentDateIso}
 Recency focus: prioritize developments, use-cases, and terminology from ${recencyWindowStartYear}-${today.getFullYear()} where relevant.
 Preferred difficulty: ${difficultyLabel}.
 
 CLARITY REQUIREMENTS:
 - Keep contexts short (1-2 sentences, under 45 words).
-- Use varied but simple contexts: ${creativeContexts.join(", ")}.
+- Use varied but simple contexts: ${creativeContexts.join(', ')}.
 - Apply different straightforward question formats: ${questionFormats.join(
-    "; "
+    '; '
   )}.
 - Avoid long storytelling; go straight to the key point being tested.
 - Keep language direct and ensure the challenge matches the requested difficulty.
@@ -187,7 +187,7 @@ OUTPUT FORMAT:
 - ${
     difficulty
       ? `Set the "difficulty" value to ${difficulty} for every question so the game keeps a consistent challenge.`
-      : "Balance the \"difficulty\" values across the set (mix of 1, 2, 3)."
+      : 'Balance the "difficulty" values across the set (mix of 1, 2, 3).'
   }
 - Make prompts contextual and scenario-based without rambling.
 - Ensure all choices are plausible and test different aspects of knowledge.
@@ -200,13 +200,13 @@ EXAMPLES OF APPROACHES TO AVOID:
 Generate questions that make learners think critically while keeping the wording straightforward.`;
 
   const result = await generateObject({
-    model: google("gemini-2.5-flash-lite-preview-09-2025"),
+    model: google('gemini-2.5-flash-lite-preview-09-2025'),
     schema: GeneratedMcqQuestionsSchema,
     prompt,
     temperature: 0.7, // Increased temperature for more creativity
   });
 
-  const items = (result.object || []).map((q) => ({
+  const items = (result.object || []).map(q => ({
     ...q,
     difficulty: difficulty ?? q.difficulty,
     language,
@@ -214,15 +214,15 @@ Generate questions that make learners think critically while keeping the wording
   }));
 
   // Server-side validation: ensure unique choices and correct in set
-  const validated = items.slice(0, num).map((q) => {
+  const validated = items.slice(0, num).map(q => {
     const seen = new Set<string>();
-    const dedupChoices = q.choices.filter((c) => {
+    const dedupChoices = q.choices.filter(c => {
       const key = `${c.id}::${c.text.trim().toLowerCase()}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
-    const hasCorrect = dedupChoices.some((c) => c.id === q.correctChoiceId);
+    const hasCorrect = dedupChoices.some(c => c.id === q.correctChoiceId);
     return {
       ...q,
       difficulty: difficulty ?? q.difficulty,

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import { BATTLE_SESSION_COOKIE } from "@/src/lib/session";
-import { supabaseAdmin } from "@/src/lib/supabase";
+import { BATTLE_SESSION_COOKIE } from '@/src/lib/session';
+import { supabaseAdmin } from '@/src/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
     if (!display_name) {
       return NextResponse.json(
-        { error: "Display name is required" },
+        { error: 'Display name is required' },
         { status: 400 }
       );
     }
@@ -20,22 +20,22 @@ export async function POST(request: NextRequest) {
     if (!fingerprintHash) {
       fingerprintHash = `fp-${display_name
         .toLowerCase()
-        .replace(/\s+/g, "-")}-${Date.now()}`;
+        .replace(/\s+/g, '-')}-${Date.now()}`;
     }
 
     const supabase = supabaseAdmin();
 
     // Check if session already exists with this fingerprint
     const { data: existingSession, error: fetchError } = await supabase
-      .from("battle_sessions")
-      .select("*")
-      .eq("fingerprint_hash", fingerprintHash)
+      .from('battle_sessions')
+      .select('*')
+      .eq('fingerprint_hash', fingerprintHash)
       .maybeSingle();
 
-    if (fetchError && fetchError.code !== "PGRST116") {
-      console.error("Error fetching existing session:", fetchError);
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error fetching existing session:', fetchError);
       return NextResponse.json(
-        { error: "Failed to check existing session" },
+        { error: 'Failed to check existing session' },
         { status: 500 }
       );
     }
@@ -44,17 +44,17 @@ export async function POST(request: NextRequest) {
       // Update display name if changed
       if (existingSession.display_name !== display_name) {
         const { error: updateError } = await supabase
-          .from("battle_sessions")
+          .from('battle_sessions')
           .update({
             display_name,
             last_active_at: new Date().toISOString(),
           })
-          .eq("id", existingSession.id);
+          .eq('id', existingSession.id);
 
         if (updateError) {
-          console.error("Error updating session display name:", updateError);
+          console.error('Error updating session display name:', updateError);
           return NextResponse.json(
-            { error: "Failed to update session" },
+            { error: 'Failed to update session' },
             { status: 500 }
           );
         }
@@ -63,9 +63,9 @@ export async function POST(request: NextRequest) {
       } else {
         // Just update last_active_at
         await supabase
-          .from("battle_sessions")
+          .from('battle_sessions')
           .update({ last_active_at: new Date().toISOString() })
-          .eq("id", existingSession.id);
+          .eq('id', existingSession.id);
       }
 
       const res = NextResponse.json({
@@ -75,9 +75,9 @@ export async function POST(request: NextRequest) {
 
       res.cookies.set(BATTLE_SESSION_COOKIE, existingSession.id, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
         maxAge: 60 * 60 * 24 * 30, // 30 days
       });
 
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       .substring(2)}`;
 
     const { data: newSession, error: createError } = await supabase
-      .from("battle_sessions")
+      .from('battle_sessions')
       .insert({
         id: sessionId,
         display_name,
@@ -102,9 +102,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (createError) {
-      console.error("Error creating session:", createError);
+      console.error('Error creating session:', createError);
       return NextResponse.json(
-        { error: "Failed to create session" },
+        { error: 'Failed to create session' },
         { status: 500 }
       );
     }
@@ -117,17 +117,17 @@ export async function POST(request: NextRequest) {
     // Set HttpOnly cookie for session binding
     res.cookies.set(BATTLE_SESSION_COOKIE, newSession.id, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
 
     return res;
   } catch (error) {
-    console.error("Battle sessions API error:", error);
+    console.error('Battle sessions API error:', error);
     return NextResponse.json(
-      { error: "Failed to create session" },
+      { error: 'Failed to create session' },
       { status: 500 }
     );
   }

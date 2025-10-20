@@ -1,12 +1,12 @@
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import {
   useRoomStats,
   useScoreboard,
   useUserAnswers,
-} from "@/src/hooks/useBattleQueries";
-import type { FinalScoreEntry, ScoreboardEntry } from "@/src/types/battle";
+} from '@/src/hooks/useBattleQueries';
+import type { FinalScoreEntry, ScoreboardEntry } from '@/src/types/battle';
 
 export function useBattleResult() {
   const params = useParams<{ id: string }>();
@@ -45,9 +45,7 @@ export function useBattleResult() {
     // Use scoreboard data if available, otherwise fallback to simple sorting
     if (scoreboardData?.scoreboard?.length) {
       const ordered = scoreboardData.scoreboard.map((b: ScoreboardEntry) => {
-        const p = results.participants!.find(
-          (x) => x.session_id === b.sessionId
-        );
+        const p = results.participants!.find(x => x.session_id === b.sessionId);
         return {
           session_id: b.sessionId,
           display_name: b.displayName,
@@ -59,7 +57,7 @@ export function useBattleResult() {
     } else {
       // Fallback: sort by score only
       const fallback = [...(results.participants || [])]
-        .map((p) => ({
+        .map(p => ({
           session_id: p.session_id,
           display_name: p.display_name,
           total_score: p.total_score,
@@ -73,7 +71,7 @@ export function useBattleResult() {
   const winner = sortedParticipants[0];
   const currentUserRank =
     sortedParticipants.findIndex(
-      (p) => p.session_id === results?.currentUser?.session_id
+      p => p.session_id === results?.currentUser?.session_id
     ) + 1;
 
   const shareResults = () => {
@@ -84,13 +82,13 @@ export function useBattleResult() {
 
     if (navigator.share) {
       navigator.share({
-        title: "Quiz Battle Results",
+        title: 'Quiz Battle Results',
         text,
         url: resultUrl,
       });
     } else {
-      navigator.clipboard.writeText(text + " " + resultUrl);
-      alert("Results copied to clipboard!");
+      navigator.clipboard.writeText(text + ' ' + resultUrl);
+      alert('Results copied to clipboard!');
     }
   };
 

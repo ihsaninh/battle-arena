@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import { publishBattleEvent } from "@/src/lib/realtime";
-import { buildScoreboardDetails } from "@/src/lib/scoreboard-utils";
-import {
-  createErrorResponse,
-  ERROR_TYPES,
-} from "@/src/lib/api-errors";
-import { getBattleSessionIdFromCookies } from "@/src/lib/session";
-import { supabaseAdmin } from "@/src/lib/supabase";
+import { publishBattleEvent } from '@/src/lib/realtime';
+import { buildScoreboardDetails } from '@/src/lib/scoreboard-utils';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
+import { getBattleSessionIdFromCookies } from '@/src/lib/session';
+import { supabaseAdmin } from '@/src/lib/supabase';
 
 export async function POST(
   req: NextRequest,
@@ -24,23 +21,23 @@ export async function POST(
 
     // Close round (idempotent)
     const { data: round, error: rErr } = await supabase
-      .from("battle_room_rounds")
-      .select("id, status")
-      .eq("room_id", roomId)
-      .eq("round_no", Number(roundNo))
+      .from('battle_room_rounds')
+      .select('id, status')
+      .eq('room_id', roomId)
+      .eq('round_no', Number(roundNo))
       .single();
     if (rErr || !round)
       return createErrorResponse({
-        code: "ROUND_NOT_FOUND",
-        message: "The specified round was not found.",
+        code: 'ROUND_NOT_FOUND',
+        message: 'The specified round was not found.',
         retryable: false,
         statusCode: 404,
       });
 
     const { data: room, error: roomErr } = await supabase
-      .from("battle_rooms")
-      .select("host_session_id, status")
-      .eq("id", roomId)
+      .from('battle_rooms')
+      .select('host_session_id, status')
+      .eq('id', roomId)
       .single();
 
     if (roomErr || !room) {
@@ -48,13 +45,13 @@ export async function POST(
     }
 
     const { data: membership, error: membershipErr } = await supabase
-      .from("battle_room_participants")
-      .select("is_host")
-      .eq("room_id", roomId)
-      .eq("session_id", sessionId)
+      .from('battle_room_participants')
+      .select('is_host')
+      .eq('room_id', roomId)
+      .eq('session_id', sessionId)
       .maybeSingle();
 
-    if (membershipErr && membershipErr.code !== "PGRST116") {
+    if (membershipErr && membershipErr.code !== 'PGRST116') {
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -62,8 +59,8 @@ export async function POST(
 
     if (!isHostSession && !membership?.is_host) {
       return createErrorResponse({
-        code: "NOT_HOST",
-        message: "Only the room host can close the round.",
+        code: 'NOT_HOST',
+        message: 'Only the room host can close the round.',
         retryable: false,
         statusCode: 403,
       });
@@ -71,9 +68,9 @@ export async function POST(
 
     let justClosed = false;
     let usedFallback = false;
-    if (round.status !== "scoreboard" && round.status !== "closed") {
+    if (round.status !== 'scoreboard' && round.status !== 'closed') {
       const { data: rpcResult, error: rpcError } = await supabase.rpc(
-        "close_round_and_update_scores",
+        'close_round_and_update_scores',
         {
           p_round_id: round.id,
           p_room_id: roomId,
@@ -81,18 +78,18 @@ export async function POST(
       );
 
       if (rpcError) {
-        console.error("[CLOSE_ROUND] RPC failed, falling back", rpcError);
+        console.error('[CLOSE_ROUND] RPC failed, falling back', rpcError);
       }
 
       if (rpcResult?.round_closed) {
         justClosed = true;
       } else {
         const { data: closedRows, error: updErr } = await supabase
-          .from("battle_room_rounds")
-          .update({ status: "scoreboard" })
-          .eq("id", round.id)
-          .eq("status", "active")
-          .select("id");
+          .from('battle_room_rounds')
+          .update({ status: 'scoreboard' })
+          .eq('id', round.id)
+          .eq('status', 'active')
+          .select('id');
 
         if (updErr) {
           return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
@@ -103,15 +100,15 @@ export async function POST(
       }
 
       if (justClosed) {
-        round.status = "scoreboard";
+        round.status = 'scoreboard';
       }
     }
 
     // Scoreboard for this round
     const { data: answers, error: aErr } = await supabase
-      .from("battle_room_answers")
-      .select("session_id, score_final")
-      .eq("round_id", round.id);
+      .from('battle_room_answers')
+      .select('session_id, score_final')
+      .eq('round_id', round.id);
     if (aErr) {
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
@@ -120,36 +117,36 @@ export async function POST(
     if (usedFallback && answers && answers.length > 0) {
       for (const a of answers) {
         const { data: curr } = await supabase
-          .from("battle_room_participants")
-          .select("total_score")
-          .eq("room_id", roomId)
-          .eq("session_id", a.session_id)
+          .from('battle_room_participants')
+          .select('total_score')
+          .eq('room_id', roomId)
+          .eq('session_id', a.session_id)
           .single();
         const next = (curr?.total_score || 0) + (a.score_final || 0);
         await supabase
-          .from("battle_room_participants")
+          .from('battle_room_participants')
           .update({ total_score: next })
-          .eq("room_id", roomId)
-          .eq("session_id", a.session_id);
+          .eq('room_id', roomId)
+          .eq('session_id', a.session_id);
       }
     }
 
     const { data: participants } = await supabase
-      .from("battle_room_participants")
-      .select("session_id, display_name, id, total_score")
-      .eq("room_id", roomId);
+      .from('battle_room_participants')
+      .select('session_id, display_name, id, total_score')
+      .eq('room_id', roomId);
 
     const roundScores = new Map(
-      (answers || []).map((a) => [a.session_id, a.score_final || 0])
+      (answers || []).map(a => [a.session_id, a.score_final || 0])
     );
 
     const scoreboard = (participants || [])
-      .map((participant) => {
+      .map(participant => {
         const roundScore = roundScores.get(participant.session_id) || 0;
         return {
           participantId: participant.id,
           sessionId: participant.session_id,
-          displayName: participant.display_name || "Player",
+          displayName: participant.display_name || 'Player',
           roundScore,
           totalScore: participant.total_score || roundScore,
         };
@@ -157,24 +154,25 @@ export async function POST(
       .sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
 
     const { count: remainingRounds } = await supabase
-      .from("battle_room_rounds")
-      .select("id", { count: "exact", head: true })
-      .eq("room_id", roomId)
-      .in("status", ["pending", "active"]);
+      .from('battle_room_rounds')
+      .select('id', { count: 'exact', head: true })
+      .eq('room_id', roomId)
+      .in('status', ['pending', 'active']);
 
     if (justClosed) {
-      const { question, answers: detailedAnswers } = await buildScoreboardDetails({
-        supabase,
-        roomId,
-        roundId: round.id,
-      });
+      const { question, answers: detailedAnswers } =
+        await buildScoreboardDetails({
+          supabase,
+          roomId,
+          roundId: round.id,
+        });
       await publishBattleEvent({
         roomId,
-        event: "round_closed",
+        event: 'round_closed',
         payload: {
           roundNo: Number(roundNo),
           scoreboard,
-          stage: "scoreboard",
+          stage: 'scoreboard',
           generatedAt: new Date().toISOString(),
           hasMoreRounds: !!remainingRounds && remainingRounds > 0,
           question,

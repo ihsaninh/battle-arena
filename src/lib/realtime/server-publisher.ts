@@ -1,8 +1,8 @@
-import type { RealtimeChannel } from "@supabase/realtime-js";
+import type { RealtimeChannel } from '@supabase/realtime-js';
 
-import { supabaseAdmin } from "@/src/lib/supabase";
+import { supabaseAdmin } from '@/src/lib/supabase';
 
-import { getConnectionStats } from "./client-connections";
+import { getConnectionStats } from './client-connections';
 
 const channelQueues = new Map<string, Promise<boolean>>();
 const serverChannelStates = new Map<string, ServerChannelState>();
@@ -35,7 +35,7 @@ export async function publishBattleEvent(params: {
         const channel = await ensureSubscribedChannel(params.roomId);
 
         await channel.send({
-          type: "broadcast",
+          type: 'broadcast',
           event: params.event,
           payload: eventPayload,
         });
@@ -59,7 +59,7 @@ export async function publishBattleEvent(params: {
         await dropServerChannel(params.roomId);
 
         if (retryCount <= maxRetries) {
-          await new Promise((resolve) =>
+          await new Promise(resolve =>
             setTimeout(resolve, Math.pow(2, retryCount) * 1000)
           );
         }
@@ -131,11 +131,11 @@ function waitForSubscription(roomId: string, channel: RealtimeChannel) {
       reject(new Error(`Subscription timeout for room:${roomId}`));
     }, 5000);
 
-    channel.subscribe((status) => {
-      if (status === "SUBSCRIBED") {
+    channel.subscribe(status => {
+      if (status === 'SUBSCRIBED') {
         clearTimeout(timeout);
         resolve();
-      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         clearTimeout(timeout);
         reject(new Error(`Subscription failed: ${status}`));
       }
@@ -144,12 +144,12 @@ function waitForSubscription(roomId: string, channel: RealtimeChannel) {
 }
 
 function setupServerChannelTeardown(roomId: string, channel: RealtimeChannel) {
-  channel.on("system", { event: "CHANNEL_ERROR" }, (payload) => {
+  channel.on('system', { event: 'CHANNEL_ERROR' }, payload => {
     console.error(`💥 Server channel error for room:${roomId}:`, payload);
     void dropServerChannel(roomId);
   });
 
-  channel.on("system", { event: "CLOSED" }, () => {
+  channel.on('system', { event: 'CLOSED' }, () => {
     console.log(`🔌 Server channel closed for room:${roomId}`);
     void dropServerChannel(roomId);
   });

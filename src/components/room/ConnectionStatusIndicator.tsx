@@ -1,9 +1,11 @@
 interface ConnectionStatusIndicatorProps {
-  status: "connected" | "disconnected";
+  status: 'connected' | 'disconnected';
 }
 
-export const ConnectionStatusIndicator = ({ status }: ConnectionStatusIndicatorProps) => {
-  if (status !== "disconnected") return null;
+export const ConnectionStatusIndicator = ({
+  status,
+}: ConnectionStatusIndicatorProps) => {
+  if (status !== 'disconnected') return null;
 
   return (
     <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-500/90 backdrop-blur-xl border border-red-400/30 rounded-xl px-4 py-2 text-white text-sm shadow-lg">

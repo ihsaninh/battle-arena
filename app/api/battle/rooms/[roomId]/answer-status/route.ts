@@ -1,12 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import { publishBattleEvent } from "@/src/lib/realtime";
-import {
-  createErrorResponse,
-  ERROR_TYPES,
-} from "@/src/lib/api-errors";
-import { getBattleSessionIdFromCookies } from "@/src/lib/session";
-import { supabaseAdmin } from "@/src/lib/supabase";
+import { publishBattleEvent } from '@/src/lib/realtime';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
+import { getBattleSessionIdFromCookies } from '@/src/lib/session';
+import { supabaseAdmin } from '@/src/lib/supabase';
 
 type ParticipantAnswerStatus = {
   session_id: string;
@@ -31,9 +28,9 @@ export async function GET(
     const supabase = supabaseAdmin();
 
     const { data: room, error: roomErr } = await supabase
-      .from("battle_rooms")
-      .select("host_session_id")
-      .eq("id", roomId)
+      .from('battle_rooms')
+      .select('host_session_id')
+      .eq('id', roomId)
       .single();
 
     if (roomErr || !room) {
@@ -41,13 +38,13 @@ export async function GET(
     }
 
     const { data: membership, error: membershipErr } = await supabase
-      .from("battle_room_participants")
-      .select("session_id, is_host")
-      .eq("room_id", roomId)
-      .eq("session_id", sessionId)
+      .from('battle_room_participants')
+      .select('session_id, is_host')
+      .eq('room_id', roomId)
+      .eq('session_id', sessionId)
       .maybeSingle();
 
-    if (membershipErr && membershipErr.code !== "PGRST116") {
+    if (membershipErr && membershipErr.code !== 'PGRST116') {
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -59,11 +56,11 @@ export async function GET(
 
     // Get the current active round
     const { data: activeRound } = await supabase
-      .from("battle_room_rounds")
-      .select("id, round_no")
-      .eq("room_id", roomId)
-      .eq("status", "active")
-      .order("round_no", { ascending: false })
+      .from('battle_room_rounds')
+      .select('id, round_no')
+      .eq('room_id', roomId)
+      .eq('status', 'active')
+      .order('round_no', { ascending: false })
       .limit(1)
       .maybeSingle();
 
@@ -77,25 +74,23 @@ export async function GET(
 
     // Get all participants in the room
     const { data: participants } = await supabase
-      .from("battle_room_participants")
-      .select("session_id, display_name, is_host, connection_status, is_ready")
-      .eq("room_id", roomId)
-      .order("display_name", { ascending: true });
+      .from('battle_room_participants')
+      .select('session_id, display_name, is_host, connection_status, is_ready')
+      .eq('room_id', roomId)
+      .order('display_name', { ascending: true });
 
     // Get who has answered this round
     const { data: answers } = await supabase
-      .from("battle_room_answers")
-      .select("session_id")
-      .eq("round_id", activeRound.id);
+      .from('battle_room_answers')
+      .select('session_id')
+      .eq('round_id', activeRound.id);
 
-    const answeredSessionIds = new Set(
-      (answers || []).map((a) => a.session_id)
-    );
+    const answeredSessionIds = new Set((answers || []).map(a => a.session_id));
 
     // Combine data to show answer status
     const participantStatus: ParticipantAnswerStatus[] = (
       participants || []
-    ).map((p) => ({
+    ).map(p => ({
       session_id: p.session_id,
       display_name: p.display_name,
       has_answered: answeredSessionIds.has(p.session_id),
@@ -105,12 +100,10 @@ export async function GET(
     }));
 
     const activeParticipants = participantStatus.filter(
-      (p) => p.connection_status !== "offline"
+      p => p.connection_status !== 'offline'
     );
 
-    const totalAnswered = activeParticipants.filter(
-      (p) => p.has_answered
-    ).length;
+    const totalAnswered = activeParticipants.filter(p => p.has_answered).length;
 
     const totalParticipants = activeParticipants.length;
 
@@ -124,7 +117,7 @@ export async function GET(
         try {
           await publishBattleEvent({
             roomId,
-            event: "all_participants_answered",
+            event: 'all_participants_answered',
             payload: {
               roundNo: activeRound.round_no,
               totalAnswered,
@@ -133,7 +126,7 @@ export async function GET(
           });
         } catch (err) {
           console.error(
-            "Failed to publish all_participants_answered event:",
+            'Failed to publish all_participants_answered event:',
             err
           );
         }
@@ -148,7 +141,7 @@ export async function GET(
       allAnswered, // Add this flag for client-side handling
     });
   } catch (error) {
-    console.error("Get answer status exception:", error);
+    console.error('Get answer status exception:', error);
     return createErrorResponse(error);
   }
 }

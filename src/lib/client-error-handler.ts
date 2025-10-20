@@ -2,8 +2,7 @@
  * Client-side error handling utilities for standardized API error responses
  */
 
-import { ApiError } from "./api-errors";
-
+import { ApiError } from './api-errors';
 
 export interface ClientError {
   code: string;
@@ -18,11 +17,11 @@ export interface ClientError {
  */
 export function parseApiError(error: unknown): ClientError {
   // Handle fetch errors
-  if (error instanceof TypeError && error.message.includes("fetch")) {
+  if (error instanceof TypeError && error.message.includes('fetch')) {
     return {
-      code: "NETWORK_ERROR",
+      code: 'NETWORK_ERROR',
       message:
-        "Network connection failed. Please check your internet connection.",
+        'Network connection failed. Please check your internet connection.',
       retryable: true,
     };
   }
@@ -30,14 +29,14 @@ export function parseApiError(error: unknown): ClientError {
   // Handle Response objects (from failed fetch)
   if (error instanceof Response) {
     return {
-      code: "HTTP_ERROR",
+      code: 'HTTP_ERROR',
       message: `Request failed with status ${error.status}`,
       retryable: error.status >= 500 || error.status === 429,
     };
   }
 
   // Handle API error responses
-  if (error && typeof error === "object" && "error" in error) {
+  if (error && typeof error === 'object' && 'error' in error) {
     const apiError = (error as { error: ApiError }).error;
     return {
       code: apiError.code,
@@ -51,7 +50,7 @@ export function parseApiError(error: unknown): ClientError {
   // Handle generic errors
   if (error instanceof Error) {
     return {
-      code: "UNKNOWN_ERROR",
+      code: 'UNKNOWN_ERROR',
       message: error.message,
       retryable: true,
     };
@@ -59,8 +58,8 @@ export function parseApiError(error: unknown): ClientError {
 
   // Handle unknown errors
   return {
-    code: "UNKNOWN_ERROR",
-    message: "An unexpected error occurred",
+    code: 'UNKNOWN_ERROR',
+    message: 'An unexpected error occurred',
     retryable: true,
   };
 }
@@ -70,35 +69,35 @@ export function parseApiError(error: unknown): ClientError {
  */
 export function getErrorMessage(error: ClientError): string {
   switch (error.code) {
-    case "MISSING_SESSION":
-      return "Your session has expired. Please refresh the page and try again.";
+    case 'MISSING_SESSION':
+      return 'Your session has expired. Please refresh the page and try again.';
 
-    case "NOT_PARTICIPANT":
-      return "You are not a participant in this room. Please rejoin the room.";
+    case 'NOT_PARTICIPANT':
+      return 'You are not a participant in this room. Please rejoin the room.';
 
-    case "ROUND_NOT_FOUND":
-      return "This round could not be found. The room may have been updated.";
+    case 'ROUND_NOT_FOUND':
+      return 'This round could not be found. The room may have been updated.';
 
-    case "ROUND_NOT_ACTIVE":
-      return "This round is not currently active. Please wait for the next round.";
+    case 'ROUND_NOT_ACTIVE':
+      return 'This round is not currently active. Please wait for the next round.';
 
-    case "ROUND_ALREADY_ANSWERED":
-      return "You have already answered this round.";
+    case 'ROUND_ALREADY_ANSWERED':
+      return 'You have already answered this round.';
 
-    case "DEADLINE_PASSED":
-      return "The time limit for this round has expired.";
+    case 'DEADLINE_PASSED':
+      return 'The time limit for this round has expired.';
 
-    case "RATE_LIMIT_EXCEEDED":
-      return "Too many requests. Please wait a moment before trying again.";
+    case 'RATE_LIMIT_EXCEEDED':
+      return 'Too many requests. Please wait a moment before trying again.';
 
-    case "NETWORK_ERROR":
-      return "Connection failed. Please check your internet connection and try again.";
+    case 'NETWORK_ERROR':
+      return 'Connection failed. Please check your internet connection and try again.';
 
-    case "SERVICE_UNAVAILABLE":
-      return "Service is temporarily unavailable. Please try again later.";
+    case 'SERVICE_UNAVAILABLE':
+      return 'Service is temporarily unavailable. Please try again later.';
 
     default:
-      return error.message || "An unexpected error occurred. Please try again.";
+      return error.message || 'An unexpected error occurred. Please try again.';
   }
 }
 
@@ -113,7 +112,7 @@ export function shouldRetryError(
   if (attemptCount >= 3) return false; // Max 3 retries
 
   // Don't retry certain error types
-  const noRetryCodes = ["MISSING_SESSION", "NOT_PARTICIPANT", "INVALID_INPUT"];
+  const noRetryCodes = ['MISSING_SESSION', 'NOT_PARTICIPANT', 'INVALID_INPUT'];
   return !noRetryCodes.includes(error.code);
 }
 
@@ -124,19 +123,19 @@ export function handleApiError(
   error: unknown,
   showNotification?: (
     message: string,
-    type?: "error" | "warning" | "info"
+    type?: 'error' | 'warning' | 'info'
   ) => void
 ): ClientError {
   const clientError = parseApiError(error);
   const message = getErrorMessage(clientError);
 
   if (showNotification) {
-    const notificationType = clientError.retryable ? "warning" : "error";
+    const notificationType = clientError.retryable ? 'warning' : 'error';
     showNotification(message, notificationType);
   }
 
   // Log error for debugging
-  console.error("[API Error]", {
+  console.error('[API Error]', {
     code: clientError.code,
     message: clientError.message,
     details: clientError.details,
@@ -176,7 +175,7 @@ export function createRetryFunction<T>(
               maxRetries + 1
             } failed, retrying in ${delay}ms`
           );
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }

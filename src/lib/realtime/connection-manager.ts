@@ -1,9 +1,9 @@
-import type { RealtimeChannel } from "@supabase/realtime-js";
+import type { RealtimeChannel } from '@supabase/realtime-js';
 
-import { ConnectionInfo } from "@/src/types/realtime";
-import { supabaseBrowser } from "@/src/lib/supabase";
+import { ConnectionInfo } from '@/src/types/realtime';
+import { supabaseBrowser } from '@/src/lib/supabase';
 
-import { ReconnectionStrategy } from "./reconnection-strategy";
+import { ReconnectionStrategy } from './reconnection-strategy';
 
 interface ConnectionConfig {
   maxConnectionsPerUser: number;
@@ -41,14 +41,14 @@ export class ConnectionManager {
     try {
       const sb = supabaseBrowser;
       if (!sb) {
-        console.error("Supabase browser client not available");
+        console.error('Supabase browser client not available');
         return null;
       }
 
       // Check and enforce connection limits
       if (!this.enforceConnectionLimits()) {
         console.error(
-          "Connection limits enforced, cannot create new connection"
+          'Connection limits enforced, cannot create new connection'
         );
         return null;
       }
@@ -87,7 +87,7 @@ export class ConnectionManager {
 
       return channel;
     } catch (err) {
-      console.error("Failed to create room channel:", err);
+      console.error('Failed to create room channel:', err);
       return null;
     }
   }
@@ -175,13 +175,13 @@ export class ConnectionManager {
    */
   private getUserId(): string {
     try {
-      if (typeof window === "undefined" || !window.localStorage) {
-        return "server";
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return 'server';
       }
-      return localStorage.getItem("user_id") || "anonymous";
+      return localStorage.getItem('user_id') || 'anonymous';
     } catch (err) {
-      console.warn("Error accessing localStorage, using anonymous ID:", err);
-      return "anonymous";
+      console.warn('Error accessing localStorage, using anonymous ID:', err);
+      return 'anonymous';
     }
   }
 
@@ -210,7 +210,7 @@ export class ConnectionManager {
           this.activeConnections.delete(channelId);
           successfullyClosed++;
         } catch (err) {
-          console.error("Error closing excess connection:", err);
+          console.error('Error closing excess connection:', err);
         }
       }
 
@@ -225,11 +225,11 @@ export class ConnectionManager {
    * Sets up basic event handlers for the channel
    */
   private setupBasicEventHandlers(channel: RealtimeChannel, roomId: string) {
-    channel.on("system", { event: "*" }, (payload) => {
+    channel.on('system', { event: '*' }, payload => {
       console.log(`🔗 Channel system event for room:${roomId}:`, payload.type);
     });
 
-    channel.on("system", { event: "CHANNEL_ERROR" }, (payload) => {
+    channel.on('system', { event: 'CHANNEL_ERROR' }, payload => {
       console.error(`💥 Channel error for room:${roomId}:`, payload);
     });
   }
@@ -244,8 +244,8 @@ export class ConnectionManager {
       this.activeConnections.delete(channelId);
       console.log(
         `🧹 Cleaned up connection for room:${channelId.replace(
-          "room:",
-          ""
+          'room:',
+          ''
         )}. Active connections: ${this.activeConnections.size}`
       );
       return originalUnsubscribe();

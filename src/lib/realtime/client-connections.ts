@@ -1,16 +1,16 @@
-import type { RealtimeChannel } from "@supabase/realtime-js";
+import type { RealtimeChannel } from '@supabase/realtime-js';
 
-import { ConnectionInfo } from "@/src/types/realtime";
-import { supabaseBrowser } from "@/src/lib/supabase";
+import { ConnectionInfo } from '@/src/types/realtime';
+import { supabaseBrowser } from '@/src/lib/supabase';
 
-import { battleEventBuffer } from "./event-buffer";
+import { battleEventBuffer } from './event-buffer';
 
 const activeConnections = new Map<string, ConnectionInfo>();
 const MAX_CONNECTIONS_PER_USER = 3;
 
 function getUserId(): string {
-  if (typeof window === "undefined") return "server";
-  return localStorage.getItem("user_id") || "anonymous";
+  if (typeof window === 'undefined') return 'server';
+  return localStorage.getItem('user_id') || 'anonymous';
 }
 
 export function createRoomChannel(
@@ -20,7 +20,7 @@ export function createRoomChannel(
   try {
     const sb = supabaseBrowser;
     if (!sb) {
-      console.error("Supabase browser client not available");
+      console.error('Supabase browser client not available');
       return null;
     }
 
@@ -42,7 +42,7 @@ export function createRoomChannel(
           conn.channel.unsubscribe();
           activeConnections.delete(channelId);
         } catch (err) {
-          console.error("Error closing excess connection:", err);
+          console.error('Error closing excess connection:', err);
         }
       }
     }
@@ -66,11 +66,11 @@ export function createRoomChannel(
       roomId,
     });
 
-    channel.on("system", { event: "*" }, (payload) => {
+    channel.on('system', { event: '*' }, payload => {
       console.log(`🔗 Channel system event for room:${roomId}:`, payload.type);
     });
 
-    channel.on("system", { event: "CHANNEL_ERROR" }, (payload) => {
+    channel.on('system', { event: 'CHANNEL_ERROR' }, payload => {
       console.error(`💥 Channel error for room:${roomId}:`, payload);
     });
 
@@ -88,7 +88,7 @@ export function createRoomChannel(
     );
     return channel;
   } catch (err) {
-    console.error("Failed to create room channel:", err);
+    console.error('Failed to create room channel:', err);
     return null;
   }
 }
@@ -115,7 +115,7 @@ export function createEnhancedRoomChannel(
     });
   };
 
-  channel.on("broadcast", { event: "*" }, (payload) => {
+  channel.on('broadcast', { event: '*' }, payload => {
     const eventType = payload.event as string;
     bufferedEventHandler(eventType, payload.payload as Record<string, unknown>);
   });
@@ -173,15 +173,15 @@ export function createEnhancedRoomChannel(
       `🔄 Attempting reconnection ${reconnectAttempts}/${maxReconnectAttempts} for room:${roomId}`
     );
 
-    channel.subscribe((status) => {
-      if (status === "SUBSCRIBED") {
+    channel.subscribe(status => {
+      if (status === 'SUBSCRIBED') {
         console.log(
           `✅ Reconnected to room:${roomId} on attempt ${reconnectAttempts}`
         );
         reconnectAttempts = 0;
         isReconnecting = false;
         onReconnect?.();
-      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         console.error(
           `❌ Reconnection attempt ${reconnectAttempts} failed for room:${roomId}`
         );
@@ -204,7 +204,7 @@ export function createEnhancedRoomChannel(
   }, 10000);
 
   const setupReconnectionLogic = () => {
-    channel.on("system", { event: "CHANNEL_ERROR" }, () => {
+    channel.on('system', { event: 'CHANNEL_ERROR' }, () => {
       if (isDestroyed) return;
 
       console.warn(
@@ -214,7 +214,7 @@ export function createEnhancedRoomChannel(
       attemptReconnection();
     });
 
-    channel.on("system", { event: "CLOSED" }, () => {
+    channel.on('system', { event: 'CLOSED' }, () => {
       if (isDestroyed) return;
       console.log(`🔌 Connection closed for room:${roomId}`);
       if (connectionTimeout) {
@@ -223,7 +223,7 @@ export function createEnhancedRoomChannel(
       }
     });
 
-    channel.on("system", { event: "SUBSCRIBED" }, () => {
+    channel.on('system', { event: 'SUBSCRIBED' }, () => {
       if (connectionTimeout) {
         clearTimeout(connectionTimeout);
         connectionTimeout = null;

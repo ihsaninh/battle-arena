@@ -1,4 +1,4 @@
-import { getConnectionStats } from "./realtime";
+import { getConnectionStats } from './realtime';
 
 // Connection monitoring utility
 class ConnectionMonitor {
@@ -8,7 +8,7 @@ class ConnectionMonitor {
 
   startMonitoring() {
     if (this.monitoringInterval) {
-      console.warn("Connection monitoring already started");
+      console.warn('Connection monitoring already started');
       return;
     }
 
@@ -36,34 +36,34 @@ class ConnectionMonitor {
       }
     }, this.logInterval);
 
-    console.log("🔌 Connection monitoring started");
+    console.log('🔌 Connection monitoring started');
   }
 
   stopMonitoring() {
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
-      console.log("🔌 Connection monitoring stopped");
+      console.log('🔌 Connection monitoring stopped');
     }
   }
 
   private logDetailedStats(stats: ReturnType<typeof getConnectionStats>) {
-    console.group("🔍 Detailed Connection Stats");
-    console.log("Total connections:", stats.totalConnections);
-    console.log("User connections:", stats.userConnections);
-    console.log("Max user connections:", stats.maxUserConnections);
-    console.log("Connections by user:", stats.connectionsByUser);
+    console.group('🔍 Detailed Connection Stats');
+    console.log('Total connections:', stats.totalConnections);
+    console.log('User connections:', stats.userConnections);
+    console.log('Max user connections:', stats.maxUserConnections);
+    console.log('Connections by user:', stats.connectionsByUser);
     console.groupEnd();
   }
 
   // Force cleanup of connections
   forceCleanup() {
-    console.log("🧹 Forcing connection cleanup");
+    console.log('🧹 Forcing connection cleanup');
     const statsBefore = getConnectionStats();
     // This would be implemented in the realtime module
     console.log(`📊 Before cleanup - Total: ${statsBefore.totalConnections}`);
     // Call cleanup function from realtime module
-    console.log("✅ Connection cleanup completed");
+    console.log('✅ Connection cleanup completed');
   }
 
   // Get current connection status
@@ -76,14 +76,14 @@ class ConnectionMonitor {
 export const connectionMonitor = new ConnectionMonitor();
 
 // Auto-start monitoring in browser environment
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   // Start monitoring when the page loads
-  window.addEventListener("load", () => {
+  window.addEventListener('load', () => {
     connectionMonitor.startMonitoring();
   });
 
   // Stop monitoring when the page unloads
-  window.addEventListener("beforeunload", () => {
+  window.addEventListener('beforeunload', () => {
     connectionMonitor.stopMonitoring();
   });
 }

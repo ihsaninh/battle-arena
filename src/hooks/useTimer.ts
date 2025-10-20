@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
-import { useInterval } from "usehooks-ts";
+import { useEffect, useRef } from 'react';
+import { useInterval } from 'usehooks-ts';
 
-import { useBattleStore } from "@/src/lib/battle-store";
-import type { StateResp } from "@/src/types/battle";
+import { useBattleStore } from '@/src/lib/battle-store';
+import type { StateResp } from '@/src/types/battle';
 
 export function useTimer(
   state: StateResp | undefined,
@@ -42,11 +42,11 @@ export function useTimer(
     // Auto-progress when timer reaches zero (only for host)
     if (
       remaining === 0 &&
-      gamePhase === "answering" &&
-      state.activeRound?.status === "active" &&
+      gamePhase === 'answering' &&
+      state.activeRound?.status === 'active' &&
       !isProgressing
     ) {
-      console.log("[TIMER] Auto-closing round due to timer expiration");
+      console.log('[TIMER] Auto-closing round due to timer expiration');
       autoCloseRound();
     }
   };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export const useViewport = (breakpoint: number = 1024) => {
   const [isMobile, setIsMobile] = useState(false);
@@ -9,9 +9,9 @@ export const useViewport = (breakpoint: number = 1024) => {
     };
 
     updateViewport();
-    window.addEventListener("resize", updateViewport);
+    window.addEventListener('resize', updateViewport);
 
-    return () => window.removeEventListener("resize", updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);
   }, [breakpoint]);
 
   return { isMobile };

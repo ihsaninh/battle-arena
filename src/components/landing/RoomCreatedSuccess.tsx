@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { FaCopy, FaCrown, FaTrophy } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import { FaCopy, FaCrown, FaTrophy } from 'react-icons/fa';
 
-import { useBattleStore } from "@/src/lib/battle-store";
+import { useBattleStore } from '@/src/lib/battle-store';
 
 interface RoomCreatedSuccessProps {
   createdRoomCode: string | null;
@@ -13,7 +13,7 @@ interface RoomCreatedSuccessProps {
   loading: boolean;
   copied: boolean;
   onSetCreatedRoomCode: (code: string | null) => void;
-  onSetGameMode: (mode: "create" | "join" | null) => void;
+  onSetGameMode: (mode: 'create' | 'join' | null) => void;
   onCopyRoomCode: () => void;
   onHandleJoinRoom: (
     nameOverride?: string,
@@ -31,7 +31,7 @@ export function RoomCreatedSuccess({
   onCopyRoomCode,
   onHandleJoinRoom,
 }: RoomCreatedSuccessProps) {
-  const addNotification = useBattleStore((state) => state.addNotification);
+  const addNotification = useBattleStore(state => state.addNotification);
 
   return (
     <motion.div
@@ -54,7 +54,9 @@ export function RoomCreatedSuccess({
         </button>
         <div className="flex items-center gap-3">
           <span className="text-2xl md:text-3xl">🏆</span>
-          <h2 className="text-2xl md:text-3xl font-bold text-white">Room Created</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-white">
+            Room Created
+          </h2>
         </div>
       </div>
 
@@ -62,7 +64,7 @@ export function RoomCreatedSuccess({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: "spring", duration: 0.6 }}
+          transition={{ type: 'spring', duration: 0.6 }}
           className="w-16 h-16 md:w-20 md:h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-5 md:mb-6"
         >
           <FaTrophy className="w-8 h-8 md:w-10 md:h-10 text-green-400" />
@@ -85,7 +87,7 @@ export function RoomCreatedSuccess({
             className="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors flex items-center gap-2"
           >
             <FaCopy className="w-4 h-4" />
-            {copied ? "Copied!" : "Copy"}
+            {copied ? 'Copied!' : 'Copy'}
           </button>
         </div>
 
@@ -98,7 +100,7 @@ export function RoomCreatedSuccess({
                 // Skip session creation since it was already done during room creation
                 onHandleJoinRoom(hostName, true);
               } else {
-                addNotification("Host name is required to join the room");
+                addNotification('Host name is required to join the room');
               }
             }}
             disabled={loading}
@@ -109,7 +111,7 @@ export function RoomCreatedSuccess({
             ) : (
               <FaCrown className="w-5 h-5" />
             )}
-            {loading ? "Joining..." : "Join as Host"}
+            {loading ? 'Joining...' : 'Join as Host'}
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
 export const BattleLoadingState = () => {
   return (
@@ -24,7 +24,7 @@ export const BattleLoadingState = () => {
               duration: 3,
               repeat: Infinity,
               delay: i * 0.4,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }}
           />
         ))}
@@ -39,7 +39,7 @@ export const BattleLoadingState = () => {
         <div className="relative mb-6">
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
             className="w-20 h-20 mx-auto"
           >
             <div className="w-full h-full border-4 border-purple-500/20 border-t-purple-500 rounded-full" />
@@ -48,7 +48,7 @@ export const BattleLoadingState = () => {
           {/* Inner spinning element */}
           <motion.div
             animate={{ rotate: -360 }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
             className="absolute inset-2 border-2 border-pink-500/20 border-b-pink-500 rounded-full"
           />
 
@@ -71,7 +71,7 @@ export const BattleLoadingState = () => {
             Loading battle room
           </p>
           <div className="flex justify-center space-x-1">
-            {[0, 1, 2].map((i) => (
+            {[0, 1, 2].map(i => (
               <motion.span
                 key={i}
                 animate={{ opacity: [0.3, 1, 0.3] }}
@@ -91,7 +91,7 @@ export const BattleLoadingState = () => {
         {/* Progress indicator */}
         <motion.div
           initial={{ width: 0 }}
-          animate={{ width: "100%" }}
+          animate={{ width: '100%' }}
           transition={{ duration: 3, repeat: Infinity }}
           className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mx-auto mt-4 max-w-xs"
         />

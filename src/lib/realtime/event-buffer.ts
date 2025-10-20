@@ -1,4 +1,4 @@
-import { BattleEventListener } from "@/src/types/realtime";
+import { BattleEventListener } from '@/src/types/realtime';
 
 export interface BufferedEvent {
   sequence: number;
@@ -82,7 +82,7 @@ export class EventBuffer {
     if (!roomBuffer || roomBuffer.length === 0) return;
 
     // Process all events in order
-    roomBuffer.forEach((event) => {
+    roomBuffer.forEach(event => {
       this.emitEvent(roomId, event);
     });
 
@@ -172,7 +172,7 @@ export class EventBuffer {
   private emitEvent(roomId: string, event: BufferedEvent): void {
     const listeners = this.eventListeners.get(roomId) || [];
 
-    listeners.forEach((listener) => {
+    listeners.forEach(listener => {
       try {
         listener(event.event, event.payload);
       } catch (err) {

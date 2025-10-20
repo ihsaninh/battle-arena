@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { FaBolt, FaCheck, FaStar } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import { FaBolt, FaCheck, FaStar } from 'react-icons/fa';
 
-import { useBattleStore } from "@/src/lib/battle-store";
-import { getDifficultyColor, getDifficultyLabel } from "@/src/lib/formatters";
-import type { AnsweringPhaseProps } from "@/src/types/battle";
+import { useBattleStore } from '@/src/lib/battle-store';
+import { getDifficultyColor, getDifficultyLabel } from '@/src/lib/formatters';
+import type { AnsweringPhaseProps } from '@/src/types/battle';
 
 export function AnsweringPhase({
   onSubmitAnswer,
@@ -34,7 +34,7 @@ export function AnsweringPhase({
               : `Round ${state.activeRound?.roundNo}${
                   state?.room?.num_questions
                     ? `/${state.room.num_questions}`
-                    : ""
+                    : ''
                 }`}
           </h3>
           <div className="flex items-center gap-2">
@@ -45,7 +45,7 @@ export function AnsweringPhase({
             >
               {getDifficultyLabel(
                 state.activeRound?.question?.difficulty || 0,
-                state.activeRound?.question?.language || ""
+                state.activeRound?.question?.language || ''
               )}
             </span>
             {state.activeRound?.question?.category && (
@@ -65,7 +65,7 @@ export function AnsweringPhase({
         <div className="space-y-3 md:space-y-4">
           {state.activeRound?.question?.choices?.length ? (
             <div className="space-y-3 md:space-y-3">
-              {state.activeRound.question.choices.map((c) => {
+              {state.activeRound.question.choices.map(c => {
                 const isSelected = selectedChoiceId === c.id;
 
                 const handleSelect = () => {
@@ -73,7 +73,7 @@ export function AnsweringPhase({
                   setSelectedChoiceId(c.id);
 
                   // Haptic feedback for mobile
-                  if ("vibrate" in navigator && window.innerWidth < 768) {
+                  if ('vibrate' in navigator && window.innerWidth < 768) {
                     navigator.vibrate(50);
                   }
                 };
@@ -83,14 +83,14 @@ export function AnsweringPhase({
                     key={c.id}
                     className={`group relative flex items-start gap-4 md:gap-3 p-5 md:p-4 rounded-xl border transition-all cursor-pointer touch-manipulation ${
                       isSelected
-                        ? "border-cyan-400 bg-cyan-500/10 shadow-[0_0_0_2px_rgba(34,211,238,0.2)] scale-[1.02] md:scale-100"
-                        : "border-white/10 bg-white/5 hover:bg-white/10 active:scale-[0.98] md:active:scale-100"
+                        ? 'border-cyan-400 bg-cyan-500/10 shadow-[0_0_0_2px_rgba(34,211,238,0.2)] scale-[1.02] md:scale-100'
+                        : 'border-white/10 bg-white/5 hover:bg-white/10 active:scale-[0.98] md:active:scale-100'
                     } ${
                       timeLeft === 0 || timeLeft === null
-                        ? "opacity-60 cursor-not-allowed"
-                        : ""
+                        ? 'opacity-60 cursor-not-allowed'
+                        : ''
                     }`}
-                    style={{ minHeight: "56px" }} // Ensure minimum touch target
+                    style={{ minHeight: '56px' }} // Ensure minimum touch target
                   >
                     {/* Hide the native radio visually but keep it accessible */}
                     <input
@@ -105,8 +105,8 @@ export function AnsweringPhase({
                     <div
                       className={`mt-1 md:mt-0.5 flex h-8 w-8 md:h-6 md:w-6 items-center justify-center rounded-full border transition-all ${
                         isSelected
-                          ? "bg-cyan-500 border-cyan-400 text-white shadow-lg"
-                          : "border-white/30 text-transparent group-hover:border-cyan-400 group-active:border-cyan-300"
+                          ? 'bg-cyan-500 border-cyan-400 text-white shadow-lg'
+                          : 'border-white/30 text-transparent group-hover:border-cyan-400 group-active:border-cyan-300'
                       }`}
                       aria-hidden="true"
                     >
@@ -133,7 +133,7 @@ export function AnsweringPhase({
           ) : (
             <textarea
               value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
+              onChange={e => setAnswer(e.target.value)}
               placeholder="Type your answer here..."
               className="w-full h-32 px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-white placeholder-gray-400 resize-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all"
               disabled={timeLeft === 0 || timeLeft === null}
@@ -144,7 +144,7 @@ export function AnsweringPhase({
           <motion.button
             onClick={() => {
               // Haptic feedback on submit
-              if ("vibrate" in navigator && window.innerWidth < 768) {
+              if ('vibrate' in navigator && window.innerWidth < 768) {
                 navigator.vibrate([100, 50, 100]);
               }
               onSubmitAnswer();
@@ -180,7 +180,7 @@ export function AnsweringPhase({
               <FaBolt className="w-6 h-6 md:w-5 md:h-5" />
             )}
             <span className="font-bold">
-              {loading ? "Submitting..." : "Submit Answer"}
+              {loading ? 'Submitting...' : 'Submit Answer'}
             </span>
           </motion.button>
         </div>

@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
-import { useBattleStore } from "@/src/lib/battle-store";
-import type { StateResp } from "@/src/types/battle";
-import { BATTLE_SESSION_COOKIE } from "@/src/lib/session";
+import { useBattleStore } from '@/src/lib/battle-store';
+import type { StateResp } from '@/src/types/battle';
+import { BATTLE_SESSION_COOKIE } from '@/src/lib/session';
 
 export function useHostDetection(
   roomId: string | undefined,
@@ -36,13 +36,13 @@ export function useHostDetection(
     ) {
       // If we don't have currentUser but we have participants, check if any participant with our session is host
       const currentSessionId = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith(`${BATTLE_SESSION_COOKIE}=`))
-        ?.split("=")[1];
+        .split('; ')
+        .find(row => row.startsWith(`${BATTLE_SESSION_COOKIE}=`))
+        ?.split('=')[1];
 
       if (currentSessionId) {
         const hostParticipant = state?.participants?.find(
-          (p) => p.session_id === currentSessionId && p.is_host
+          p => p.session_id === currentSessionId && p.is_host
         );
 
         if (hostParticipant && prevIsHostCacheRef.current !== true) {
@@ -68,7 +68,7 @@ export function useHostDetection(
 
   const isHost = (): boolean => {
     // Check for SSR safety
-    if (typeof window === "undefined") return false;
+    if (typeof window === 'undefined') return false;
 
     if (!roomId) return false;
 

@@ -1,4 +1,4 @@
-import type { RealtimeChannel } from "@supabase/realtime-js";
+import type { RealtimeChannel } from '@supabase/realtime-js';
 
 export type BattleEventListener = (
   event: string,

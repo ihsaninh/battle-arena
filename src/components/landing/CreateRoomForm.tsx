@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 import {
   FaBolt,
   FaClock,
@@ -10,18 +10,18 @@ import {
   FaSlidersH,
   FaTachometerAlt,
   FaUsers,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
 interface CreateRoomFormProps {
   createPayload: {
     topic: string;
     hostDisplayName: string;
-    language: "en" | "id";
+    language: 'en' | 'id';
     numQuestions: number;
     roundTimeSec: number;
     capacity: number;
-    questionType: "open-ended" | "multiple-choice";
-    difficulty: "easy" | "medium" | "hard" | undefined;
+    questionType: 'open-ended' | 'multiple-choice';
+    difficulty: 'easy' | 'medium' | 'hard' | undefined;
   };
   loading: boolean;
   onCreateRoom: (e: React.FormEvent) => void;
@@ -29,15 +29,15 @@ interface CreateRoomFormProps {
     payload: React.SetStateAction<{
       topic: string;
       hostDisplayName: string;
-      language: "en" | "id";
+      language: 'en' | 'id';
       numQuestions: number;
       roundTimeSec: number;
       capacity: number;
-      questionType: "open-ended" | "multiple-choice";
-      difficulty: "easy" | "medium" | "hard" | undefined;
+      questionType: 'open-ended' | 'multiple-choice';
+      difficulty: 'easy' | 'medium' | 'hard' | undefined;
     }>
   ) => void;
-  onSetGameMode: (mode: "create" | "join" | null) => void;
+  onSetGameMode: (mode: 'create' | 'join' | null) => void;
 }
 
 export function CreateRoomForm({
@@ -89,7 +89,7 @@ export function CreateRoomForm({
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all"
                 placeholder="Enter your battle name"
                 value={createPayload.hostDisplayName}
-                onChange={(e) =>
+                onChange={e =>
                   onSetCreatePayload({
                     ...createPayload,
                     hostDisplayName: e.target.value,
@@ -106,7 +106,7 @@ export function CreateRoomForm({
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all"
                 placeholder="e.g., Technology, History (optional)"
                 value={createPayload.topic}
-                onChange={(e) =>
+                onChange={e =>
                   onSetCreatePayload({
                     ...createPayload,
                     topic: e.target.value,
@@ -120,20 +120,20 @@ export function CreateRoomForm({
         <div className="md:hidden flex justify-center">
           <button
             type="button"
-            onClick={() => setShowAdvancedMobile((value) => !value)}
+            onClick={() => setShowAdvancedMobile(value => !value)}
             className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white"
           >
             <FaSlidersH className="h-4 w-4" />
             {showAdvancedMobile
-              ? "Hide advanced settings"
-              : "Show advanced settings"}
+              ? 'Hide advanced settings'
+              : 'Show advanced settings'}
           </button>
         </div>
 
         {/* Game Settings */}
         <div
           className={`rounded-2xl border border-blue-500/30 bg-blue-900/20 backdrop-blur-xl ${
-            showAdvancedMobile ? "block" : "hidden"
+            showAdvancedMobile ? 'block' : 'hidden'
           } md:block`}
         >
           <div className="p-5 md:p-6">
@@ -149,19 +149,19 @@ export function CreateRoomForm({
                 <select
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all"
                   value={createPayload.questionType}
-                  onChange={(e) =>
+                  onChange={e =>
                     onSetCreatePayload({
                       ...createPayload,
                       questionType: e.target.value as
-                        | "open-ended"
-                        | "multiple-choice",
+                        | 'open-ended'
+                        | 'multiple-choice',
                     })
                   }
                 >
                   <option value="multiple-choice">Multiple Choice</option>
                   <option value="open-ended">Open-ended</option>
                 </select>
-                {createPayload.questionType === "multiple-choice" ? (
+                {createPayload.questionType === 'multiple-choice' ? (
                   <div className="text-xs text-blue-300 mt-1">
                     MCQ shows 4 options, 1 correct
                   </div>
@@ -178,10 +178,10 @@ export function CreateRoomForm({
                 <select
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all"
                   value={createPayload.language}
-                  onChange={(e) =>
+                  onChange={e =>
                     onSetCreatePayload({
                       ...createPayload,
-                      language: e.target.value as "en" | "id",
+                      language: e.target.value as 'en' | 'id',
                     })
                   }
                 >
@@ -197,12 +197,12 @@ export function CreateRoomForm({
                 </label>
                 <select
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all"
-                  value={createPayload.difficulty ?? ""}
-                  onChange={(e) =>
+                  value={createPayload.difficulty ?? ''}
+                  onChange={e =>
                     onSetCreatePayload({
                       ...createPayload,
                       difficulty: e.target.value
-                        ? (e.target.value as "easy" | "medium" | "hard")
+                        ? (e.target.value as 'easy' | 'medium' | 'hard')
                         : undefined,
                     })
                   }
@@ -215,13 +215,13 @@ export function CreateRoomForm({
                 <div className="text-xs text-blue-300 mt-1">
                   {createPayload.difficulty
                     ? `All rounds will use ${
-                        createPayload.difficulty === "easy"
-                          ? "easy"
-                          : createPayload.difficulty === "hard"
-                          ? "hard"
-                          : "medium"
+                        createPayload.difficulty === 'easy'
+                          ? 'easy'
+                          : createPayload.difficulty === 'hard'
+                            ? 'hard'
+                            : 'medium'
                       } questions`
-                    : "Keep difficulty randomized each round"}
+                    : 'Keep difficulty randomized each round'}
                 </div>
               </div>
 
@@ -235,7 +235,7 @@ export function CreateRoomForm({
                   min={2}
                   max={12}
                   value={createPayload.capacity}
-                  onChange={(e) =>
+                  onChange={e =>
                     onSetCreatePayload({
                       ...createPayload,
                       capacity: Number(e.target.value),
@@ -256,7 +256,7 @@ export function CreateRoomForm({
                   min={3}
                   max={10}
                   value={createPayload.numQuestions}
-                  onChange={(e) =>
+                  onChange={e =>
                     onSetCreatePayload({
                       ...createPayload,
                       numQuestions: Number(e.target.value),
@@ -278,7 +278,7 @@ export function CreateRoomForm({
                   max={180}
                   step={15}
                   value={createPayload.roundTimeSec}
-                  onChange={(e) =>
+                  onChange={e =>
                     onSetCreatePayload({
                       ...createPayload,
                       roundTimeSec: Number(e.target.value),
@@ -306,7 +306,7 @@ export function CreateRoomForm({
             ) : (
               <FaCrown className="w-5 h-5" />
             )}
-            {loading ? "Creating..." : "Create Battle Room"}
+            {loading ? 'Creating...' : 'Create Battle Room'}
           </button>
         </div>
       </form>

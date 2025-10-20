@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 // Simple in-memory rate limiter
 // In production, consider using Redis or a more robust solution
@@ -91,15 +91,15 @@ export function checkRateLimit(
   if (isLimited) {
     const response = NextResponse.json(
       {
-        error: "Rate limit exceeded",
+        error: 'Rate limit exceeded',
         retryAfter: Math.ceil((resetTime - Date.now()) / 1000),
       },
       {
         status: 429,
         headers: {
-          "Retry-After": Math.ceil((resetTime - Date.now()) / 1000).toString(),
-          "X-RateLimit-Remaining": remaining.toString(),
-          "X-RateLimit-Reset": resetTime.toString(),
+          'Retry-After': Math.ceil((resetTime - Date.now()) / 1000).toString(),
+          'X-RateLimit-Remaining': remaining.toString(),
+          'X-RateLimit-Reset': resetTime.toString(),
         },
       }
     );
@@ -111,16 +111,16 @@ export function checkRateLimit(
 
 function getClientIdentifier(req: NextRequest): string {
   // Use IP address, fallback to user agent + some entropy
-  const forwarded = req.headers.get("x-forwarded-for");
-  const realIp = req.headers.get("x-real-ip");
+  const forwarded = req.headers.get('x-forwarded-for');
+  const realIp = req.headers.get('x-real-ip');
   const ip = forwarded
-    ? forwarded.split(",")[0].trim()
+    ? forwarded.split(',')[0].trim()
     : realIp
-    ? realIp
-    : "unknown";
+      ? realIp
+      : 'unknown';
 
   // Add some entropy to prevent simple IP-based attacks
-  const userAgent = req.headers.get("user-agent") || "";
+  const userAgent = req.headers.get('user-agent') || '';
   return `${ip}-${userAgent.slice(0, 50)}`;
 }
 

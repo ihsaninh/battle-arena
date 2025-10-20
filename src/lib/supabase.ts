@@ -1,5 +1,5 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 // Share Supabase instances across hot reloads and server invocations
 const globalClients = globalThis as typeof globalThis & {
@@ -21,7 +21,7 @@ export const supabaseBrowser = (() => {
 export function supabaseServer() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anon) throw new Error("Supabase env missing");
+  if (!url || !anon) throw new Error('Supabase env missing');
 
   if (!globalClients._supabaseServerClient) {
     globalClients._supabaseServerClient = createClient(url, anon, {
@@ -36,7 +36,7 @@ export function supabaseServer() {
 export function supabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceRole) throw new Error("Supabase admin env missing");
+  if (!url || !serviceRole) throw new Error('Supabase admin env missing');
 
   if (!globalClients._supabaseAdminClient) {
     globalClients._supabaseAdminClient = createClient(url, serviceRole, {

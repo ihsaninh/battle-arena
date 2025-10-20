@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { FaCrown, FaTrophy } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import { FaCrown, FaTrophy } from 'react-icons/fa';
 
 type FinalScoreEntry = {
   session_id: string;
@@ -37,14 +37,14 @@ export function Leaderboard({ participants, currentUserId }: LeaderboardProps) {
             transition={{ delay: 1 + index * 0.1 }}
             className={`flex items-center justify-between p-4 rounded-xl ${
               participant.session_id === currentUserId
-                ? "bg-gradient-to-r from-cyan-600/20 to-blue-600/20 border border-cyan-500/50 ring-2 ring-cyan-400/30"
+                ? 'bg-gradient-to-r from-cyan-600/20 to-blue-600/20 border border-cyan-500/50 ring-2 ring-cyan-400/30'
                 : index === 0
-                ? "bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30"
-                : index === 1
-                ? "bg-gradient-to-r from-gray-600/20 to-slate-600/20 border border-gray-400/30"
-                : index === 2
-                ? "bg-gradient-to-r from-amber-600/20 to-yellow-600/20 border border-amber-500/30"
-                : "bg-white/5 border border-white/10"
+                  ? 'bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30'
+                  : index === 1
+                    ? 'bg-gradient-to-r from-gray-600/20 to-slate-600/20 border border-gray-400/30'
+                    : index === 2
+                      ? 'bg-gradient-to-r from-amber-600/20 to-yellow-600/20 border border-amber-500/30'
+                      : 'bg-white/5 border border-white/10'
             }`}
           >
             <div className="flex items-center gap-4">
@@ -52,12 +52,12 @@ export function Leaderboard({ participants, currentUserId }: LeaderboardProps) {
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                   index === 0
-                    ? "bg-yellow-500 text-white shadow-lg"
+                    ? 'bg-yellow-500 text-white shadow-lg'
                     : index === 1
-                    ? "bg-gray-400 text-white shadow-lg"
-                    : index === 2
-                    ? "bg-amber-600 text-white shadow-lg"
-                    : "bg-white/20 text-gray-300"
+                      ? 'bg-gray-400 text-white shadow-lg'
+                      : index === 2
+                        ? 'bg-amber-600 text-white shadow-lg'
+                        : 'bg-white/20 text-gray-300'
                 }`}
               >
                 {index + 1}
@@ -68,10 +68,10 @@ export function Leaderboard({ participants, currentUserId }: LeaderboardProps) {
                 <FaTrophy
                   className={`w-5 h-5 ${
                     index === 0
-                      ? "text-yellow-400"
+                      ? 'text-yellow-400'
                       : index === 1
-                      ? "text-gray-400"
-                      : "text-amber-600"
+                        ? 'text-gray-400'
+                        : 'text-amber-600'
                   }`}
                 />
               )}

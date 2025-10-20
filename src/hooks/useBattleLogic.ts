@@ -1,15 +1,15 @@
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useTimeout } from "usehooks-ts";
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTimeout } from 'usehooks-ts';
 
-import { useBattleActions } from "@/src/hooks/useBattleActions";
-import { useHostDetection } from "@/src/hooks/useHostDetection";
-import { useRealtime } from "@/src/hooks/useRealtime";
-import { useBattleStore } from "@/src/lib/battle-store";
-import { BATTLE_SESSION_COOKIE } from "@/src/lib/session";
+import { useBattleActions } from '@/src/hooks/useBattleActions';
+import { useHostDetection } from '@/src/hooks/useHostDetection';
+import { useRealtime } from '@/src/hooks/useRealtime';
+import { useBattleStore } from '@/src/lib/battle-store';
+import { BATTLE_SESSION_COOKIE } from '@/src/lib/session';
 
-import { useBattleRoomState } from "./useRoomState";
-import { useTimer } from "./useTimer";
+import { useBattleRoomState } from './useRoomState';
+import { useTimer } from './useTimer';
 
 export function useBattleLogic() {
   const params = useParams<{ id: string }>();
@@ -65,15 +65,15 @@ export function useBattleLogic() {
     if ([401, 403, 404].includes(status)) {
       accessDeniedRef.current = true;
       const store = useBattleStore.getState();
-      let message = "Unable to access this battle room.";
-      const notJoinedCodes = new Set(["MISSING_SESSION", "NOT_PARTICIPANT"]);
-      if (notJoinedCodes.has(err.code ?? "") || [401, 403].includes(status)) {
+      let message = 'Unable to access this battle room.';
+      const notJoinedCodes = new Set(['MISSING_SESSION', 'NOT_PARTICIPANT']);
+      if (notJoinedCodes.has(err.code ?? '') || [401, 403].includes(status)) {
         message = "You haven't joined this battle room yet.";
       } else if (status === 404) {
         message = "This battle room doesn't exist or is no longer available.";
       }
       store.addNotification(message);
-      router.replace("/");
+      router.replace('/');
     }
   }, [stateError, router]);
 
@@ -121,15 +121,15 @@ export function useBattleLogic() {
       return state.currentUser.session_id;
     }
 
-    if (typeof document === "undefined") {
+    if (typeof document === 'undefined') {
       return null;
     }
 
     const cookieMatch = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(`${BATTLE_SESSION_COOKIE}=`));
+      .split('; ')
+      .find(row => row.startsWith(`${BATTLE_SESSION_COOKIE}=`));
 
-    return cookieMatch ? cookieMatch.split("=")[1] : null;
+    return cookieMatch ? cookieMatch.split('=')[1] : null;
   }, [state?.currentUser?.session_id]);
 
   const serverMarkedAnswered = useMemo(() => {
@@ -148,14 +148,14 @@ export function useBattleLogic() {
       return answerStatus.totalParticipants;
     }
     const participants = state?.participants || [];
-    return participants.filter((p) => p.connection_status !== "offline").length;
+    return participants.filter(p => p.connection_status !== 'offline').length;
   }, [answerStatus?.totalParticipants, state?.participants]);
 
   // Redirect when gamePhase becomes finished (most robust trigger)
   useEffect(() => {
     if (hasRedirectedRef.current) return;
-    if (gamePhase !== "finished") return;
-    if (state?.room?.status !== "finished") return;
+    if (gamePhase !== 'finished') return;
+    if (state?.room?.status !== 'finished') return;
 
     hasRedirectedRef.current = true;
     setShouldRedirect(true);

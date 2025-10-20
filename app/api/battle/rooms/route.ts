@@ -1,19 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-import {
-  createErrorResponse,
-  ERROR_TYPES,
-} from "@/src/lib/api-errors";
-import {
-  checkRateLimit,
-  generalLimiter,
-} from "@/src/lib/rate-limit";
-import { getBattleSessionIdFromCookies } from "@/src/lib/session";
-import { supabaseAdmin } from "@/src/lib/supabase";
-import {
-  createRoomSchema,
-  validateRequest,
-} from "@/src/lib/utils/validation";
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
+import { checkRateLimit, generalLimiter } from '@/src/lib/rate-limit';
+import { getBattleSessionIdFromCookies } from '@/src/lib/session';
+import { supabaseAdmin } from '@/src/lib/supabase';
+import { createRoomSchema, validateRequest } from '@/src/lib/utils/validation';
 
 // Simple in-memory connection tracking for server-side
 const serverConnections = new Map<
@@ -27,9 +18,9 @@ async function isRoomCodeTaken(
   roomCode: string
 ): Promise<boolean> {
   const { data } = await supabase
-    .from("battle_rooms")
-    .select("id")
-    .eq("room_code", roomCode)
+    .from('battle_rooms')
+    .select('id')
+    .eq('room_code', roomCode)
     .single();
   return !!data;
 }
@@ -67,8 +58,8 @@ export async function POST(req: NextRequest) {
     const validation = validateRequest(createRoomSchema, json);
     if (!validation.success) {
       return createErrorResponse({
-        code: "VALIDATION_ERROR",
-        message: "Invalid room creation data",
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid room creation data',
         details: validation.details,
         retryable: false,
         statusCode: 400,
@@ -88,16 +79,16 @@ export async function POST(req: NextRequest) {
 
     // Ensure host session exists
     const { data: session, error: sessionErr } = await supabase
-      .from("battle_sessions")
-      .select("*")
-      .eq("id", hostSessionId)
+      .from('battle_sessions')
+      .select('*')
+      .eq('id', hostSessionId)
       .single();
 
     if (sessionErr || !session) {
       console.error(
-        "Session lookup error:",
+        'Session lookup error:',
         sessionErr,
-        "for sessionId:",
+        'for sessionId:',
         hostSessionId
       );
       console.log(
@@ -131,7 +122,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create room
-    const { error: roomErr } = await supabase.from("battle_rooms").insert({
+    const { error: roomErr } = await supabase.from('battle_rooms').insert({
       id: roomId,
       room_code: roomCode,
       host_session_id: hostSessionId,
@@ -141,13 +132,13 @@ export async function POST(req: NextRequest) {
       num_questions: body.numQuestions,
       round_time_sec: body.roundTimeSec,
       capacity: body.capacity ?? null,
-      question_type: body.questionType ?? "open-ended",
+      question_type: body.questionType ?? 'open-ended',
       difficulty: body.difficulty ?? null,
-      status: "waiting",
+      status: 'waiting',
     });
 
     if (roomErr) {
-      console.error("Create room error", roomErr);
+      console.error('Create room error', roomErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -157,7 +148,7 @@ export async function POST(req: NextRequest) {
     // Room created successfully - host will join manually
     return NextResponse.json({ roomId, roomCode });
   } catch (e: unknown) {
-    console.error("Create room exception", e);
+    console.error('Create room exception', e);
     return createErrorResponse(e);
   }
 }

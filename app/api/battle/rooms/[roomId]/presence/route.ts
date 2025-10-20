@@ -1,16 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { handlePresenceUpdate } from "@/src/lib/presence";
-import {
-  createErrorResponse,
-  ERROR_TYPES,
-} from "@/src/lib/api-errors";
-import { getBattleSessionIdFromCookies } from "@/src/lib/session";
-import { supabaseAdmin } from "@/src/lib/supabase";
+import { handlePresenceUpdate } from '@/src/lib/presence';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
+import { getBattleSessionIdFromCookies } from '@/src/lib/session';
+import { supabaseAdmin } from '@/src/lib/supabase';
 
 const PresenceSchema = z.object({
-  status: z.enum(["online", "offline"]),
+  status: z.enum(['online', 'offline']),
 });
 
 export async function POST(
@@ -29,10 +26,10 @@ export async function POST(
 
     const supabase = supabaseAdmin();
     const { data: membership, error: membershipErr } = await supabase
-      .from("battle_room_participants")
-      .select("id")
-      .eq("room_id", roomId)
-      .eq("session_id", sessionId)
+      .from('battle_room_participants')
+      .select('id')
+      .eq('room_id', roomId)
+      .eq('session_id', sessionId)
       .maybeSingle();
 
     if (membershipErr) {

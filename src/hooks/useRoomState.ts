@@ -1,19 +1,15 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
   useAnswerStatus,
   useBattleRefresh,
   useRoomState,
-} from "@/src/hooks/useBattleQueries";
-import { useBattleStore } from "@/src/lib/battle-store";
-import type {
-  AnswerStatus,
-  GamePhase,
-  StateResp,
-} from "@/src/types/battle";
-import { BATTLE_SESSION_COOKIE } from "@/src/lib/session";
+} from '@/src/hooks/useBattleQueries';
+import { useBattleStore } from '@/src/lib/battle-store';
+import type { AnswerStatus, GamePhase, StateResp } from '@/src/types/battle';
+import { BATTLE_SESSION_COOKIE } from '@/src/lib/session';
 
 // Extend Window interface to include custom properties
 declare global {
@@ -26,26 +22,26 @@ declare global {
 
 // Helper function to determine correct gamePhase from server state
 function determineGamePhaseFromServerState(state: StateResp): GamePhase {
-  if (!state.room) return "waiting";
+  if (!state.room) return 'waiting';
 
   switch (state.room.status) {
-    case "waiting":
-      return "waiting";
-    case "finished":
-      return "finished";
-    case "active":
+    case 'waiting':
+      return 'waiting';
+    case 'finished':
+      return 'finished';
+    case 'active':
       // If room is active, check if there's an active round
-      if (state.activeRound?.status === "scoreboard") {
-        return "scoreboard";
+      if (state.activeRound?.status === 'scoreboard') {
+        return 'scoreboard';
       }
 
-      if (state.activeRound?.status === "active") {
-        return "answering";
+      if (state.activeRound?.status === 'active') {
+        return 'answering';
       } else {
-        return "playing"; // Waiting for round to be revealed
+        return 'playing'; // Waiting for round to be revealed
       }
     default:
-      return "waiting";
+      return 'waiting';
   }
 }
 
@@ -71,7 +67,7 @@ function validateStateSync(state: StateResp, gamePhase: GamePhase): boolean {
 
   // Check for phase mismatch
   if (expectedPhase !== gamePhase) {
-    console.warn("[SYNC] Phase mismatch detected:", {
+    console.warn('[SYNC] Phase mismatch detected:', {
       expected: expectedPhase,
       current: gamePhase,
       state: state.room?.status,
@@ -81,7 +77,7 @@ function validateStateSync(state: StateResp, gamePhase: GamePhase): boolean {
 
   // Check for state drift using checksum
   if (storedChecksum && storedChecksum !== currentChecksum) {
-    console.warn("[SYNC] State drift detected:", {
+    console.warn('[SYNC] State drift detected:', {
       stored: storedChecksum,
       current: currentChecksum,
     });
@@ -92,7 +88,7 @@ function validateStateSync(state: StateResp, gamePhase: GamePhase): boolean {
 }
 
 function recoverFromStateDesync(roomId: string, refresh: () => Promise<void>) {
-  console.log("[SYNC] Initiating state recovery for room:", roomId);
+  console.log('[SYNC] Initiating state recovery for room:', roomId);
 
   // Clear local state
   window.battleStateChecksum = undefined;
@@ -100,8 +96,8 @@ function recoverFromStateDesync(roomId: string, refresh: () => Promise<void>) {
 
   // Force refresh from server
   setTimeout(() => {
-    refresh().catch((err) => {
-      console.error("[SYNC] Recovery refresh failed:", err);
+    refresh().catch(err => {
+      console.error('[SYNC] Recovery refresh failed:', err);
     });
   }, 1000);
 }
@@ -127,10 +123,10 @@ export function useBattleRoomState(): {
       // Clear TanStack Query cache for previous room to prevent conflicts
       if (lastRoomIdRef.current) {
         queryClient.removeQueries({
-          queryKey: ["room-state", lastRoomIdRef.current],
+          queryKey: ['room-state', lastRoomIdRef.current],
         });
         queryClient.removeQueries({
-          queryKey: ["answer-status", lastRoomIdRef.current],
+          queryKey: ['answer-status', lastRoomIdRef.current],
         });
       }
 
@@ -143,9 +139,9 @@ export function useBattleRoomState(): {
       if (lastRoomIdRef.current !== undefined) {
         // Force reset all battle state immediately
         const store = useBattleStore.getState();
-        store.setGamePhase("waiting");
+        store.setGamePhase('waiting');
         store.setHasSubmitted(false);
-        store.setAnswer("");
+        store.setAnswer('');
         store.setSelectedChoiceId(null);
         store.setAnsweredCount(0);
         store.setIsProgressing(false);
@@ -182,13 +178,13 @@ export function useBattleRoomState(): {
 
       // Prevent multiple simultaneous refresh requests
       if (refreshInProgress.current) {
-        console.log("[POLL] Refresh already in progress, skipping");
+        console.log('[POLL] Refresh already in progress, skipping');
         return;
       }
 
       // Less aggressive throttling for participant updates (unless forced)
       if (!force && now - lastRefreshTime.current < 500) {
-        console.log("[POLL] Refresh throttled, too frequent");
+        console.log('[POLL] Refresh throttled, too frequent');
         return;
       }
 
@@ -196,7 +192,7 @@ export function useBattleRoomState(): {
       lastRefreshTime.current = now;
 
       try {
-        console.log("[POLL] Executing refresh", force ? "(forced)" : "");
+        console.log('[POLL] Executing refresh', force ? '(forced)' : '');
         await refreshBattleData();
         useBattleStore.getState().setLastEventTime(now);
 
@@ -209,14 +205,14 @@ export function useBattleRoomState(): {
           );
           if (!isValid) {
             console.warn(
-              "[SYNC] State validation failed after refresh, attempting recovery"
+              '[SYNC] State validation failed after refresh, attempting recovery'
             );
             // Don't call recoverFromStateDesync here to avoid infinite loop
           }
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Unknown error";
-        console.error("[SYNC] Refresh error:", message);
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        console.error('[SYNC] Refresh error:', message);
         useBattleStore.getState().addNotification(`Refresh error: ${message}`);
 
         // Trigger recovery on refresh failure
@@ -232,8 +228,8 @@ export function useBattleRoomState(): {
 
   // Manual state recovery function for user-triggered sync
   const forceStateSync = async () => {
-    console.log("[SYNC] Manual state sync requested");
-    useBattleStore.getState().addNotification("Syncing with server...");
+    console.log('[SYNC] Manual state sync requested');
+    useBattleStore.getState().addNotification('Syncing with server...');
 
     // Clear local state cache
     window.battleStateChecksum = undefined;
@@ -241,16 +237,16 @@ export function useBattleRoomState(): {
 
     // Force complete refresh
     try {
-      await queryClient.invalidateQueries({ queryKey: ["battle"] });
+      await queryClient.invalidateQueries({ queryKey: ['battle'] });
       await refresh();
       useBattleStore
         .getState()
-        .addNotification("State synchronized successfully");
+        .addNotification('State synchronized successfully');
     } catch (err) {
-      console.error("[SYNC] Manual sync failed:", err);
+      console.error('[SYNC] Manual sync failed:', err);
       useBattleStore
         .getState()
-        .addNotification("Sync failed, please refresh the page");
+        .addNotification('Sync failed, please refresh the page');
     }
   };
 
@@ -279,18 +275,18 @@ export function useBattleRoomState(): {
       const serverGamePhase = determineGamePhaseFromServerState(state);
       const currentGamePhase = useBattleStore.getState().gamePhase;
       if (serverGamePhase !== currentGamePhase) {
-        console.warn("[SYNC] Phase sync triggered:", {
+        console.warn('[SYNC] Phase sync triggered:', {
           from: currentGamePhase,
           to: serverGamePhase,
-          reason: "server_state_update",
+          reason: 'server_state_update',
         });
         useBattleStore.getState().setGamePhase(serverGamePhase);
       }
 
       // Validate state synchronization
       if (!validateStateSync(state, currentGamePhase)) {
-        console.error("[SYNC] State desync detected, initiating recovery");
-        recoverFromStateDesync(roomId || "", refresh);
+        console.error('[SYNC] State desync detected, initiating recovery');
+        recoverFromStateDesync(roomId || '', refresh);
       }
 
       // CRITICAL: Validate round progression to prevent regression
@@ -335,9 +331,9 @@ export function useBattleRoomState(): {
         const mySessionId =
           state?.currentUser?.session_id ||
           document.cookie
-            .split("; ")
-            .find((row) => row.startsWith(`${BATTLE_SESSION_COOKIE}=`))
-            ?.split("=")[1];
+            .split('; ')
+            .find(row => row.startsWith(`${BATTLE_SESSION_COOKIE}=`))
+            ?.split('=')[1];
         if (mySessionId && Array.isArray(answerStatus.participants)) {
           const me = answerStatus.participants.find(
             (p: { session_id: string; has_answered: boolean }) =>
@@ -355,7 +351,7 @@ export function useBattleRoomState(): {
 
   // Additional sync logic for active rooms to ensure proper phase transitions
   useEffect(() => {
-    if (state?.room?.status === "active") {
+    if (state?.room?.status === 'active') {
       // Room is active, determine correct phase
       const correctPhase = determineGamePhaseFromServerState(state);
       const currentPhase = useBattleStore.getState().gamePhase;
@@ -368,15 +364,15 @@ export function useBattleRoomState(): {
 
   // Ensure phase resets to waiting when entering a fresh room
   useEffect(() => {
-    if (state?.room?.status === "waiting") {
+    if (state?.room?.status === 'waiting') {
       const store = useBattleStore.getState();
-      if (store.gamePhase !== "waiting") {
-        store.setGamePhase("waiting");
+      if (store.gamePhase !== 'waiting') {
+        store.setGamePhase('waiting');
       }
       store.setHasSubmitted(false);
-      store.setAnswer("");
+      store.setAnswer('');
       try {
-        if (typeof store.setSelectedChoiceId === "function") {
+        if (typeof store.setSelectedChoiceId === 'function') {
           store.setSelectedChoiceId(null);
         }
       } catch {}
@@ -387,8 +383,8 @@ export function useBattleRoomState(): {
   useEffect(() => {
     const store = useBattleStore.getState();
     if (
-      store.gamePhase === "answering" &&
-      state?.activeRound?.status === "active" &&
+      store.gamePhase === 'answering' &&
+      state?.activeRound?.status === 'active' &&
       !state?.activeRound?.question
     ) {
       // Only poll if we haven't had a recent event (avoid interfering with round transitions)
@@ -398,14 +394,14 @@ export function useBattleRoomState(): {
       // Wait at least 3 seconds after last event before starting gentle polling
       if (timeSinceLastEvent > 3000) {
         console.log(
-          "[SYNC] Question missing in answering phase, starting gentle polling"
+          '[SYNC] Question missing in answering phase, starting gentle polling'
         );
         const interval = setInterval(() => {
           // Check again if we still need to poll (might have been resolved by round transition)
           const currentStore = useBattleStore.getState();
           if (
-            currentStore.gamePhase === "answering" &&
-            currentStore.state?.activeRound?.status === "active" &&
+            currentStore.gamePhase === 'answering' &&
+            currentStore.state?.activeRound?.status === 'active' &&
             !currentStore.state?.activeRound?.question
           ) {
             refresh(true);
