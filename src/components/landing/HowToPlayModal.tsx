@@ -2,70 +2,12 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import {
-  FaChevronLeft,
-  FaChevronRight,
-  FaTimes,
-  FaStar,
-  FaLightbulb,
-} from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaTimes } from 'react-icons/fa';
 
 interface HowToPlayModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const mascotTips = [
-  '💡 Pro tip: Speed is key! Answer quickly to earn bonus points.',
-  '🎯 Remember: Accuracy matters more than you think!',
-  '⚡ Did you know? You can use arrow keys to navigate!',
-  '🏆 Secret: The leaderboard updates in real-time!',
-  '🎮 Fun fact: Each battle lasts about 2-3 minutes.',
-  '🚀 Challenge yourself: Try to beat your personal record!',
-  '👥 Team up: The more players, the more fun!',
-  '🧠 Brain power: Open-ended questions test your knowledge!',
-];
-
-const achievements = [
-  {
-    id: 1,
-    icon: '🏠',
-    label: 'Room Master',
-    color: 'from-purple-500 to-purple-600',
-  },
-  {
-    id: 2,
-    icon: '📤',
-    label: 'Social Butterfly',
-    color: 'from-green-500 to-green-600',
-  },
-  {
-    id: 3,
-    icon: '🚪',
-    label: 'Quick Joiner',
-    color: 'from-cyan-500 to-cyan-600',
-  },
-  {
-    id: 4,
-    icon: '⚔️',
-    label: 'Battle Ready',
-    color: 'from-orange-500 to-orange-600',
-  },
-  {
-    id: 5,
-    icon: '🏆',
-    label: 'Score Master',
-    color: 'from-yellow-500 to-yellow-600',
-  },
-  { id: 6, icon: '🏅', label: 'Legend', color: 'from-pink-500 to-pink-600' },
-  {
-    id: 7,
-    icon: '🎓',
-    label: 'Wise Warrior',
-    color: 'from-blue-500 to-blue-600',
-  },
-  { id: 8, icon: '🚀', label: 'Champion', color: 'from-red-500 to-red-600' },
-];
 
 const tutorialSteps = [
   {
@@ -538,12 +480,10 @@ const tutorialSteps = [
 
 export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [randomTip, setRandomTip] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
       setCurrentStep(0);
-      setRandomTip(Math.floor(Math.random() * mascotTips.length));
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -553,10 +493,6 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
-
-  useEffect(() => {
-    setRandomTip(Math.floor(Math.random() * mascotTips.length));
-  }, [currentStep]);
 
   const handleNext = () => {
     if (currentStep < tutorialSteps.length - 1) {
@@ -588,9 +524,6 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, currentStep]);
 
-  const progressPercentage = ((currentStep + 1) / tutorialSteps.length) * 100;
-  const unlockedAchievements = Math.min(currentStep + 1, achievements.length);
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -610,11 +543,11 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-lg sm:max-w-2xl lg:max-w-5xl max-h-[90vh] bg-slate-900/95 backdrop-blur-xl rounded-xl md:rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col"
+            className="relative w-full max-w-lg md:max-w-2xl max-h-[85vh] md:max-h-[90vh] bg-slate-900/95 backdrop-blur-xl rounded-xl md:rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
-            {/* Header with Progress Bar */}
-            <div className="relative bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-white/10 p-4 md:p-6">
+            {/* Header */}
+            <div className="relative bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-white/10 p-4 md:p-6">
               <button
                 onClick={onClose}
                 className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors duration-200"
@@ -631,137 +564,36 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
                   Step {currentStep + 1} of {tutorialSteps.length}
                 </p>
               </div>
-
-              {/* Visual Progress Bar */}
-              <div className="mt-4 h-1.5 bg-gray-700/50 rounded-full overflow-hidden border border-white/10">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500"
-                  animate={{ width: `${progressPercentage}%` }}
-                  transition={{ duration: 0.5, ease: 'easeInOut' }}
-                />
-              </div>
             </div>
 
-            {/* Main Content Area - Responsive Layout */}
-            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-              {/* Left: Main Content */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:pr-4">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentStep}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4">
-                      {tutorialSteps[currentStep].title}
-                    </h3>
-                    <div className="text-gray-300 text-sm md:text-base">
-                      {tutorialSteps[currentStep].content}
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-              {/* Right: Badges & Tips (Hidden on Mobile, Show on lg+) */}
-              <div className="hidden lg:flex flex-col w-56 bg-gradient-to-b from-slate-800/50 to-slate-900/50 border-l border-white/10 p-4 gap-4 overflow-y-auto">
-                {/* Mascot Tips */}
+            {/* Content */}
+            <div className="p-4 md:p-6 overflow-y-auto max-h-[50vh] md:max-h-[60vh]">
+              <AnimatePresence mode="wait">
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  key={randomTip}
-                  className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg p-3 border border-blue-400/30"
+                  key={currentStep}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <div className="flex items-start gap-2">
-                    <span className="text-xl mt-0.5">🤖</span>
-                    <div className="flex-1">
-                      <p className="text-xs text-blue-200 leading-relaxed">
-                        {mascotTips[randomTip]}
-                      </p>
-                    </div>
+                  <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4">
+                    {tutorialSteps[currentStep].title}
+                  </h3>
+                  <div className="text-gray-300">
+                    {tutorialSteps[currentStep].content}
                   </div>
                 </motion.div>
-
-                {/* Achievement Badges */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <FaStar className="text-yellow-400 text-sm" />
-                    <p className="text-xs font-semibold text-gray-300">
-                      Achievements
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    {achievements.map((achievement, idx) => (
-                      <motion.div
-                        key={achievement.id}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{
-                          opacity: idx < unlockedAchievements ? 1 : 0.3,
-                          scale: idx < unlockedAchievements ? 1 : 0.8,
-                        }}
-                        transition={{ delay: idx * 0.05 }}
-                        className={`relative group cursor-default`}
-                      >
-                        <div
-                          className={`w-full aspect-square rounded-lg flex flex-col items-center justify-center text-sm font-semibold transition-all ${
-                            idx < unlockedAchievements
-                              ? `bg-gradient-to-br ${achievement.color} shadow-lg shadow-purple-500/50`
-                              : 'bg-gray-700/30 border border-gray-600/30'
-                          }`}
-                        >
-                          <span className="text-2xl mb-1">
-                            {achievement.icon}
-                          </span>
-                        </div>
-
-                        {/* Tooltip */}
-                        <div className="absolute left-0 right-0 -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="text-xs text-gray-300 text-center whitespace-nowrap bg-slate-800/90 px-2 py-1 rounded">
-                            {achievement.label}
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile Badge Showcase (Visible on mobile only) */}
-            <div className="lg:hidden px-4 md:px-6 py-3 bg-slate-800/30 border-t border-white/10">
-              <div className="flex items-center gap-2 mb-2">
-                <FaStar className="text-yellow-400 text-sm" />
-                <p className="text-xs font-semibold text-gray-300">
-                  Progress: {unlockedAchievements}/{achievements.length}{' '}
-                  Unlocked
-                </p>
-              </div>
-              <div className="flex gap-1 overflow-x-auto">
-                {achievements
-                  .slice(0, unlockedAchievements)
-                  .map(achievement => (
-                    <div
-                      key={achievement.id}
-                      className="flex-shrink-0 w-8 h-8 text-lg flex items-center justify-center"
-                    >
-                      {achievement.icon}
-                    </div>
-                  ))}
-              </div>
+              </AnimatePresence>
             </div>
 
             {/* Footer */}
             <div className="bg-slate-800/50 border-t border-white/10 p-4 md:p-6">
               {/* Progress indicator */}
-              <div className="flex justify-center gap-1.5 mb-4 flex-wrap">
+              <div className="flex justify-center space-x-1 mb-4">
                 {tutorialSteps.map((_, index) => (
-                  <motion.div
+                  <div
                     key={index}
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all ${
+                    className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-colors duration-200 ${
                       index <= currentStep
                         ? 'bg-gradient-to-r from-purple-400 to-pink-400'
                         : 'bg-gray-600'
@@ -770,18 +602,20 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
                 ))}
               </div>
 
-              <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center justify-between">
                 <button
                   onClick={handlePrev}
                   disabled={currentStep === 0}
-                  className="flex items-center gap-1 md:gap-2 px-3 py-2 md:px-4 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-gray-500/30 text-xs md:text-sm"
+                  className="flex items-center space-x-1 md:space-x-2 px-3 py-2 md:px-4 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-gray-500/30"
                 >
                   <FaChevronLeft className="w-3 h-3 md:w-4 md:h-4 text-gray-300" />
-                  <span className="hidden sm:inline">Prev</span>
+                  <span className="text-xs md:text-sm text-gray-300">Prev</span>
                 </button>
 
-                <div className="text-center hidden md:block text-xs text-gray-400">
-                  Use ← → or swipe to navigate
+                <div className="text-center hidden md:block">
+                  <span className="text-xs text-gray-400">
+                    Use ← → keys or navigation buttons
+                  </span>
                 </div>
 
                 {currentStep === tutorialSteps.length - 1 ? (
@@ -794,12 +628,9 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
                 ) : (
                   <button
                     onClick={handleNext}
-                    className="flex items-center gap-1 md:gap-2 px-3 py-2 md:px-4 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200 text-xs md:text-sm"
+                    className="flex items-center space-x-1 md:space-x-2 px-3 py-2 md:px-4 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-200"
                   >
-                    <span className="hidden sm:inline">Next</span>
-                    <span className="sm:hidden">
-                      <FaLightbulb />
-                    </span>
+                    <span className="text-xs md:text-sm">Next</span>
                     <FaChevronRight className="w-3 h-3 md:w-4 md:h-4" />
                   </button>
                 )}
