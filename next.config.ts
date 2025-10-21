@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob:",
               "media-src 'self'",
-              "connect-src 'self' https://api.vercel.com https://vercel.live https://generativelanguage.googleapis.com wss://https://eadwyixaigicqhuqlvmk.supabase.co https://https://eadwyixaigicqhuqlvmk.supabase.co",
+              "connect-src 'self' https://api.vercel.com https://vercel.live https://generativelanguage.googleapis.com wss://eadwyixaigicqhuqlvmk.supabase.co https://eadwyixaigicqhuqlvmk.supabase.co",
               "frame-src 'none'",
               "object-src 'none'",
               "base-uri 'self'",
