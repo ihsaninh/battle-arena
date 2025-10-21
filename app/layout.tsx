@@ -11,7 +11,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'Battle Arena | Ihsan Nurul Habib - Portfolio',
+  title: 'Battle Arena',
   description:
     'Challenge your friends in real-time knowledge battles! Create or join quiz battles on various topics.',
   manifest: '/manifest.json',
