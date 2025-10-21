@@ -14,9 +14,9 @@ import {
   type StartBattlePayload,
   type SubmitAnswerPayload,
   type SubmitAnswerResponse,
-} from '@/src/lib/api';
-import { ensureSession } from '@/src/lib/session';
-import { handleApiError } from '@/src/lib/client-error-handler';
+} from '@/src/lib/api/api';
+import { ensureSession } from '@/src/lib/database/session';
+import { handleApiError } from '@/src/lib/utils/client-error-handler';
 
 // Query Keys
 export const battleQueryKeys = {

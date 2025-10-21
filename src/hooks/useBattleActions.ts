@@ -7,13 +7,13 @@ import {
   useSubmitAnswer,
   useUpdateReadyStatus,
 } from '@/src/hooks/useBattleQueries';
-import { useBattleStore } from '@/src/lib/battle-store';
+import { useBattleStore } from '@/src/lib/store/battle-store';
 import {
   formatBattleTime,
   getDifficultyColor,
   getDifficultyLabel,
   getRoomStatusColor,
-} from '@/src/lib/formatters';
+} from '@/src/lib/utils/formatters';
 import type { StateResp } from '@/src/types/battle';
 
 export function useBattleActions(

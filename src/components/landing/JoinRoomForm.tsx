@@ -15,13 +15,13 @@ import {
   FaUsers,
 } from 'react-icons/fa';
 
-import { battleApi } from '@/src/lib/api';
+import { battleApi } from '@/src/lib/api/api';
 import {
   getDifficultyColor,
   getDifficultyLabel,
   getStatusColor,
   getStatusLabel,
-} from '@/src/lib/formatters';
+} from '@/src/lib/utils/formatters';
 import type { RoomAvailabilityResponse } from '@/src/types/api';
 
 interface JoinRoomFormProps {

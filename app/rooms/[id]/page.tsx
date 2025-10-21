@@ -15,7 +15,7 @@ import {
   RoomInfo,
 } from '@/src/components';
 import { useBattleLogic } from '@/src/hooks/useBattleLogic';
-import { useBattleStore } from '@/src/lib/battle-store';
+import { useBattleStore } from '@/src/lib/store/battle-store';
 import { SharedAnimatedBackground } from '@/src/components/SharedAnimatedBackground';
 import { useViewport } from '@/src/hooks/useViewport';
 

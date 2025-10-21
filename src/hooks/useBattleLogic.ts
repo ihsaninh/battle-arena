@@ -5,8 +5,8 @@ import { useTimeout } from 'usehooks-ts';
 import { useBattleActions } from '@/src/hooks/useBattleActions';
 import { useHostDetection } from '@/src/hooks/useHostDetection';
 import { useRealtime } from '@/src/hooks/useRealtime';
-import { useBattleStore } from '@/src/lib/battle-store';
-import { BATTLE_SESSION_COOKIE } from '@/src/lib/session';
+import { useBattleStore } from '@/src/lib/store/battle-store';
+import { BATTLE_SESSION_COOKIE } from '@/src/lib/database/session';
 
 import { useBattleRoomState } from './useRoomState';
 import { useTimer } from './useTimer';

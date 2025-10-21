@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useInterval } from 'usehooks-ts';
 
-import { useBattleStore } from '@/src/lib/battle-store';
+import { useBattleStore } from '@/src/lib/store/battle-store';
 import type { StateResp } from '@/src/types/battle';
 
 export function useTimer(

@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { FaCopy, FaCrown, FaTrophy } from 'react-icons/fa';
 
-import { useBattleStore } from '@/src/lib/battle-store';
+import { useBattleStore } from '@/src/lib/store/battle-store';
 
 interface RoomCreatedSuccessProps {
   createdRoomCode: string | null;

@@ -1,4 +1,4 @@
-import { getConnectionStats } from './realtime';
+import { getConnectionStats } from '../client/realtime';
 
 // Connection monitoring utility
 class ConnectionMonitor {

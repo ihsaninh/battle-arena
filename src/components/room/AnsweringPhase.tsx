@@ -3,8 +3,11 @@
 import { motion } from 'framer-motion';
 import { FaBolt, FaCheck, FaStar } from 'react-icons/fa';
 
-import { useBattleStore } from '@/src/lib/battle-store';
-import { getDifficultyColor, getDifficultyLabel } from '@/src/lib/formatters';
+import { useBattleStore } from '@/src/lib/store/battle-store';
+import {
+  getDifficultyColor,
+  getDifficultyLabel,
+} from '@/src/lib/utils/formatters';
 import type { AnsweringPhaseProps } from '@/src/types/battle';
 
 export function AnsweringPhase({

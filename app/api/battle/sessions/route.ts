@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { BATTLE_SESSION_COOKIE } from '@/src/lib/session';
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { BATTLE_SESSION_COOKIE } from '@/src/lib/database/session';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 export async function POST(request: NextRequest) {
   try {

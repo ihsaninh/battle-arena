@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self'",
-              "connect-src 'self' https://eadwyixaigicqhuqlvmk.supabase.co",
+              "connect-src 'self' https://eadwyixaigicqhuqlvmk.supabase.co wss://eadwyixaigicqhuqlvmk.supabase.co",
             ].join('; '),
           },
         ],

@@ -1,6 +1,6 @@
-import { publishBattleEvent } from '@/src/lib/realtime';
-import { buildScoreboardDetails } from '@/src/lib/scoreboard-utils';
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { publishBattleEvent } from '@/src/lib/client/realtime';
+import { buildScoreboardDetails } from '@/src/lib/utils/scoreboard-utils';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 interface StatusChange {
   sessionId: string;

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { publishBattleEvent } from '@/src/lib/realtime';
-import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
-import { getBattleSessionIdFromCookies } from '@/src/lib/session';
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { publishBattleEvent } from '@/src/lib/client/realtime';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
+import { getBattleSessionIdFromCookies } from '@/src/lib/database/session';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 const JoinRoomSchema = z.object({
   displayName: z.string().min(1).max(100).optional(),

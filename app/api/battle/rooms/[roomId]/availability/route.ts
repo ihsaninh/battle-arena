@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 type RoomStatus = 'waiting' | 'active' | 'finished' | string;
 

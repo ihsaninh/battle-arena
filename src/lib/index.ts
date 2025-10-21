@@ -1,5 +1,9 @@
 // Battle Lib Exports
-export { battleApi } from './api';
-export { useBattleStore } from './battle-store';
-export * from './realtime';
-export { ensureSession } from './session';
+export { battleApi } from './api/api';
+export { useBattleStore } from './store/battle-store';
+export * from './client/realtime';
+export { ensureSession } from './database/session';
+
+// Additional exports
+export * from './api/api-errors';
+export * from './utils/validation';

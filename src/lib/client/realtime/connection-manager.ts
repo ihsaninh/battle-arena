@@ -1,7 +1,7 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 
 import { ConnectionInfo } from '@/src/types/realtime';
-import { supabaseBrowser } from '@/src/lib/supabase';
+import { supabaseBrowser } from '@/src/lib/database/supabase';
 
 import { ReconnectionStrategy } from './reconnection-strategy';
 

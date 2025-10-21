@@ -9,7 +9,7 @@ import {
   FaInfoCircle,
 } from 'react-icons/fa';
 
-import { useBattleStore } from '@/src/lib/battle-store';
+import { useBattleStore } from '@/src/lib/store/battle-store';
 import type {
   RoundScoreboardEntry,
   ScoreboardPhaseProps,

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { handlePresenceUpdate } from '@/src/lib/presence';
-import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
-import { getBattleSessionIdFromCookies } from '@/src/lib/session';
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { handlePresenceUpdate } from '@/src/lib/database/presence';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
+import { getBattleSessionIdFromCookies } from '@/src/lib/database/session';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 const PresenceSchema = z.object({
   status: z.enum(['online', 'offline']),

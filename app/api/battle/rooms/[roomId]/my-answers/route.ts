@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
-import { getBattleSessionIdFromCookies } from '@/src/lib/session';
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
+import { getBattleSessionIdFromCookies } from '@/src/lib/database/session';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 // Define types for better type safety
 interface BankQuestion {

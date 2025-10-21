@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
-import { checkRateLimit, generalLimiter } from '@/src/lib/rate-limit';
-import { getBattleSessionIdFromCookies } from '@/src/lib/session';
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
+import { checkRateLimit, generalLimiter } from '@/src/lib/utils/rate-limit';
+import { getBattleSessionIdFromCookies } from '@/src/lib/database/session';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 import { createRoomSchema, validateRequest } from '@/src/lib/utils/validation';
 
 // Simple in-memory connection tracking for server-side

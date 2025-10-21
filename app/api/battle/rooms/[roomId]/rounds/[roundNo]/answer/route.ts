@@ -1,13 +1,16 @@
 import { after, NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { publishBattleEvent } from '@/src/lib/realtime';
-import { buildScoreboardDetails } from '@/src/lib/scoreboard-utils';
+import { publishBattleEvent } from '@/src/lib/client/realtime';
+import { buildScoreboardDetails } from '@/src/lib/utils/scoreboard-utils';
 import { evaluateAnswer } from '@/src/lib/ai/ai-scoring';
-import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
-import { answerSubmitLimiter, checkRateLimit } from '@/src/lib/rate-limit';
-import { getBattleSessionIdFromCookies } from '@/src/lib/session';
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
+import {
+  answerSubmitLimiter,
+  checkRateLimit,
+} from '@/src/lib/utils/rate-limit';
+import { getBattleSessionIdFromCookies } from '@/src/lib/database/session';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 const AnswerSchema = z.object({ answer_text: z.string().min(1).max(5000) });
 const McqAnswerSchema = z.object({ choice_id: z.string().min(1) });

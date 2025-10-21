@@ -2,8 +2,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { useCreateRoom, useJoinRoom } from '@/src/hooks/useBattleQueries';
-import { useBattleStore } from '@/src/lib/battle-store';
-import { handleApiError } from '@/src/lib/client-error-handler';
+import { useBattleStore } from '@/src/lib/store/battle-store';
+import { handleApiError } from '@/src/lib/utils/client-error-handler';
 
 type GameMode = 'create' | 'join' | null;
 

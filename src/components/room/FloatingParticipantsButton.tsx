@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { FaChevronUp, FaInfo, FaUsers } from 'react-icons/fa';
 
-import { useBattleStore } from '@/src/lib/battle-store';
+import { useBattleStore } from '@/src/lib/store/battle-store';
 
 import { Participants } from './Participants';
 import { RoomInfo } from './RoomInfo';

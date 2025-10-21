@@ -2,15 +2,15 @@ import type { RealtimeChannel } from '@supabase/realtime-js';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDebounceCallback, useInterval } from 'usehooks-ts';
 
-import { battleRequest } from '@/src/lib/api-request';
-import { useBattleStore } from '@/src/lib/battle-store';
-import { connectionMonitor } from '@/src/lib/connection-monitor';
+import { battleRequest } from '@/src/lib/api/api-request';
+import { useBattleStore } from '@/src/lib/store/battle-store';
+import { connectionMonitor } from '@/src/lib/database/connection-monitor';
 import {
   createEnhancedRoomChannel,
   getConnectionStats,
-} from '@/src/lib/realtime';
+} from '@/src/lib/client/realtime';
 import type { StateResp } from '@/src/types/battle';
-import { BATTLE_SESSION_COOKIE } from '@/src/lib/session';
+import { BATTLE_SESSION_COOKIE } from '@/src/lib/database/session';
 
 export function useRealtime(
   roomId: string | undefined,

@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 type SupabaseClient = ReturnType<typeof supabaseAdmin>;
 

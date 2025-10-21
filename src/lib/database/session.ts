@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { battleApi, BattleSessionRequest } from './api';
+import { battleApi, BattleSessionRequest } from '../api/api';
 
 export const SESSION_COOKIE = 'quiz_session_id';
 export const BATTLE_SESSION_COOKIE = 'battle_session_id';

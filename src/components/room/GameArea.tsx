@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 import { FaClock, FaUsers } from 'react-icons/fa';
 
-import { useBattleStore } from '@/src/lib/battle-store';
-import { formatBattleTime } from '@/src/lib/formatters';
+import { useBattleStore } from '@/src/lib/store/battle-store';
+import { formatBattleTime } from '@/src/lib/utils/formatters';
 import type { GameAreaProps } from '@/src/types/battle';
 
 import { AnsweringPhase } from './AnsweringPhase';

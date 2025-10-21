@@ -1,6 +1,6 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 import { getConnectionStats } from './client-connections';
 

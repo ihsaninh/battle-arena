@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 
-import { useBattleStore } from '@/src/lib/battle-store';
+import { useBattleStore } from '@/src/lib/store/battle-store';
 import type { StateResp } from '@/src/types/battle';
-import { BATTLE_SESSION_COOKIE } from '@/src/lib/session';
+import { BATTLE_SESSION_COOKIE } from '@/src/lib/database/session';
 
 export function useHostDetection(
   roomId: string | undefined,

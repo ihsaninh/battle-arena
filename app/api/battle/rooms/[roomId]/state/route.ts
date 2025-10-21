@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import type { ApiParticipant } from '@/src/types/battle';
-import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api-errors';
-import { getBattleSessionIdFromCookies } from '@/src/lib/session';
-import { supabaseAdmin } from '@/src/lib/supabase';
+import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
+import { getBattleSessionIdFromCookies } from '@/src/lib/database/session';
+import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 type QuestionSummary = {
   prompt: string;

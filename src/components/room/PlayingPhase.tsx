@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { FaClock, FaGamepad, FaStar } from 'react-icons/fa';
 
-import { useBattleStore } from '@/src/lib/battle-store';
+import { useBattleStore } from '@/src/lib/store/battle-store';
 
 export function PlayingPhase() {
   const { isProgressing, state } = useBattleStore();
