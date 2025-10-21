@@ -84,7 +84,7 @@ export function AnsweringPhase({
                 return (
                   <label
                     key={c.id}
-                    className={`group relative flex items-start gap-4 md:gap-3 p-5 md:p-4 rounded-xl border transition-all cursor-pointer touch-manipulation ${
+                  className={`group relative flex items-center md:items-start gap-4 md:gap-3 p-5 md:p-4 rounded-xl border transition-all cursor-pointer touch-manipulation ${
                       isSelected
                         ? 'border-cyan-400 bg-cyan-500/10 shadow-[0_0_0_2px_rgba(34,211,238,0.2)] scale-[1.02] md:scale-100'
                         : 'border-white/10 bg-white/5 hover:bg-white/10 active:scale-[0.98] md:active:scale-100'
@@ -118,7 +118,7 @@ export function AnsweringPhase({
                       )}
                     </div>
                     {/* Option text */}
-                    <div className="flex-1 text-white">
+                    <div className="flex-1 text-white flex flex-col justify-center">
                       <div className="font-medium leading-relaxed">
                         <span className="text-base md:text-sm">{c.text}</span>
                       </div>

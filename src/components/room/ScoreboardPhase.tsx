@@ -343,6 +343,11 @@ export function ScoreboardPhase({
                       : isMySelection
                         ? 'border-red-400/40 bg-red-500/10 text-red-100'
                         : 'border-white/10 bg-white/5 text-white/80';
+                    const indicatorClass = isCorrectChoice
+                      ? 'border-emerald-400/40 bg-emerald-500/20 text-emerald-100 shadow-md'
+                      : isMySelection
+                        ? 'border-red-300 text-red-200 bg-red-500/10'
+                        : 'border-white/30 text-transparent';
 
                     return (
                       <div
@@ -350,14 +355,14 @@ export function ScoreboardPhase({
                         className={`${baseClass} ${stateClass}`}
                       >
                         <div
-                          className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-                            isMySelection
-                              ? 'border-white bg-white'
-                              : 'border-white/40'
-                          }`}
+                          className={`flex h-4 w-4 items-center justify-center rounded-full border transition-all ${indicatorClass}`}
                         >
-                          {isMySelection && (
-                            <span className="h-2.5 w-2.5 rounded-full bg-current" />
+                          {isCorrectChoice ? (
+                            <FaCheckCircle className="h-2.5 w-2.5" />
+                          ) : (
+                            isMySelection && (
+                              <span className="h-2.5 w-2.5 rounded-full bg-current" />
+                            )
                           )}
                         </div>
                         <span className="flex-1 text-sm font-medium text-white">

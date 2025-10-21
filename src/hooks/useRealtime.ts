@@ -100,7 +100,7 @@ export function useRealtime(
 
   const presencePing = useCallback(
     async (status: 'online' | 'offline') => {
-      if (presenceEnabled || typeof window === 'undefined' || !roomId) {
+      if (typeof window === 'undefined' || !roomId) {
         return;
       }
       try {
@@ -121,7 +121,7 @@ export function useRealtime(
         }
       }
     },
-    [presenceEnabled, roomId]
+    [roomId]
   );
 
   const presencePingRef = useRef(presencePing);
@@ -129,6 +129,19 @@ export function useRealtime(
     presencePingRef.current = presencePing;
   }, [presencePing]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const handleBeforeUnload = () => {
+      presencePingRef.current?.('offline');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      handleBeforeUnload();
+    };
+  }, []);
   const clearStuckDetectionTimer = useCallback(() => {
     const { stuckDetectionTimerId } = useBattleStore.getState();
     if (stuckDetectionTimerId) {
@@ -167,9 +180,7 @@ export function useRealtime(
       if (prevConnectionStateRef.current === 'disconnected') return;
       prevConnectionStateRef.current = 'disconnected';
       setConnectionState('disconnected');
-      if (!presenceEnabled) {
-        presencePing('offline');
-      }
+      presencePing('offline');
     };
 
     const handleOnline = () => {
@@ -192,9 +203,7 @@ export function useRealtime(
             prevConnectionStateRef.current = 'connected';
             setConnectionState('connected');
           }
-          if (!presenceEnabled) {
-            presencePing('online');
-          }
+          presencePing('online');
         })
         .catch(err => {
           console.error(
@@ -215,7 +224,7 @@ export function useRealtime(
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
     };
-  }, [presenceEnabled, presencePing, roomId, setConnectionState]);
+  }, [presencePing, roomId, setConnectionState]);
 
   // Refs for polling
   const pollingBackupCallback = () => {
@@ -244,13 +253,13 @@ export function useRealtime(
     () => {
       presencePing('online');
     },
-    !presenceEnabled && roomId ? 5000 : null
+    roomId ? 5000 : null
   );
 
   useEffect(() => {
-    if (!roomId || presenceEnabled) return;
+    if (!roomId) return;
     presencePing('online');
-  }, [presenceEnabled, presencePing, roomId]);
+  }, [presencePing, roomId]);
 
   // Production fallback: aggressive polling for participant updates in waiting phase
   const productionParticipantPolling = () => {
@@ -727,9 +736,8 @@ export function useRealtime(
                 console.error('[PRESENCE] Track failed:', trackErr);
               });
             }
-          } else {
-            presencePingRef.current?.('online');
           }
+          presencePingRef.current?.('online');
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           isChannelSubscribedRef.current = false;
           console.error(`❌ Connection error for room:${roomId}`, err);
