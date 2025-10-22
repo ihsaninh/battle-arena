@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
 import './globals.css';
 
-import { SWRegister } from '@/src/components';
 import Providers from './providers';
 
 const outfit = Outfit({
@@ -14,7 +13,6 @@ export const metadata: Metadata = {
   title: 'Battle Arena',
   description:
     'Challenge your friends in real-time knowledge battles! Create or join quiz battles on various topics.',
-  manifest: '/manifest.json',
   icons: {
     icon: '/images/battle-icon.svg',
     apple: '/images/battle-icon.svg',
@@ -37,7 +35,6 @@ export default function RootLayout({
         style={{ fontFamily: 'var(--font-outfit)' }}
       >
         <Providers>
-          <SWRegister />
           {children}
         </Providers>
       </body>
