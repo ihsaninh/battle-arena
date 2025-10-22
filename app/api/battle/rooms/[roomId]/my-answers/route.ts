@@ -5,14 +5,6 @@ import { getBattleSessionIdFromCookies } from '@/src/lib/database/session';
 import { supabaseAdmin } from '@/src/lib/database/supabase';
 
 // Define types for better type safety
-interface BankQuestion {
-  id: string;
-  prompt: string;
-  difficulty: number;
-  language: string;
-  category_id: string;
-}
-
 interface AIQuestion {
   prompt: string;
   difficulty: number;
@@ -51,7 +43,6 @@ export async function GET(
         round_id,
         battle_room_rounds!inner(
           round_no,
-          question_id,
           question_json
         )
       `
@@ -67,7 +58,7 @@ export async function GET(
     // Fetch all rounds for this room to ensure unanswered rounds are included
     const { data: rounds, error: roundsErr } = await supabase
       .from('battle_room_rounds')
-      .select('id, round_no, question_id, question_json')
+      .select('id, round_no, question_json')
       .eq('room_id', roomId)
       .order('round_no', { ascending: true });
 
@@ -77,27 +68,6 @@ export async function GET(
     }
 
     const allRounds = rounds || [];
-
-    // Get questions for rounds that have question_id (from question bank)
-    const questionIds = Array.from(
-      new Set(
-        allRounds
-          .map(round => round.question_id)
-          .filter((id): id is string => Boolean(id))
-      )
-    );
-
-    let bankQuestions: BankQuestion[] = [];
-    if (questionIds.length > 0) {
-      const { data: questions } = await supabase
-        .from('quiz_questions')
-        .select('id, prompt, difficulty, language, category_id')
-        .in('id', questionIds);
-
-      bankQuestions = questions || [];
-    }
-
-    const bankQuestionMap = new Map(bankQuestions.map(q => [q.id, q]));
 
     type AnswerRecord = NonNullable<typeof answers>[number];
 
@@ -125,21 +95,7 @@ export async function GET(
       let isCorrect: boolean | undefined;
       let timeMs: number | null = null;
 
-      if (round.question_id) {
-        const bankQuestion = bankQuestionMap.get(round.question_id);
-        if (bankQuestion) {
-          questionData = {
-            prompt: bankQuestion.prompt,
-            difficulty: bankQuestion.difficulty,
-            language: bankQuestion.language,
-            category: bankQuestion.category_id,
-          };
-        }
-        if (wasAnswered) {
-          answerText = answer?.answer_text || '';
-          feedback = answer?.feedback || 'No feedback available';
-        }
-      } else if (round.question_json) {
+      if (round.question_json) {
         const q = round.question_json as AIQuestion;
         if (q) {
           questionData = {

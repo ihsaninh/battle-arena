@@ -129,8 +129,7 @@ export async function POST(
       id: string;
       room_id: string;
       round_no: number;
-      question_id: string | null;
-      question_json: Record<string, unknown> | null;
+      question_json: Record<string, unknown>;
       status: 'pending';
     }> = [];
     let usedAI = false;
@@ -139,19 +138,10 @@ export async function POST(
     const difficultyPreference = difficultyToLevel(room.difficulty);
     if (preferAI) {
       try {
-        let categoryName: string | null = null;
-        if (room.category_id) {
-          const { data: cat } = await supabase
-            .from('quiz_categories')
-            .select('name')
-            .eq('id', room.category_id)
-            .single();
-          categoryName = cat?.name ?? null;
-        }
         if (room.question_type === 'multiple-choice') {
           const aiQs = await generateMcqQuestions({
             topic: room.topic || null,
-            categoryName,
+            categoryName: null,
             categoryId: room.category_id || null,
             language: room.language,
             num: room.num_questions,
@@ -165,7 +155,6 @@ export async function POST(
               id: `round-${roomId}-${idx + 1}`,
               room_id: roomId,
               round_no: idx + 1,
-              question_id: null,
               question_json: q,
               status: 'pending' as const,
             }));
@@ -174,7 +163,7 @@ export async function POST(
         } else {
           const aiQs = await generateQuestions({
             topic: room.topic || null,
-            categoryName,
+            categoryName: null,
             categoryId: room.category_id || null,
             language: room.language,
             num: room.num_questions,
@@ -186,7 +175,6 @@ export async function POST(
               id: `round-${roomId}-${idx + 1}`,
               room_id: roomId,
               round_no: idx + 1,
-              question_id: null,
               question_json: q,
               status: 'pending' as const,
             }));
@@ -200,68 +188,12 @@ export async function POST(
     }
 
     if (inserts.length === 0) {
-      // If MCQ is requested but AI failed and no inserts, abort early (no bank fallback for MCQ in MVP)
-      if (room.question_type === 'multiple-choice') {
-        return createErrorResponse({
-          code: 'QUESTION_GENERATION_FAILED',
-          message:
-            'Failed to generate multiple choice questions. Please try again.',
-          retryable: true,
-          statusCode: 500,
-        });
-      }
-
-      let questionsQuery = supabase
-        .from('quiz_questions')
-        .select('id, prompt, difficulty, rubric_json, language, category_id')
-        .eq('is_active', true)
-        .eq('language', room.language)
-        .order('created_at')
-        .limit(room.num_questions);
-
-      if (difficultyPreference !== undefined) {
-        questionsQuery = questionsQuery.eq('difficulty', difficultyPreference);
-      }
-
-      const initialQuestions = await questionsQuery;
-      let questions = initialQuestions.data;
-      const qErr = initialQuestions.error;
-      if (qErr) {
-        return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
-      }
-      if (
-        (!questions || questions.length === 0) &&
-        difficultyPreference !== undefined
-      ) {
-        // Retry without difficulty filter so the battle can still start.
-        const retry = await supabase
-          .from('quiz_questions')
-          .select('id, prompt, difficulty, rubric_json, language, category_id')
-          .eq('is_active', true)
-          .eq('language', room.language)
-          .order('created_at')
-          .limit(room.num_questions);
-        if (!retry.error) {
-          questions = retry.data;
-        }
-      }
-      if (!questions || questions.length === 0) {
-        return createErrorResponse({
-          code: 'NO_QUESTIONS_AVAILABLE',
-          message:
-            'No questions are available for the selected language and category.',
-          retryable: false,
-          statusCode: 400,
-        });
-      }
-      inserts = questions.map((q, idx) => ({
-        id: `round-${roomId}-${idx + 1}`,
-        room_id: roomId,
-        round_no: idx + 1,
-        question_id: q.id,
-        question_json: null,
-        status: 'pending' as const,
-      }));
+      return createErrorResponse({
+        code: 'QUESTION_GENERATION_FAILED',
+        message: 'Failed to generate questions. Please try again.',
+        retryable: true,
+        statusCode: 500,
+      });
     }
     const { error: rErr } = await supabase
       .from('battle_room_rounds')

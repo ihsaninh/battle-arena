@@ -97,9 +97,7 @@ export async function GET(
     // Active round snapshot (if any)
     const { data: round } = await supabase
       .from('battle_room_rounds')
-      .select(
-        'round_no, revealed_at, deadline_at, status, question_id, question_json'
-      )
+      .select('round_no, revealed_at, deadline_at, status, question_json')
       .eq('room_id', roomId)
       .in('status', ['active', 'scoreboard'])
       .order('round_no', { ascending: false })
@@ -107,37 +105,22 @@ export async function GET(
       .maybeSingle();
 
     let questionSummary: QuestionSummary = null;
-    if (round && round.revealed_at) {
-      if (round.question_id) {
-        const { data: q } = await supabase
-          .from('quiz_questions')
-          .select('prompt, difficulty, language, category_id')
-          .eq('id', round.question_id)
-          .single();
-        if (q)
-          questionSummary = {
-            prompt: q.prompt,
-            difficulty: q.difficulty,
-            language: q.language,
-            category: q.category_id,
-          };
-      } else if (round.question_json) {
-        const q = round.question_json as {
-          prompt: string;
-          difficulty: number;
-          language: string;
-          category?: string;
-          choices?: Array<{ id: string; text: string }>;
-          correctChoiceId?: string;
-        };
-        questionSummary = {
-          prompt: q.prompt,
-          difficulty: q.difficulty,
-          language: q.language,
-          category: q.category,
-          choices: q.choices?.map(c => ({ id: c.id, text: c.text })),
-        };
-      }
+    if (round && round.revealed_at && round.question_json) {
+      const q = round.question_json as {
+        prompt: string;
+        difficulty: number;
+        language: string;
+        category?: string;
+        choices?: Array<{ id: string; text: string }>;
+        correctChoiceId?: string;
+      };
+      questionSummary = {
+        prompt: q.prompt,
+        difficulty: q.difficulty,
+        language: q.language,
+        category: q.category,
+        choices: q.choices?.map(c => ({ id: c.id, text: c.text })),
+      };
     }
 
     return NextResponse.json({

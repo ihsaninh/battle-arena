@@ -39,7 +39,7 @@ export async function POST(
     // Load round and check status/deadline
     const { data: round, error: roundErr } = await supabase
       .from('battle_room_rounds')
-      .select('id, status, deadline_at, question_id, question_json')
+      .select('id, status, deadline_at, question_json')
       .eq('room_id', roomId)
       .eq('round_no', Number(roundNo))
       .single();
@@ -172,47 +172,22 @@ export async function POST(
 
     // Fetch question for evaluation (open-ended)
     const body = AnswerSchema.parse(raw);
-    let question: {
-      prompt: string;
-      difficulty: number;
-      rubric_json: Record<string, unknown> | null;
-      language: string;
-      category: string;
-    } = {
-      prompt: '',
-      difficulty: 2,
-      rubric_json: null,
-      language: 'en',
-      category: 'tech',
-    };
-    if (round.question_id) {
-      const { data: q, error: qErr } = await supabase
-        .from('quiz_questions')
-        .select('prompt, difficulty, rubric_json, language, category_id')
-        .eq('id', round.question_id)
-        .single();
-      if (qErr || !q)
-        return NextResponse.json(
-          { error: 'Question missing' },
-          { status: 500 }
-        );
-      question = {
-        prompt: q.prompt,
-        difficulty: q.difficulty ?? 2,
-        rubric_json: q.rubric_json,
-        language: q.language ?? 'en',
-        category: q.category_id ?? 'tech',
-      };
-    } else if (round.question_json) {
-      const q = round.question_json as Record<string, unknown>;
-      question = {
-        prompt: (q.prompt as string) ?? '',
-        difficulty: (q.difficulty as number) ?? 2,
-        rubric_json: (q.rubric_json as Record<string, unknown>) ?? null,
-        language: (q.language as string) ?? 'en',
-        category: (q.category as string) ?? 'tech',
-      };
+
+    if (!round.question_json) {
+      return NextResponse.json(
+        { error: 'Question data missing' },
+        { status: 500 }
+      );
     }
+
+    const q = round.question_json as Record<string, unknown>;
+    const question = {
+      prompt: (q.prompt as string) ?? '',
+      difficulty: (q.difficulty as number) ?? 2,
+      rubric_json: (q.rubric_json as Record<string, unknown>) ?? null,
+      language: (q.language as string) ?? 'en',
+      category: (q.category as string) ?? 'tech',
+    };
 
     // Evaluate answer (AI with fallback inside evaluator)
     const ai = await evaluateAnswer({
