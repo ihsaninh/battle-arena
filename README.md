@@ -169,7 +169,9 @@ BATTLE_AUTO_ADVANCE=true
 - **Difficulty Levels**: Easy, Medium, Hard
 - **Languages**: Multi-language support (English, Bahasa Indonesia)
 - **Time Limits**: Configurable round times (15-120 seconds)
-- **Room Capacity**: 2-100 players per room
+- **Room Capacity**:
+  - Individual mode: 2-12 players (slider)
+  - Team mode: 4, 6, 8, 10, or 12 players (even numbers only)
 - **Team Features**:
   - Automatic balanced team assignment
   - Team score aggregation
