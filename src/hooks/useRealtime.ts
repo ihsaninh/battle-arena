@@ -517,9 +517,49 @@ export function useRealtime(
         refresh(true);
       });
 
+      ch.on('broadcast', { event: 'teams_assigned' }, () => {
+        setLastEventTime(Date.now());
+        console.log('[REALTIME] Teams assigned, showing reveal animation...');
+
+        // Show team reveal animation and record timestamp
+        const store = useBattleStore.getState();
+        store.setShowTeamReveal(true);
+        useBattleStore.setState({ teamRevealShownAt: Date.now() });
+
+        // Refresh to get updated participant team assignments
+        refresh(true);
+      });
+
       ch.on('broadcast', { event: 'room_started' }, () => {
         setLastEventTime(Date.now());
         resetParticipantReadyStates();
+
+        // Hide team reveal animation if still showing (with minimum display time)
+        const store = useBattleStore.getState();
+        if (store.showTeamReveal) {
+          const shownAt = store.teamRevealShownAt || 0;
+          const elapsed = Date.now() - shownAt;
+          const minDisplayTime = 3500; // 3.5 seconds - enough time to see teams
+
+          if (elapsed < minDisplayTime) {
+            // Delay hide to ensure minimum display time
+            const remainingTime = minDisplayTime - elapsed;
+            console.log(
+              `[ROOM_STARTED] Delaying hide animation by ${remainingTime}ms`
+            );
+            setTimeout(() => {
+              console.log(
+                '[ROOM_STARTED] Hiding team reveal animation (delayed)'
+              );
+              useBattleStore.getState().setShowTeamReveal(false);
+              useBattleStore.setState({ teamRevealShownAt: null });
+            }, remainingTime);
+          } else {
+            console.log('[ROOM_STARTED] Hiding team reveal animation');
+            store.setShowTeamReveal(false);
+            useBattleStore.setState({ teamRevealShownAt: null });
+          }
+        }
 
         // Transition to playing on room start
         if (prevGamePhaseRef.current !== 'playing') {
@@ -667,8 +707,14 @@ export function useRealtime(
           store.setAnsweredCount(0);
           store.setTimeLeft(null);
 
-          debouncedRefresh();
+          // Immediate refresh + delayed refresh to ensure participant scores are updated
           refresh(true);
+          setTimeout(() => {
+            console.log(
+              '[ROUND_CLOSED] Delayed refresh for updated participant scores'
+            );
+            refresh(true);
+          }, 500);
           return;
         }
 

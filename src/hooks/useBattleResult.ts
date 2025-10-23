@@ -51,6 +51,7 @@ export function useBattleResult() {
           display_name: b.displayName,
           total_score: b.totalScore,
           is_host: p?.is_host,
+          team_id: p?.team_id,
         } as FinalScoreEntry;
       });
       setSortedParticipants(ordered);
@@ -62,13 +63,46 @@ export function useBattleResult() {
           display_name: p.display_name,
           total_score: p.total_score,
           is_host: p.is_host,
+          team_id: p.team_id,
         }))
         .sort((a, b) => (b.total_score || 0) - (a.total_score || 0));
       setSortedParticipants(fallback);
     }
   }, [results?.participants, scoreboardData?.scoreboard]);
 
-  const winner = sortedParticipants[0];
+  // Calculate team scores if it's a team battle
+  const isTeamBattle = results?.room?.battle_mode === 'team';
+  const teams = results?.teams || [];
+
+  const teamScores =
+    isTeamBattle && teams.length > 0
+      ? teams
+          .map(team => {
+            const teamMembers = sortedParticipants.filter(
+              p => p.team_id === team.id
+            );
+            const totalScore = teamMembers.reduce(
+              (sum, member) => sum + (member.total_score || 0),
+              0
+            );
+            return {
+              ...team,
+              members: teamMembers,
+              totalScore,
+            };
+          })
+          .sort((a, b) => b.totalScore - a.totalScore)
+      : [];
+
+  const winner = (
+    isTeamBattle && teamScores.length > 0
+      ? {
+          display_name: teamScores[0].team_name,
+          total_score: teamScores[0].totalScore,
+          isTeam: true as const,
+        }
+      : sortedParticipants[0]
+  ) as FinalScoreEntry & { isTeam?: boolean };
   const currentUserRank =
     sortedParticipants.findIndex(
       p => p.session_id === results?.currentUser?.session_id
@@ -104,6 +138,9 @@ export function useBattleResult() {
     sortedParticipants,
     winner,
     currentUserRank,
+    isTeamBattle,
+    teamScores,
+    teams,
 
     // State setters
     setShowAnswers,

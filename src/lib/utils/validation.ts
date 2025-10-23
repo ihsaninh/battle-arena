@@ -60,18 +60,37 @@ export const questionTypeSchema = z.enum(['open-ended', 'multiple-choice']);
 
 export const battleDifficultySchema = z.enum(['easy', 'medium', 'hard']);
 
+export const battleModeSchema = z.enum(['individual', 'team']);
+
 // Composite schemas
-export const createRoomSchema = z.object({
-  hostDisplayName: displayNameSchema,
-  topic: topicSchema,
-  categoryId: z.string().optional(),
-  language: languageSchema.default('en'),
-  numQuestions: numQuestionsSchema.default(10),
-  roundTimeSec: roundTimeSecSchema.default(30),
-  capacity: capacitySchema,
-  questionType: questionTypeSchema.default('open-ended'),
-  difficulty: battleDifficultySchema.optional(),
-});
+export const createRoomSchema = z
+  .object({
+    hostDisplayName: displayNameSchema,
+    topic: topicSchema,
+    categoryId: z.string().optional(),
+    language: languageSchema.default('en'),
+    numQuestions: numQuestionsSchema.default(10),
+    roundTimeSec: roundTimeSecSchema.default(30),
+    capacity: capacitySchema,
+    questionType: questionTypeSchema.default('open-ended'),
+    difficulty: battleDifficultySchema.optional(),
+    battleMode: battleModeSchema.default('individual'),
+  })
+  .refine(
+    data => {
+      // If team mode, capacity must be even and between 4-12
+      if (data.battleMode === 'team' && data.capacity) {
+        return (
+          data.capacity % 2 === 0 && data.capacity >= 4 && data.capacity <= 12
+        );
+      }
+      return true;
+    },
+    {
+      message: 'Team battle requires even capacity between 4 and 12 players',
+      path: ['capacity'],
+    }
+  );
 
 export const joinRoomSchema = z.object({
   displayName: displayNameSchema,

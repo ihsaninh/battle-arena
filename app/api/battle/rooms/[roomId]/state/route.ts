@@ -27,11 +27,11 @@ export async function GET(
 
     const supabase = supabaseAdmin();
 
-    // Get room info with capacity
+    // Get room info with capacity and battle_mode
     const { data: room, error: roomErr } = await supabase
       .from('battle_rooms')
       .select(
-        'id, topic, category_id, language, num_questions, round_time_sec, status, start_time, capacity, question_type, room_code, host_session_id, difficulty'
+        'id, topic, category_id, language, num_questions, round_time_sec, status, start_time, capacity, question_type, room_code, host_session_id, difficulty, battle_mode'
       )
       .eq('id', roomId)
       .single();
@@ -67,15 +67,26 @@ export async function GET(
       hostDisplayName = hostSession?.display_name ?? null;
     }
 
-    // Get participants with session_id for proper mapping
+    // Get participants with session_id and team_id for proper mapping
     // Order by participant ID to maintain consistent ordering
     const { data: participants } = await supabase
       .from('battle_room_participants')
       .select(
-        'id, session_id, display_name, is_host, connection_status, total_score, joined_at, last_seen_at, is_ready'
+        'id, session_id, display_name, is_host, connection_status, total_score, joined_at, last_seen_at, is_ready, team_id'
       )
       .eq('room_id', roomId)
       .order('id', { ascending: true }); // Use participant ID for consistent ordering
+
+    // Get teams if battle mode is team
+    let teams = null;
+    if (room.battle_mode === 'team') {
+      const { data: teamsData } = await supabase
+        .from('battle_teams')
+        .select('id, room_id, team_name, team_color, team_order, total_score')
+        .eq('room_id', roomId)
+        .order('team_order', { ascending: true });
+      teams = teamsData || [];
+    }
     // Build current user response from membership or host session
     let currentUser = null;
     if (membership) {
@@ -135,7 +146,9 @@ export async function GET(
         joined_at: p.joined_at,
         last_seen_at: p.last_seen_at,
         is_ready: p.is_ready,
+        team_id: p.team_id, // Include team assignment
       })),
+      teams, // Include teams data if battle mode is team
       currentUser, // Include current user info for host detection
       activeRound: round
         ? {

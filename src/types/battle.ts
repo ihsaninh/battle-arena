@@ -14,6 +14,17 @@ export type RoomStatus =
 
 export type ConnectionState = 'connected' | 'disconnected' | 'reconnecting';
 
+export type BattleMode = 'individual' | 'team';
+
+export interface BattleTeam {
+  id: string;
+  room_id: string;
+  team_name: string;
+  team_color: string;
+  team_order: number;
+  total_score: number;
+}
+
 export interface BattleRoom {
   id: string;
   topic?: string;
@@ -27,6 +38,7 @@ export interface BattleRoom {
   question_type?: string;
   finished_reason?: string | null;
   winner_session_id?: string | null;
+  battle_mode?: BattleMode;
 }
 
 export interface BattleParticipant {
@@ -39,6 +51,7 @@ export interface BattleParticipant {
   joined_at?: string;
   last_seen_at?: string | null;
   is_ready?: boolean;
+  team_id?: string | null;
 }
 
 export interface BattleCurrentUser {
@@ -72,6 +85,7 @@ export interface BattleActiveRound {
 export interface StateResp {
   room?: BattleRoom;
   participants?: BattleParticipant[];
+  teams?: BattleTeam[];
   activeRound?: BattleActiveRound | null;
   currentUser?: BattleCurrentUser;
   serverTime?: number;
@@ -123,12 +137,14 @@ export interface FinalScoreEntry {
   display_name: string;
   total_score: number;
   is_host?: boolean;
+  team_id?: string;
 }
 
 export interface ScoreboardEntry {
   sessionId: string;
   displayName: string;
   totalScore: number;
+  teamId?: string;
 }
 
 export interface RoundScoreboardEntry {
@@ -137,12 +153,22 @@ export interface RoundScoreboardEntry {
   participantId?: string;
   roundScore: number;
   totalScore: number;
+  teamId?: string | null;
+}
+
+export interface TeamScoreboardEntry {
+  teamId: string;
+  teamName: string;
+  teamColor: string;
+  totalScore: number;
+  members: RoundScoreboardEntry[];
 }
 
 export interface RoundScoreboardSnapshot {
   roundNo: number;
   reason?: string;
   entries: RoundScoreboardEntry[];
+  teamEntries?: TeamScoreboardEntry[];
   generatedAt?: string;
   hasMoreRounds?: boolean;
   question?: RoundQuestionSummary | null;
@@ -171,8 +197,10 @@ export interface RoomStats {
     language: string;
     num_questions: number;
     status: string;
+    battle_mode?: 'individual' | 'team';
   };
   participants?: FinalScoreEntry[];
+  teams?: BattleTeam[];
   currentUser?: {
     session_id: string;
     display_name: string;
@@ -196,6 +224,8 @@ export interface BattleState {
   lastEventTime: number;
   isHostCache: boolean | null;
   tabId: string;
+  showTeamReveal: boolean;
+  teamRevealShownAt: number | null;
 
   // Data state
   state: StateResp | null;
@@ -234,6 +264,7 @@ export interface BattleState {
   clearTimers: () => void;
   setParticipantReady: (sessionId: string, isReady: boolean) => void;
   resetParticipantReadyStates: () => void;
+  setShowTeamReveal: (show: boolean) => void;
   setTimerIds: (timerIds: {
     stuckDetectionTimerId?: NodeJS.Timeout | null;
     pollingIntervalId?: NodeJS.Timeout | null;
@@ -277,6 +308,7 @@ export interface WaitingPhaseProps {
   currentSessionId: string | null;
   isReady: boolean;
   roomCapacity?: number | null;
+  battleMode?: 'individual' | 'team';
 }
 
 export interface AnsweringPhaseProps {
@@ -302,4 +334,5 @@ export interface ApiParticipant {
   joined_at?: string;
   last_seen_at?: string | null;
   is_ready?: boolean;
+  team_id?: string | null;
 }

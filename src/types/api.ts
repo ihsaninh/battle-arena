@@ -7,6 +7,7 @@ export interface CreateRoomPayload {
   capacity: number;
   questionType: 'open-ended' | 'multiple-choice';
   difficulty?: 'easy' | 'medium' | 'hard';
+  battleMode?: 'individual' | 'team';
 }
 
 export interface CreateRoomResponse {

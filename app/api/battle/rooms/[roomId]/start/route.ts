@@ -38,7 +38,7 @@ export async function POST(
     const { data: room, error: roomErr } = await supabase
       .from('battle_rooms')
       .select(
-        'id, host_session_id, status, num_questions, category_id, language, round_time_sec, topic, question_type, capacity, difficulty'
+        'id, host_session_id, status, num_questions, category_id, language, round_time_sec, topic, question_type, capacity, difficulty, battle_mode'
       )
       .eq('id', roomId)
       .single();
@@ -122,6 +122,58 @@ export async function POST(
         retryable: true,
         statusCode: 400,
       });
+    }
+
+    // TEAM MODE: Validate even participant count and shuffle assign teams
+    if (room.battle_mode === 'team') {
+      if (participantCount % 2 !== 0) {
+        return createErrorResponse({
+          code: 'INVALID_TEAM_COUNT',
+          message: `Team battle requires an even number of players. Currently ${participantCount} participant(s) in the room.`,
+          retryable: true,
+          statusCode: 400,
+        });
+      }
+
+      // Get teams
+      const { data: teams, error: teamsErr } = await supabase
+        .from('battle_teams')
+        .select('id, team_order')
+        .eq('room_id', roomId)
+        .order('team_order', { ascending: true });
+
+      if (teamsErr || !teams || teams.length !== 2) {
+        console.error('[START_BATTLE] Teams not found for team mode room');
+        return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
+      }
+
+      const [redTeam, blueTeam] = teams;
+
+      // Shuffle participants
+      const shuffled = [...participants].sort(() => Math.random() - 0.5);
+
+      // Assign to teams (alternating)
+      const teamAssignments = shuffled.map((p, index) => ({
+        participant_id: p.id,
+        team_id: index % 2 === 0 ? redTeam.id : blueTeam.id,
+      }));
+
+      // Update participants with team assignments
+      for (const assignment of teamAssignments) {
+        const { error: assignErr } = await supabase
+          .from('battle_room_participants')
+          .update({ team_id: assignment.team_id })
+          .eq('id', assignment.participant_id);
+
+        if (assignErr) {
+          console.error('[START_BATTLE] Failed to assign team:', assignErr);
+          return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
+        }
+      }
+
+      console.log(
+        `✅ Shuffled and assigned ${participantCount} players to 2 teams`
+      );
     }
 
     // Prefer AI generation if enabled; fallback to bank
@@ -216,6 +268,18 @@ export async function POST(
       .from('battle_room_participants')
       .update({ is_ready: false })
       .eq('room_id', roomId);
+
+    // Broadcast team assignments BEFORE room_started (for team battles)
+    if (room.battle_mode === 'team') {
+      await publishBattleEvent({
+        roomId,
+        event: 'teams_assigned',
+        payload: { ready: true },
+      });
+
+      // Delay to allow animation to show and users to see their teams (3.5 seconds)
+      await new Promise(resolve => setTimeout(resolve, 3500));
+    }
 
     // Broadcast room started
     await publishBattleEvent({

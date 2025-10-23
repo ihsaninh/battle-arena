@@ -23,6 +23,7 @@ export function useBattleLanding() {
     capacity: 4,
     questionType: 'multiple-choice' as 'open-ended' | 'multiple-choice',
     difficulty: undefined as 'easy' | 'medium' | 'hard' | undefined,
+    battleMode: 'individual' as 'individual' | 'team',
   });
   const [joinPlayerName, setJoinPlayerName] = useState('');
   const [joinRoomId, setJoinRoomId] = useState('');

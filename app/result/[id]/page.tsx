@@ -23,6 +23,9 @@ export default function BattleResultPage() {
     sortedParticipants,
     winner,
     currentUserRank,
+    isTeamBattle,
+    teamScores,
+    teams,
 
     // State setters
     setShowAnswers,
@@ -54,12 +57,16 @@ export default function BattleResultPage() {
           <WinnerSpotlight
             winnerName={winner?.display_name}
             winnerScore={winner?.total_score}
+            isTeam={isTeamBattle && winner?.isTeam}
           />
 
           {/* Final Leaderboard */}
           <Leaderboard
             participants={sortedParticipants}
             currentUserId={results?.currentUser?.session_id}
+            isTeamBattle={isTeamBattle}
+            teamScores={teamScores}
+            teams={teams}
           />
 
           {/* User Answers Section */}

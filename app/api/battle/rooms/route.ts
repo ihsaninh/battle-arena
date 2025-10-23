@@ -134,12 +134,48 @@ export async function POST(req: NextRequest) {
       capacity: body.capacity ?? null,
       question_type: body.questionType ?? 'open-ended',
       difficulty: body.difficulty ?? null,
+      battle_mode: body.battleMode ?? 'individual',
       status: 'waiting',
     });
 
     if (roomErr) {
       console.error('Create room error', roomErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
+    }
+
+    // If team mode, create 2 teams (Red and Blue)
+    if (body.battleMode === 'team') {
+      const teams = [
+        {
+          id: `${roomId}-team-red`,
+          room_id: roomId,
+          team_name: 'Red Team',
+          team_color: '#EF4444',
+          team_order: 0,
+          total_score: 0,
+        },
+        {
+          id: `${roomId}-team-blue`,
+          room_id: roomId,
+          team_name: 'Blue Team',
+          team_color: '#3B82F6',
+          team_order: 1,
+          total_score: 0,
+        },
+      ];
+
+      const { error: teamsErr } = await supabase
+        .from('battle_teams')
+        .insert(teams);
+
+      if (teamsErr) {
+        console.error('Create teams error', teamsErr);
+        // Rollback room creation
+        await supabase.from('battle_rooms').delete().eq('id', roomId);
+        return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
+      }
+
+      console.log(`✅ Created 2 teams for room ${roomId}`);
     }
 
     // Update connection tracking with actual room ID

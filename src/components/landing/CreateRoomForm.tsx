@@ -22,6 +22,7 @@ interface CreateRoomFormProps {
     capacity: number;
     questionType: 'open-ended' | 'multiple-choice';
     difficulty: 'easy' | 'medium' | 'hard' | undefined;
+    battleMode: 'individual' | 'team';
   };
   loading: boolean;
   onCreateRoom: (e: React.FormEvent) => void;
@@ -35,6 +36,7 @@ interface CreateRoomFormProps {
       capacity: number;
       questionType: 'open-ended' | 'multiple-choice';
       difficulty: 'easy' | 'medium' | 'hard' | undefined;
+      battleMode: 'individual' | 'team';
     }>
   ) => void;
   onSetGameMode: (mode: 'create' | 'join' | null) => void;
@@ -114,6 +116,89 @@ export function CreateRoomForm({
                 }
               />
             </div>
+          </div>
+        </div>
+
+        {/* Battle Mode Selection */}
+        <div className="rounded-2xl border border-green-500/30 bg-green-900/20 p-5 md:p-6 backdrop-blur-xl">
+          <h3 className="text-lg md:text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <FaUsers className="w-6 h-6 text-green-400" />
+            Battle Mode
+          </h3>
+          <div className="space-y-4">
+            {/* Mode Toggle */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  onSetCreatePayload({
+                    ...createPayload,
+                    battleMode: 'individual',
+                    capacity:
+                      createPayload.battleMode === 'team'
+                        ? 4
+                        : createPayload.capacity,
+                  })
+                }
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  createPayload.battleMode === 'individual'
+                    ? 'border-green-400 bg-green-500/20 text-white'
+                    : 'border-white/10 bg-white/5 text-gray-300 hover:border-white/20'
+                }`}
+              >
+                <div className="text-2xl mb-2">🏃</div>
+                <div className="font-semibold">Individual</div>
+                <div className="text-xs mt-1 opacity-70">
+                  Every player for themselves
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onSetCreatePayload({
+                    ...createPayload,
+                    battleMode: 'team',
+                    capacity:
+                      createPayload.capacity % 2 === 0
+                        ? createPayload.capacity
+                        : 4,
+                  })
+                }
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  createPayload.battleMode === 'team'
+                    ? 'border-green-400 bg-green-500/20 text-white'
+                    : 'border-white/10 bg-white/5 text-gray-300 hover:border-white/20'
+                }`}
+              >
+                <div className="text-2xl mb-2">👥</div>
+                <div className="font-semibold">Team Battle</div>
+                <div className="text-xs mt-1 opacity-70">
+                  Red vs Blue (2 teams)
+                </div>
+              </button>
+            </div>
+
+            {/* Team Mode Info */}
+            {createPayload.battleMode === 'team' && (
+              <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
+                <div className="flex items-start gap-2 text-yellow-200">
+                  <span className="text-lg">ℹ️</span>
+                  <div className="text-sm">
+                    <div className="font-semibold mb-1">Team Battle Mode:</div>
+                    <ul className="space-y-1 opacity-90">
+                      <li>
+                        • 2 teams:{' '}
+                        <span className="text-red-400">Red Team</span> vs{' '}
+                        <span className="text-blue-400">Blue Team</span>
+                      </li>
+                      <li>• Players randomly assigned when battle starts</li>
+                      <li>• Room must be full to start</li>
+                      <li>• Team with highest total score wins</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -228,22 +313,52 @@ export function CreateRoomForm({
               <div>
                 <label className="text-xs md:text-sm font-medium text-blue-200 mb-2 flex items-center gap-2">
                   <FaUsers className="w-4 h-4" />
-                  Max Players: {createPayload.capacity}
+                  Max Players
                 </label>
-                <input
-                  type="range"
-                  min={2}
-                  max={12}
-                  value={createPayload.capacity}
-                  onChange={e =>
-                    onSetCreatePayload({
-                      ...createPayload,
-                      capacity: Number(e.target.value),
-                    })
-                  }
-                  className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer"
-                />
-                <div className="text-xs text-blue-300 mt-1">2-12 players</div>
+                {createPayload.battleMode === 'team' ? (
+                  <>
+                    <select
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all"
+                      value={createPayload.capacity}
+                      onChange={e =>
+                        onSetCreatePayload({
+                          ...createPayload,
+                          capacity: Number(e.target.value),
+                        })
+                      }
+                    >
+                      <option value={4}>4 Players (2v2)</option>
+                      <option value={6}>6 Players (3v3)</option>
+                      <option value={8}>8 Players (4v4)</option>
+                      <option value={10}>10 Players (5v5)</option>
+                      <option value={12}>12 Players (6v6)</option>
+                    </select>
+                    <div className="text-xs text-blue-300 mt-1">
+                      Even number required for team battles
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="range"
+                      min={2}
+                      max={12}
+                      value={createPayload.capacity}
+                      onChange={e =>
+                        onSetCreatePayload({
+                          ...createPayload,
+                          capacity: Number(e.target.value),
+                        })
+                      }
+                      className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <div className="flex justify-between text-xs text-blue-300 mt-1">
+                      <span>2</span>
+                      <span>{createPayload.capacity} players</span>
+                      <span>12</span>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div>

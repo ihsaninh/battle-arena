@@ -14,7 +14,7 @@ export async function GET(
     // Fetch participants and their scores
     const { data: participants, error: pErr } = await supabase
       .from('battle_room_participants')
-      .select('id, session_id, display_name, total_score')
+      .select('id, session_id, display_name, total_score, team_id')
       .eq('room_id', roomId);
     if (pErr) {
       console.error(pErr);
@@ -49,6 +49,7 @@ export async function GET(
       displayName: p.display_name,
       totalScore: p.total_score || 0,
       timeTotalMs: timeBySession.get(p.session_id) || 0,
+      teamId: p.team_id || undefined,
     }));
 
     board.sort((a, b) => {

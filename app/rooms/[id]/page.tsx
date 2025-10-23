@@ -13,6 +13,7 @@ import {
   QuickSubmitButton,
   RoomHeader,
   RoomInfo,
+  TeamRevealAnimation,
 } from '@/src/components';
 import { useBattleLogic } from '@/src/hooks/useBattleLogic';
 import { useBattleStore } from '@/src/lib/store/battle-store';
@@ -49,7 +50,8 @@ export default function BattleRoom() {
   } = useBattleLogic();
 
   // Access to selected answer for quick submit validation
-  const { selectedChoiceId, answer } = useBattleStore();
+  const { selectedChoiceId, answer, showTeamReveal, setShowTeamReveal } =
+    useBattleStore();
 
   useEffect(() => setMounted(true), []);
 
@@ -151,6 +153,20 @@ export default function BattleRoom() {
             />
           </div>
         </div>
+
+        {/* Team Reveal Animation - Show when teams are assigned */}
+        {state?.room?.battle_mode === 'team' && showTeamReveal && (
+          <TeamRevealAnimation
+            show={showTeamReveal}
+            participants={state?.participants || []}
+            teams={state?.teams || []}
+            currentSessionId={state?.currentUser?.session_id}
+            onComplete={() => {
+              console.log('[TEAM_REVEAL] Animation complete, hiding...');
+              setShowTeamReveal(false);
+            }}
+          />
+        )}
       </div>
     </div>
   );

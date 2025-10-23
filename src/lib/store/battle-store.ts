@@ -20,6 +20,8 @@ export const useBattleStore = create<BattleState>()(
       lastEventTime: Date.now(),
       isHostCache: null,
       tabId: `tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      showTeamReveal: false,
+      teamRevealShownAt: null,
       state: null,
       notifications: [],
       answeredCount: 0,
@@ -160,6 +162,7 @@ export const useBattleStore = create<BattleState>()(
             answerStatus: nextAnswerStatus,
           };
         }),
+      setShowTeamReveal: show => set({ showTeamReveal: show }),
       setTimerIds: timerIds => set(timerIds),
     }),
     {

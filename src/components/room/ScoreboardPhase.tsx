@@ -130,7 +130,15 @@ export function ScoreboardPhase({
   totalRounds,
 }: ScoreboardPhaseProps) {
   const previousScoreboard = useBattleStore(state => state.previousScoreboard);
-  const participants = useBattleStore(state => state.state?.participants ?? []);
+  const state = useBattleStore(state => state.state);
+  const isTeamBattle = state?.room?.battle_mode === 'team';
+
+  const participants = useMemo(
+    () => state?.participants ?? [],
+    [state?.participants]
+  );
+  const teams = useMemo(() => state?.teams ?? [], [state?.teams]);
+
   const participantTotalsMap = useMemo(() => {
     const map = new Map<string, number>();
     participants.forEach(participant => {
@@ -178,6 +186,36 @@ export function ScoreboardPhase({
   const subtitle = isFinalRound
     ? 'Great job! These are the final results.'
     : "Here's how everyone did this round.";
+
+  // Calculate team scores (both round and total)
+  const teamScores = useMemo(() => {
+    if (!isTeamBattle || teams.length === 0) return [];
+
+    return teams.map(team => {
+      const teamMembers = participants.filter(p => p.team_id === team.id);
+      const totalScore = teamMembers.reduce(
+        (sum, member) => sum + toNumber(member.total_score),
+        0
+      );
+
+      // Calculate round score for this team
+      const roundScore = animatedEntries
+        .filter(entry => {
+          const participant = participants.find(
+            p => p.session_id === entry.sessionId
+          );
+          return participant?.team_id === team.id;
+        })
+        .reduce((sum, entry) => sum + (entry.roundScore || 0), 0);
+
+      return {
+        ...team,
+        members: teamMembers,
+        calculatedScore: totalScore,
+        roundScore,
+      };
+    });
+  }, [isTeamBattle, teams, participants, animatedEntries]);
 
   const questionSummary = scoreboard.question ?? null;
   const answersSummary = useMemo(
@@ -231,90 +269,189 @@ export function ScoreboardPhase({
       </motion.div>
 
       <LayoutGroup>
-        <motion.div layout className="w-full max-w-3xl space-y-3">
-          {animatedEntries.map((entry, index) => {
-            const isSelf = entry.sessionId === currentSessionId;
-            const rank = index + 1;
-            const tierColor =
-              rank === 1
-                ? 'from-yellow-500/20 to-amber-500/20 border-yellow-400/30'
-                : rank === 2
-                  ? 'from-slate-500/30 to-indigo-500/20 border-slate-300/30'
-                  : rank === 3
-                    ? 'from-amber-500/15 to-orange-500/15 border-amber-400/30'
-                    : 'from-slate-800/40 to-slate-700/30 border-white/10';
+        {/* Team Scores Section - Show if team battle */}
+        {isTeamBattle && teamScores.length > 0 && (
+          <motion.div
+            layout
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-3xl mb-6"
+          >
+            <div className="text-center mb-3">
+              <h4 className="text-lg font-semibold text-white">Team Scores</h4>
+              <p className="text-xs text-white/50 mt-1">
+                Individual scores will be shown in final results
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {teamScores
+                .sort((a, b) => b.calculatedScore - a.calculatedScore)
+                .map((team, index) => {
+                  const isWinning =
+                    index === 0 &&
+                    teamScores[0].calculatedScore >
+                      (teamScores[1]?.calculatedScore ?? 0);
+                  const teamColor =
+                    team.team_order === 0
+                      ? 'border-red-400/40 bg-red-500/20'
+                      : 'border-blue-400/40 bg-blue-500/20';
+                  const textColor =
+                    team.team_order === 0 ? 'text-red-400' : 'text-blue-400';
 
-            const previousEntry = previousEntryMap.get(entry.sessionId);
+                  return (
+                    <motion.div
+                      key={team.id}
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`rounded-2xl border ${teamColor} p-6 relative overflow-hidden ${
+                        isWinning ? 'ring-2 ring-yellow-400/50' : ''
+                      }`}
+                    >
+                      {isWinning && (
+                        <motion.div
+                          initial={{ rotate: -20, scale: 0 }}
+                          animate={{ rotate: 0, scale: 1 }}
+                          className="absolute top-2 right-2"
+                        >
+                          <FaCrown className="w-6 h-6 text-yellow-400" />
+                        </motion.div>
+                      )}
+                      <div className="text-center">
+                        <div className="text-3xl mb-2">
+                          {team.team_order === 0 ? '🔴' : '🔵'}
+                        </div>
+                        <h5 className={`text-xl font-bold ${textColor} mb-2`}>
+                          {team.team_name}
+                        </h5>
 
-            const displayRoundScore =
-              scoreboard.roundNo === 1
-                ? entry.totalScore
-                : (entry.roundScore ?? 0);
-            const initialRoundScore = scoreboard.roundNo === 1 ? 0 : undefined;
+                        {/* Round Score */}
+                        <div className="mb-2">
+                          <p className="text-xs uppercase tracking-wide text-white/50">
+                            Round Score
+                          </p>
+                          <AnimatedNumber
+                            value={team.roundScore || 0}
+                            className="text-2xl font-bold text-emerald-300"
+                            format={val => `${val >= 0 ? '+' : ''}${val}`}
+                          />
+                        </div>
 
-            const initialTotalPoints =
-              previousEntry?.totalScore ??
-              Math.max(entry.totalScore - displayRoundScore, 0);
+                        {/* Total Score */}
+                        <div className="mb-2">
+                          <p className="text-xs uppercase tracking-wide text-white/50">
+                            Total Score
+                          </p>
+                          <div className="flex items-baseline justify-center gap-2">
+                            <AnimatedNumber
+                              value={team.calculatedScore}
+                              className="text-4xl font-black text-white"
+                              format={val => val.toLocaleString()}
+                            />
+                            <span className="text-sm text-white/50">pts</span>
+                          </div>
+                        </div>
 
-            return (
-              <motion.div
-                key={entry.sessionId}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  layout: { type: 'spring', stiffness: 600, damping: 45 },
-                  opacity: { duration: 0.25 },
-                  y: { duration: 0.25 },
-                }}
-                className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br ${tierColor} px-5 py-4 shadow-lg transition-transform md:px-6 md:py-5 ${
-                  isSelf ? 'ring-2 ring-cyan-400/60' : ''
-                }`}
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <span className="text-2xl font-black text-white/80 md:text-3xl">
-                      #{rank}
-                    </span>
-                    <div>
-                      <p className="text-lg font-semibold text-white md:text-xl">
-                        {entry.displayName}
-                      </p>
-                      <p className="text-sm text-white/60">
-                        {isSelf ? 'You' : 'Participant'}
-                      </p>
+                        <p className="text-xs text-white/50">
+                          {team.members.length} player
+                          {team.members.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Individual Player Scores - Hidden in team mode to keep it compact */}
+        {!isTeamBattle && (
+          <motion.div layout className="w-full max-w-3xl space-y-3">
+            {animatedEntries.map((entry, index) => {
+              const isSelf = entry.sessionId === currentSessionId;
+              const rank = index + 1;
+              const tierColor =
+                rank === 1
+                  ? 'from-yellow-500/20 to-amber-500/20 border-yellow-400/30'
+                  : rank === 2
+                    ? 'from-slate-500/30 to-indigo-500/20 border-slate-300/30'
+                    : rank === 3
+                      ? 'from-amber-500/15 to-orange-500/15 border-amber-400/30'
+                      : 'from-slate-800/40 to-slate-700/30 border-white/10';
+
+              const previousEntry = previousEntryMap.get(entry.sessionId);
+
+              const displayRoundScore =
+                scoreboard.roundNo === 1
+                  ? entry.totalScore
+                  : (entry.roundScore ?? 0);
+              const initialRoundScore =
+                scoreboard.roundNo === 1 ? 0 : undefined;
+
+              const initialTotalPoints =
+                previousEntry?.totalScore ??
+                Math.max(entry.totalScore - displayRoundScore, 0);
+
+              return (
+                <motion.div
+                  key={entry.sessionId}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    layout: { type: 'spring', stiffness: 600, damping: 45 },
+                    opacity: { duration: 0.25 },
+                    y: { duration: 0.25 },
+                  }}
+                  className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br ${tierColor} px-5 py-4 shadow-lg transition-transform md:px-6 md:py-5 ${
+                    isSelf ? 'ring-2 ring-cyan-400/60' : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <span className="text-2xl font-black text-white/80 md:text-3xl">
+                        #{rank}
+                      </span>
+                      <div>
+                        <p className="text-lg font-semibold text-white md:text-xl">
+                          {entry.displayName}
+                        </p>
+                        <p className="text-sm text-white/60">
+                          {isSelf ? 'You' : 'Participant'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="text-right">
+                        <p className="text-xs uppercase tracking-wide text-white/50">
+                          Round Score
+                        </p>
+                        <AnimatedNumber
+                          key={`${entry.sessionId}-round-score-${scoreboard.roundNo}`}
+                          value={displayRoundScore}
+                          className="text-lg font-semibold text-emerald-300 md:text-xl"
+                          format={val => `${val >= 0 ? '+' : ''}${val}`}
+                          initialValue={initialRoundScore}
+                        />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs uppercase tracking-wide text-white/50">
+                          Total Points
+                        </p>
+                        <AnimatedNumber
+                          value={entry.totalScore}
+                          className="text-2xl font-bold text-white md:text-3xl"
+                          format={val => val.toLocaleString()}
+                          initialValue={initialTotalPoints}
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <p className="text-xs uppercase tracking-wide text-white/50">
-                        Round Score
-                      </p>
-                      <AnimatedNumber
-                        key={`${entry.sessionId}-round-score-${scoreboard.roundNo}`}
-                        value={displayRoundScore}
-                        className="text-lg font-semibold text-emerald-300 md:text-xl"
-                        format={val => `${val >= 0 ? '+' : ''}${val}`}
-                        initialValue={initialRoundScore}
-                      />
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs uppercase tracking-wide text-white/50">
-                        Total Points
-                      </p>
-                      <AnimatedNumber
-                        value={entry.totalScore}
-                        className="text-2xl font-bold text-white md:text-3xl"
-                        format={val => val.toLocaleString()}
-                        initialValue={initialTotalPoints}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
 
         {questionSummary?.prompt && (
           <motion.div

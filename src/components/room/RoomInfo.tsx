@@ -5,6 +5,7 @@ import { FaGamepad } from 'react-icons/fa';
 
 import { useBattleStore } from '@/src/lib/store/battle-store';
 import { formatBattleTime } from '@/src/lib/utils/formatters';
+import { TeamScoreDisplay } from '@/src/components/battle';
 
 interface RoomInfoProps {
   roomId: string;
@@ -59,7 +60,30 @@ export function RoomInfo({ variant = 'default' }: RoomInfoProps) {
             {formatBattleTime(state.room.round_time_sec)}
           </span>
         </div>
+        {state.room.battle_mode === 'team' && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400">Battle Mode:</span>
+            <span className="text-yellow-400 font-semibold">
+              👥 Team Battle
+            </span>
+          </div>
+        )}
       </div>
+
+      {/* Team Scores - Only show if team battle and teams assigned */}
+      {state.room.battle_mode === 'team' &&
+        state.teams &&
+        state.teams.length > 0 &&
+        state.participants?.some(p => p.team_id) && (
+          <div className="mt-6 pt-6 border-t border-white/10">
+            <TeamScoreDisplay
+              teams={state.teams}
+              participants={state.participants || []}
+              currentSessionId={state.currentUser?.session_id}
+              compact={false}
+            />
+          </div>
+        )}
     </motion.div>
   );
 }

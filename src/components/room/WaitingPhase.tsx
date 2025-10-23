@@ -23,6 +23,7 @@ export function WaitingPhase({
   currentSessionId,
   isReady,
   roomCapacity,
+  battleMode,
 }: WaitingPhaseProps) {
   const capacity = roomCapacity || 2;
   const activeParticipants = participants.filter(
@@ -31,10 +32,18 @@ export function WaitingPhase({
   const nonHostActive = activeParticipants.filter(p => !p.is_host);
   const readyParticipants = nonHostActive.filter(p => p.is_ready);
   const pendingParticipants = nonHostActive.filter(p => !p.is_ready);
-  const minParticipants = Math.min(2, capacity);
-  const canStart =
-    activeParticipants.length >= minParticipants &&
-    pendingParticipants.length === 0;
+
+  // Team mode requires even number of players and minimum 4
+  const isTeamMode = battleMode === 'team';
+  const minParticipants = isTeamMode ? 4 : Math.min(2, capacity);
+  const hasEvenPlayers = activeParticipants.length % 2 === 0;
+
+  const canStart = isTeamMode
+    ? activeParticipants.length >= minParticipants &&
+      hasEvenPlayers &&
+      pendingParticipants.length === 0
+    : activeParticipants.length >= minParticipants &&
+      pendingParticipants.length === 0;
 
   const pendingNames = pendingParticipants
     .map(p => p.display_name || 'Peserta')
@@ -43,7 +52,13 @@ export function WaitingPhase({
   const statusMessage = (() => {
     if (isHost) {
       if (activeParticipants.length < minParticipants) {
+        if (isTeamMode) {
+          return `Team battle requires at least ${minParticipants} players (${activeParticipants.length}/${minParticipants}).`;
+        }
         return `Waiting for at least ${minParticipants} active players.`;
+      }
+      if (isTeamMode && !hasEvenPlayers) {
+        return `Team battle requires an even number of players. Currently ${activeParticipants.length} player(s).`;
       }
       if (pendingParticipants.length > 0) {
         return `Waiting for players to ready up: ${pendingNames}.`;
@@ -52,7 +67,14 @@ export function WaitingPhase({
     }
 
     if (activeParticipants.length < minParticipants) {
+      if (isTeamMode) {
+        return `Team battle requires at least ${minParticipants} players (${activeParticipants.length}/${minParticipants}).`;
+      }
       return `Waiting for more players to join (${activeParticipants.length}/${minParticipants}).`;
+    }
+
+    if (isTeamMode && !hasEvenPlayers) {
+      return `Waiting for one more player (need even number for teams).`;
     }
 
     return isReady
@@ -60,7 +82,9 @@ export function WaitingPhase({
       : "Tap the button below when you're ready.";
   })();
 
-  const totalPlayersLabel = `${activeParticipants.length}/${capacity} active`;
+  const totalPlayersLabel = isTeamMode
+    ? `${activeParticipants.length}/${capacity} active ${!hasEvenPlayers ? '(need even)' : ''}`
+    : `${activeParticipants.length}/${capacity} active`;
   const readySummary = nonHostActive.length
     ? `${readyParticipants.length}/${nonHostActive.length} players ready`
     : 'No other participants yet';
@@ -194,27 +218,50 @@ export function WaitingPhase({
           )}
 
           {isHost && (
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={onStartBattle}
-              disabled={startButtonDisabled}
-              className={`px-7 py-3 font-semibold rounded-xl transition-all flex items-center gap-2 ${
-                canStart
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-500/40'
-                  : 'bg-gray-700/60 text-gray-400 cursor-not-allowed border border-gray-600/50'
-              }`}
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <FaPlay className="w-5 h-5" />
+            <>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={onStartBattle}
+                disabled={startButtonDisabled}
+                className={`px-7 py-3 font-semibold rounded-xl transition-all flex items-center gap-2 ${
+                  canStart
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-500/40'
+                    : 'bg-gray-700/60 text-gray-400 cursor-not-allowed border border-gray-600/50'
+                }`}
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <FaPlay className="w-5 h-5" />
+                )}
+                {loading
+                  ? 'Starting...'
+                  : canStart
+                    ? 'Start Battle'
+                    : 'Waiting for Players'}
+              </motion.button>
+
+              {/* Team mode requirements hint */}
+              {isTeamMode && !canStart && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center text-sm text-yellow-300/80 bg-yellow-500/10 border border-yellow-500/30 rounded-lg px-4 py-2"
+                >
+                  {activeParticipants.length < minParticipants && (
+                    <>
+                      ⚠️ Team mode needs{' '}
+                      {minParticipants - activeParticipants.length} more
+                      player(s)
+                    </>
+                  )}
+                  {activeParticipants.length >= minParticipants &&
+                    !hasEvenPlayers && (
+                      <>⚠️ Need 1 more player for even teams</>
+                    )}
+                </motion.div>
               )}
-              {loading
-                ? 'Starting...'
-                : canStart
-                  ? 'Start Battle'
-                  : 'Waiting for Players'}
-            </motion.button>
+            </>
           )}
         </div>
       </div>

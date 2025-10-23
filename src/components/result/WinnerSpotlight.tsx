@@ -6,11 +6,13 @@ import { FaCrown } from 'react-icons/fa';
 interface WinnerSpotlightProps {
   winnerName?: string;
   winnerScore?: number;
+  isTeam?: boolean;
 }
 
 export function WinnerSpotlight({
   winnerName,
   winnerScore,
+  isTeam,
 }: WinnerSpotlightProps) {
   if (!winnerName) return null;
 
@@ -24,7 +26,8 @@ export function WinnerSpotlight({
       <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-2xl p-6">
         <FaCrown className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
         <h3 className="text-2xl font-bold text-white mb-2">
-          🎉 Champion: {winnerName}
+          🎉 {isTeam ? '🏆 Winning Team: ' : 'Champion: '}
+          {winnerName}
         </h3>
         <p className="text-yellow-300 text-lg font-semibold">
           {winnerScore} points

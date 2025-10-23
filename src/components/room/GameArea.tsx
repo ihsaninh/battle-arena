@@ -6,6 +6,7 @@ import { FaClock, FaUsers } from 'react-icons/fa';
 import { useBattleStore } from '@/src/lib/store/battle-store';
 import { formatBattleTime } from '@/src/lib/utils/formatters';
 import type { GameAreaProps } from '@/src/types/battle';
+import { TeamScoreDisplay } from '@/src/components/battle';
 
 import { AnsweringPhase } from './AnsweringPhase';
 import { FinishedPhase } from './FinishedPhase';
@@ -160,6 +161,24 @@ export function GameArea({
             </div>
           )}
         </div>
+
+        {/* Team Score Display - Compact version for during gameplay */}
+        {state?.room?.battle_mode === 'team' &&
+          state?.teams &&
+          state.teams.length > 0 &&
+          state.participants?.some(p => p.team_id) &&
+          (gamePhase === 'playing' ||
+            gamePhase === 'answering' ||
+            gamePhase === 'scoreboard') && (
+            <div className="mt-4">
+              <TeamScoreDisplay
+                teams={state.teams}
+                participants={state.participants || []}
+                currentSessionId={currentSessionId}
+                compact={true}
+              />
+            </div>
+          )}
       </div>
 
       {/* Game Content */}
@@ -175,6 +194,7 @@ export function GameArea({
             currentSessionId={currentSessionId}
             isReady={isReady}
             roomCapacity={roomCapacity}
+            battleMode={state?.room?.battle_mode}
           />
         )}
         {showScoreboard && scoreboard && (
