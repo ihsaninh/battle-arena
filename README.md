@@ -4,13 +4,50 @@ Real-time multiplayer quiz battle arena where players can challenge each other i
 
 ## ✨ Features
 
+### Core Features
+
 - **Real-time Multiplayer**: WebSocket-based battle system with live updates
-- **Game Modes**: Multiple choice and open-ended questions
-- **AI-Powered**: Dynamic question generation using Google AI
+- **AI-Powered Questions**: Dynamic question generation using Google Gemini AI
+- **Multiple Question Types**: Support for multiple-choice and open-ended questions
+- **Custom Topics**: Create battles on any topic with configurable difficulty
 - **Progressive Web App**: Installable with offline support
 - **Responsive Design**: Mobile-first with stunning animations
 - **Session Management**: Secure player authentication & sessions
-- **Live Leaderboards**: Real-time scoring and rankings
+
+### Battle Modes
+
+#### Individual Mode
+
+- Classic 1v1 or free-for-all battles
+- Individual scoring and rankings
+- Minimum 2 players to start
+
+#### Team Mode (New!)
+
+- **Automatic Team Assignment**: Fair team distribution with shuffle algorithm
+- **Team Reveal Animation**: 3.5-second cinematic reveal showing team compositions with visual highlights
+- **Real-time Team Scores**: Aggregated team scores updated live during battles
+- **Compact Scoreboard**: Team-focused scoreboard hiding individual scores during rounds
+- **Team-based Final Results**:
+  - Winning team celebration with crown indicator
+  - Expandable team cards showing individual member contributions
+  - Champion spotlight showing winning team name
+- **Smart Validation**:
+  - Requires minimum 4 players (2v2)
+  - Enforces even number of players for balanced teams
+  - Clear UI indicators for team requirements
+- **Team Identification**: Visual player highlighting (glowing cards) in team reveal so users know which team they're on
+
+### Real-time Features
+
+- **Live Score Updates**: Instant score synchronization across all players
+- **Answer Status Tracking**: See how many players have answered in real-time
+- **Connection Monitoring**: Automatic reconnection and presence tracking
+- **Scoreboard Phase**: Round-by-round results with:
+  - Animated score transitions
+  - Question recap with correct answers
+  - Player answer highlights (correct/incorrect)
+  - Automatic progression or host-controlled advancement
 
 ## 🚀 Quick Start
 
@@ -77,11 +114,12 @@ Real-time multiplayer quiz battle arena where players can challenge each other i
 
 The project enforces code quality through:
 
-- **Pre-commit hooks**: Automatic linting and formatting checks
-- **ESLint**: Code linting with Next.js configuration
-- **Prettier**: Consistent code formatting
+- **Pre-commit hooks**: Automatic linting and formatting with `lint-staged`
+- **ESLint**: Code linting with Next.js configuration (auto-fix on commit)
+- **Prettier**: Consistent code formatting (auto-format on commit)
 - **Commitlint**: Conventional commit message validation
 - **TypeScript**: Type safety throughout the application
+- **Husky**: Git hooks management for automated quality checks
 
 ### Project Structure
 
@@ -126,11 +164,17 @@ BATTLE_AUTO_ADVANCE=true
 
 ### Battle Features
 
+- **Battle Modes**: Individual (free-for-all) and Team (2v2, 3v3, etc.)
 - **Question Types**: Multiple choice, open-ended
 - **Difficulty Levels**: Easy, Medium, Hard
-- **Languages**: Multi-language support (template)
-- **Time Limits**: Configurable round times
+- **Languages**: Multi-language support (English, Bahasa Indonesia)
+- **Time Limits**: Configurable round times (15-120 seconds)
 - **Room Capacity**: 2-100 players per room
+- **Team Features**:
+  - Automatic balanced team assignment
+  - Team score aggregation
+  - Team-based victory conditions
+  - Visual team identification during battle
 
 ## 🔒 Security
 
@@ -141,12 +185,17 @@ BATTLE_AUTO_ADVANCE=true
 - **Dependency Scanning**: Automated vulnerability checks
 - **Environment Protection**: Secure handling of sensitive data
 
-## 🌐 PWA Features
+## 🎨 UI/UX Features
 
-- **Installable**: Add to home screen on mobile devices
-- **Offline Support**: Service worker for offline functionality
-- **Responsive Design**: Optimized for all screen sizes
-- **App-like Experience**: Standalone mode with custom icons
+- **Responsive Design**: Optimized for all screen sizes (mobile-first)
+- **Smooth Animations**: Framer Motion powered transitions and effects
+- **Real-time Feedback**: Instant visual feedback for all actions
+- **Accessibility**: Keyboard navigation and screen reader support
+- **Visual Polish**:
+  - Glassmorphism effects
+  - Gradient backgrounds
+  - Animated components
+  - Loading states and skeletons
 
 ## 📦 Technology Stack
 
