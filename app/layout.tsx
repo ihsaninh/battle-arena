@@ -3,7 +3,6 @@ import { Outfit } from 'next/font/google';
 import './globals.css';
 
 import Providers from './providers';
-import { UnregisterServiceWorker } from './UnregisterServiceWorker';
 
 const outfit = Outfit({
   variable: '--font-outfit',
@@ -35,7 +34,6 @@ export default function RootLayout({
         className={`${outfit.variable} antialiased`}
         style={{ fontFamily: 'var(--font-outfit)' }}
       >
-        <UnregisterServiceWorker />
         <Providers>{children}</Providers>
       </body>
     </html>
