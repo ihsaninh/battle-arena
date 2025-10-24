@@ -4,6 +4,8 @@ import './globals.css';
 
 import Providers from './providers';
 import { ClientServiceWorkerCleanup } from './ClientServiceWorkerCleanup';
+import { NavigationProgress } from '@/src/components/navigation/NavigationProgress';
+import { SkipToContent } from '@/src/components/layout/SkipToContent';
 
 const outfit = Outfit({
   variable: '--font-outfit',
@@ -35,8 +37,12 @@ export default function RootLayout({
         className={`${outfit.variable} antialiased`}
         style={{ fontFamily: 'var(--font-outfit)' }}
       >
+        <SkipToContent />
+        <NavigationProgress />
         <ClientServiceWorkerCleanup />
-        <Providers>{children}</Providers>
+        <Providers>
+          <main id="main-content">{children}</main>
+        </Providers>
       </body>
     </html>
   );

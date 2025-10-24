@@ -70,9 +70,9 @@ export function RoomCreatedSuccess({
           <FaTrophy className="w-8 h-8 md:w-10 md:h-10 text-green-400" />
         </motion.div>
 
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+        <p className="text-2xl md:text-3xl font-bold text-white mb-2">
           Room ready to share!
-        </h2>
+        </p>
 
         <p className="text-green-200 text-sm md:text-base mb-5 md:mb-6">
           Share this code with friends to invite them instantly.

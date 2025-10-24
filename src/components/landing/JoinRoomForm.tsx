@@ -287,6 +287,36 @@ export function JoinRoomForm({
               </motion.div>
             )}
 
+            {checkError && !checkingRoom && (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="flex flex-col items-center justify-center py-8 text-center"
+              >
+                <div className="w-16 h-16 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center mb-3">
+                  <FaTimesCircle className="w-7 h-7 text-red-400" />
+                </div>
+                <p className="text-red-300 font-semibold text-sm mb-1">
+                  Room Not Found
+                </p>
+                <p className="text-red-200/70 text-xs max-w-[250px]">
+                  {checkError}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCheckError(null);
+                    onSetJoinRoomId('');
+                  }}
+                  className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 text-xs font-medium rounded-lg transition-colors"
+                >
+                  Try Again
+                </button>
+              </motion.div>
+            )}
+
             {checkingRoom && (
               <motion.div
                 key="loading"

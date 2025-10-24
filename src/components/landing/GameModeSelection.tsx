@@ -74,9 +74,9 @@ export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
                 <FaCrown className="w-8 h-8 text-purple-300" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-white mb-1">
+                <h2 className="text-2xl font-bold text-white mb-1">
                   Host Battle
-                </h3>
+                </h2>
                 <p className="text-purple-200">
                   Create and lead your own arena
                 </p>
@@ -121,9 +121,9 @@ export function GameModeSelection({ onSetGameMode }: GameModeSelectionProps) {
                 <FaGamepad className="w-8 h-8 text-cyan-300" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-white mb-1">
+                <h2 className="text-2xl font-bold text-white mb-1">
                   Join Battle
-                </h3>
+                </h2>
                 <p className="text-cyan-200">Enter an existing arena</p>
               </div>
             </div>
