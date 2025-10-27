@@ -373,14 +373,18 @@ describe('Validation Schemas', () => {
     test('should return error with invalid data', () => {
       const result = validateRequest(roundNoSchema, -1);
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Validation failed');
+      if (!result.success) {
+        expect(result.error).toBe('Validation failed');
+      }
     });
 
     test('should include error details', () => {
       const result = validateRequest(roundNoSchema, 'not a number');
       expect(result.success).toBe(false);
-      expect(result.details).toBeDefined();
-      expect((result.details || []).length).toBeGreaterThan(0);
+      if (!result.success) {
+        expect(result.details).toBeDefined();
+        expect((result.details || []).length).toBeGreaterThan(0);
+      }
     });
 
     test('should handle complex schema validation', () => {
