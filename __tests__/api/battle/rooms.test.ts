@@ -3,16 +3,16 @@
  *
  * Run these tests with:
  *   1. Start dev server: bun run dev (in terminal 1)
- *   2. Run tests: bun test __tests__/api/rooms.test.ts (in terminal 2)
+ *   2. Run tests: bun test __tests__/api/battle/rooms.test.ts (in terminal 2)
  */
 
 import { describe, test, expect, beforeAll, afterEach } from 'bun:test';
-import { getTestServerUrl, isServerRunning } from '../helpers/test-server';
+import { getTestServerUrl, isServerRunning } from '../../helpers/test-server';
 import {
   cleanupTestSession,
   cleanupTestRoom,
   createTestSession,
-} from '../helpers/test-db';
+} from '../../helpers/test-db';
 
 const BASE_URL = getTestServerUrl();
 const BATTLE_SESSION_COOKIE = 'battle_session_id';

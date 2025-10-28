@@ -3,12 +3,12 @@
  *
  * Run these tests with:
  *   1. Start dev server: bun run dev (in terminal 1)
- *   2. Run tests: bun test __tests__/api/sessions.test.ts (in terminal 2)
+ *   2. Run tests: bun test __tests__/api/battle/sessions.test.ts (in terminal 2)
  */
 
 import { describe, test, expect, beforeAll, afterEach } from 'bun:test';
-import { getTestServerUrl, isServerRunning } from '../helpers/test-server';
-import { cleanupTestSession, getSession } from '../helpers/test-db';
+import { getTestServerUrl, isServerRunning } from '../../helpers/test-server';
+import { cleanupTestSession, getSession } from '../../helpers/test-db';
 
 const BASE_URL = getTestServerUrl();
 
