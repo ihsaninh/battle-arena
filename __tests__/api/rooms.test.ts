@@ -63,13 +63,12 @@ describe('POST /api/battle/rooms', () => {
     createdSessionIds = [];
   });
 
-  test.skip('should create room with minimal required fields', async () => {
-    // TODO: Debug 500 error when creating room via API
-    // Session is created but room creation fails - needs investigation
+  test('should create room with minimal required fields', async () => {
     const session = await createTestSession('Room Host');
     createdSessionIds.push(session.id);
 
     const roomData = {
+      hostDisplayName: 'Room Host',
       language: 'en',
       numQuestions: 5,
       roundTimeSec: 30,
@@ -88,11 +87,12 @@ describe('POST /api/battle/rooms', () => {
     createdRoomIds.push(data.roomId);
   });
 
-  test.skip('should create room with all optional fields', async () => {
+  test('should create room with all optional fields', async () => {
     const session = await createTestSession('Host Player');
     createdSessionIds.push(session.id);
 
     const roomData = {
+      hostDisplayName: 'Host Player',
       topic: 'Geography',
       categoryId: 'cat-123',
       language: 'id',
@@ -114,11 +114,12 @@ describe('POST /api/battle/rooms', () => {
     createdRoomIds.push(data.roomId);
   });
 
-  test.skip('should create teams when battleMode is team', async () => {
+  test('should create teams when battleMode is team', async () => {
     const session = await createTestSession('Team Host');
     createdSessionIds.push(session.id);
 
     const roomData = {
+      hostDisplayName: 'Team Host',
       language: 'en',
       numQuestions: 5,
       roundTimeSec: 30,
@@ -209,11 +210,12 @@ describe('POST /api/battle/rooms', () => {
     expect(response.status).toBeGreaterThanOrEqual(400);
   });
 
-  test.skip('should generate unique room codes', async () => {
+  test('should generate unique room codes', async () => {
     const session = await createTestSession('Host');
     createdSessionIds.push(session.id);
 
     const roomData = {
+      hostDisplayName: 'Host',
       language: 'en',
       numQuestions: 5,
       roundTimeSec: 30,
