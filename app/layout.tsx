@@ -6,6 +6,7 @@ import Providers from './providers';
 import { ClientServiceWorkerCleanup } from './ClientServiceWorkerCleanup';
 import { NavigationProgress } from '@/src/components/navigation/NavigationProgress';
 import { SkipToContent } from '@/src/components/layout/SkipToContent';
+import { FloatingHowToPlayButton, FloatingAboutButton } from '@/src/components';
 
 const outfit = Outfit({
   variable: '--font-outfit',
@@ -42,6 +43,8 @@ export default function RootLayout({
         <ClientServiceWorkerCleanup />
         <Providers>
           <main id="main-content">{children}</main>
+          <FloatingHowToPlayButton />
+          <FloatingAboutButton />
         </Providers>
       </body>
     </html>

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
-import { FloatingHowToPlayButton, GameModeSelection } from '@/src/components';
+import { GameModeSelection } from '@/src/components';
 
 export function LandingClient() {
   const router = useRouter();
@@ -19,7 +19,6 @@ export function LandingClient() {
   return (
     <>
       <GameModeSelection onSetGameMode={handleSetGameMode} />
-      <FloatingHowToPlayButton />
     </>
   );
 }
