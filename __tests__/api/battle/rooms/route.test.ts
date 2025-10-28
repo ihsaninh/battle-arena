@@ -3,21 +3,23 @@
  *
  * Run these tests with:
  *   1. Start dev server: bun run dev (in terminal 1)
- *   2. Run tests: bun test __tests__/api/battle/rooms.test.ts (in terminal 2)
+ *   2. Run tests: bun test __tests__/api/battle/rooms/ (in terminal 2)
  */
 
 import { describe, test, expect, beforeAll, afterEach } from 'bun:test';
-import { getTestServerUrl, isServerRunning } from '../../helpers/test-server';
+import {
+  getTestServerUrl,
+  isServerRunning,
+} from '../../../helpers/test-server';
 import {
   cleanupTestSession,
   cleanupTestRoom,
   createTestSession,
-} from '../../helpers/test-db';
+} from '../../../helpers/test-db';
 
 const BASE_URL = getTestServerUrl();
 const BATTLE_SESSION_COOKIE = 'battle_session_id';
 
-// Helper to POST room creation with session ID from DB
 async function createRoomViaAPI(roomData: any, sessionId: string) {
   const response = await fetch(`${BASE_URL}/api/battle/rooms`, {
     method: 'POST',
@@ -34,7 +36,6 @@ describe('POST /api/battle/rooms', () => {
   let createdSessionIds: string[] = [];
   let createdRoomIds: string[] = [];
 
-  // Check server is running before tests
   beforeAll(async () => {
     const running = await isServerRunning();
     if (!running) {
@@ -42,21 +43,18 @@ describe('POST /api/battle/rooms', () => {
       console.error('📍 Expected server at:', BASE_URL);
       console.error('\n🚀 To run these tests:');
       console.error('   Terminal 1: bun run dev');
-      console.error('   Terminal 2: bun test __tests__/api/rooms.test.ts\n');
+      console.error('   Terminal 2: bun test __tests__/api/battle/rooms/\n');
       throw new Error(`Test server not running at ${BASE_URL}`);
     }
     console.log('✅ Test server is running at', BASE_URL);
   });
 
-  // Cleanup after each test
   afterEach(async () => {
-    // Cleanup rooms first (due to foreign keys)
     for (const roomId of createdRoomIds) {
       await cleanupTestRoom(roomId);
     }
     createdRoomIds = [];
 
-    // Then cleanup sessions
     for (const sessionId of createdSessionIds) {
       await cleanupTestSession(sessionId);
     }
@@ -170,7 +168,6 @@ describe('POST /api/battle/rooms', () => {
     const roomData = {
       language: 'en',
       numQuestions: 5,
-      // Missing roundTimeSec
     };
 
     const response = await createRoomViaAPI(roomData, session.id);
@@ -204,7 +201,6 @@ describe('POST /api/battle/rooms', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(roomData),
-      // No credentials/cookie
     });
 
     expect(response.status).toBeGreaterThanOrEqual(400);

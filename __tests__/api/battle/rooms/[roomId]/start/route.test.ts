@@ -3,22 +3,25 @@
  *
  * Run these tests with:
  *   1. Start dev server: bun run dev (in terminal 1)
- *   2. Run tests: bun test __tests__/api/battle/start-battle.test.ts (in terminal 2)
+ *   2. Run tests: bun test __tests__/api/battle/rooms/[roomId]/start/ (in terminal 2)
  */
 
 import { describe, test, expect, beforeAll, afterEach } from 'bun:test';
-import { getTestServerUrl, isServerRunning } from '../../helpers/test-server';
+import {
+  getTestServerUrl,
+  isServerRunning,
+} from '../../../../../helpers/test-server';
 import {
   cleanupTestSession,
   cleanupTestRoom,
   createTestSession,
-} from '../../helpers/test-db';
+} from '../../../../../helpers/test-db';
 import {
   createRoomViaAPI,
   joinRoomViaAPI,
   setReadyViaAPI,
   getBasicHeaders,
-} from '../../helpers/api-helpers';
+} from '../../../../../helpers/api-helpers';
 
 const BASE_URL = getTestServerUrl();
 
@@ -48,7 +51,7 @@ describe('POST /api/battle/rooms/[roomId]/start', () => {
       console.error('\n🚀 To run these tests:');
       console.error('   Terminal 1: bun run dev');
       console.error(
-        '   Terminal 2: bun test __tests__/api/battle/start-battle.test.ts\n'
+        '   Terminal 2: bun test __tests__/api/battle/rooms/[roomId]/start/\n'
       );
       throw new Error(`Test server not running at ${BASE_URL}`);
     }

@@ -1,28 +1,29 @@
 /**
- * Integration Tests for POST /api/battle/rooms/[roomId]/ready
+ * Integration Tests for POST /api/battle/rooms/[roomId]/join
  *
  * Run these tests with:
  *   1. Start dev server: bun run dev (in terminal 1)
- *   2. Run tests: bun test __tests__/api/battle/ready.test.ts (in terminal 2)
+ *   2. Run tests: bun test __tests__/api/battle/rooms/[roomId]/join/ (in terminal 2)
  */
 
 import { describe, test, expect, beforeAll, afterEach } from 'bun:test';
-import { getTestServerUrl, isServerRunning } from '../../helpers/test-server';
+import {
+  getTestServerUrl,
+  isServerRunning,
+} from '../../../../../helpers/test-server';
 import {
   cleanupTestSession,
   cleanupTestRoom,
   createTestSession,
-} from '../../helpers/test-db';
+} from '../../../../../helpers/test-db';
 import {
   createRoomViaAPI,
   joinRoomViaAPI,
-  setReadyViaAPI,
-  getBasicHeaders,
-} from '../../helpers/api-helpers';
+} from '../../../../../helpers/api-helpers';
 
 const BASE_URL = getTestServerUrl();
 
-describe('POST /api/battle/rooms/[roomId]/ready', () => {
+describe('POST /api/battle/rooms/[roomId]/join', () => {
   let createdSessionIds: string[] = [];
   let createdRoomIds: string[] = [];
 
@@ -34,7 +35,7 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
       console.error('\n🚀 To run these tests:');
       console.error('   Terminal 1: bun run dev');
       console.error(
-        '   Terminal 2: bun test __tests__/api/battle/ready.test.ts\n'
+        '   Terminal 2: bun test __tests__/api/battle/rooms/[roomId]/join/\n'
       );
       throw new Error(`Test server not running at ${BASE_URL}`);
     }
@@ -53,7 +54,7 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
     createdSessionIds = [];
   });
 
-  test('should set player to ready', async () => {
+  test('should join room by roomId', async () => {
     const hostSession = await createTestSession('Host');
     createdSessionIds.push(hostSession.id);
 
@@ -72,22 +73,20 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
     const playerSession = await createTestSession('Player 1');
     createdSessionIds.push(playerSession.id);
 
-    await joinRoomViaAPI(BASE_URL, roomData.roomId, playerSession.id);
-
-    const response = await setReadyViaAPI(
+    const response = await joinRoomViaAPI(
       BASE_URL,
       roomData.roomId,
-      playerSession.id,
-      true
+      playerSession.id
     );
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data).toHaveProperty('ok');
-    expect(data.ok).toBe(true);
+    expect(data).toHaveProperty('participantId');
+    expect(data).toHaveProperty('roomId');
+    expect(data.roomId).toBe(roomData.roomId);
   });
 
-  test('should set player to not ready', async () => {
+  test('should join room by roomCode', async () => {
     const hostSession = await createTestSession('Host');
     createdSessionIds.push(hostSession.id);
 
@@ -106,25 +105,19 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
     const playerSession = await createTestSession('Player 1');
     createdSessionIds.push(playerSession.id);
 
-    await joinRoomViaAPI(BASE_URL, roomData.roomId, playerSession.id);
-
-    // First set to ready
-    await setReadyViaAPI(BASE_URL, roomData.roomId, playerSession.id, true);
-
-    // Then set to not ready
-    const response = await setReadyViaAPI(
+    const response = await joinRoomViaAPI(
       BASE_URL,
-      roomData.roomId,
-      playerSession.id,
-      false
+      roomData.roomCode,
+      playerSession.id
     );
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.ok).toBe(true);
+    expect(data).toHaveProperty('participantId');
+    expect(data.roomId).toBe(roomData.roomId);
   });
 
-  test('should handle idempotent ready (same state twice)', async () => {
+  test('should join room with custom display name override', async () => {
     const hostSession = await createTestSession('Host');
     createdSessionIds.push(hostSession.id);
 
@@ -143,62 +136,71 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
     const playerSession = await createTestSession('Player 1');
     createdSessionIds.push(playerSession.id);
 
-    await joinRoomViaAPI(BASE_URL, roomData.roomId, playerSession.id);
-
-    // First ready
-    const response1 = await setReadyViaAPI(
+    const response = await joinRoomViaAPI(
       BASE_URL,
       roomData.roomId,
       playerSession.id,
-      true
+      {
+        displayName: 'Custom Name',
+      }
+    );
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toHaveProperty('participantId');
+  });
+
+  test('should detect host when host rejoins', async () => {
+    const hostSession = await createTestSession('Host');
+    createdSessionIds.push(hostSession.id);
+
+    const roomData = await createRoomViaAPI(
+      BASE_URL,
+      {
+        hostDisplayName: 'Host',
+        language: 'en',
+        numQuestions: 5,
+        roundTimeSec: 30,
+      },
+      hostSession.id
+    );
+    createdRoomIds.push(roomData.roomId);
+
+    const response1 = await joinRoomViaAPI(
+      BASE_URL,
+      roomData.roomId,
+      hostSession.id
     );
     const data1 = await response1.json();
 
-    // Second ready (same state)
-    const response2 = await setReadyViaAPI(
+    expect(response1.status).toBe(200);
+    expect(data1).toHaveProperty('participantId');
+
+    const response2 = await joinRoomViaAPI(
       BASE_URL,
       roomData.roomId,
-      playerSession.id,
-      true
+      hostSession.id
     );
     const data2 = await response2.json();
 
-    expect(response1.status).toBe(200);
     expect(response2.status).toBe(200);
-    expect(data2.alreadySet).toBe(true);
+    expect(data2.participantId).toBe(data1.participantId);
   });
 
-  test('should reject ready if not participant', async () => {
-    const hostSession = await createTestSession('Host');
-    createdSessionIds.push(hostSession.id);
+  test('should reject join if room not found', async () => {
+    const playerSession = await createTestSession('Player 1');
+    createdSessionIds.push(playerSession.id);
 
-    const roomData = await createRoomViaAPI(
+    const response = await joinRoomViaAPI(
       BASE_URL,
-      {
-        hostDisplayName: 'Host',
-        language: 'en',
-        numQuestions: 5,
-        roundTimeSec: 30,
-      },
-      hostSession.id
-    );
-    createdRoomIds.push(roomData.roomId);
-
-    // Non-participant tries to set ready
-    const otherSession = await createTestSession('Other Player');
-    createdSessionIds.push(otherSession.id);
-
-    const response = await setReadyViaAPI(
-      BASE_URL,
-      roomData.roomId,
-      otherSession.id,
-      true
+      'non-existent-room',
+      playerSession.id
     );
 
     expect(response.status).toBeGreaterThanOrEqual(400);
   });
 
-  test('should reject ready if no session cookie', async () => {
+  test('should reject join if no session cookie', async () => {
     const hostSession = await createTestSession('Host');
     createdSessionIds.push(hostSession.id);
 
@@ -214,20 +216,55 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
     );
     createdRoomIds.push(roomData.roomId);
 
-    // Try to set ready without session cookie
     const response = await fetch(
-      `${BASE_URL}/api/battle/rooms/${roomData.roomId}/ready`,
+      `${BASE_URL}/api/battle/rooms/${roomData.roomId}/join`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ready: true }),
+        body: JSON.stringify({}),
       }
     );
 
     expect(response.status).toBeGreaterThanOrEqual(400);
   });
 
-  test('should handle invalid JSON gracefully', async () => {
+  test('should reject join if room capacity is full', async () => {
+    const hostSession = await createTestSession('Host');
+    createdSessionIds.push(hostSession.id);
+
+    const roomData = await createRoomViaAPI(
+      BASE_URL,
+      {
+        hostDisplayName: 'Host',
+        language: 'en',
+        numQuestions: 5,
+        roundTimeSec: 30,
+        capacity: 2,
+      },
+      hostSession.id
+    );
+    createdRoomIds.push(roomData.roomId);
+
+    const hostJoin = await joinRoomViaAPI(
+      BASE_URL,
+      roomData.roomId,
+      hostSession.id
+    );
+    expect(hostJoin.status).toBe(200);
+
+    const player1 = await createTestSession('Player 1');
+    createdSessionIds.push(player1.id);
+    const join1 = await joinRoomViaAPI(BASE_URL, roomData.roomId, player1.id);
+    expect(join1.status).toBe(200);
+
+    const player2 = await createTestSession('Player 2');
+    createdSessionIds.push(player2.id);
+    const join2 = await joinRoomViaAPI(BASE_URL, roomData.roomId, player2.id);
+
+    expect(join2.status).toBeGreaterThanOrEqual(400);
+  });
+
+  test('should reject join if room status is not waiting', async () => {
     const hostSession = await createTestSession('Host');
     createdSessionIds.push(hostSession.id);
 
@@ -246,22 +283,15 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
     const playerSession = await createTestSession('Player 1');
     createdSessionIds.push(playerSession.id);
 
-    await joinRoomViaAPI(BASE_URL, roomData.roomId, playerSession.id);
-
-    // Send invalid JSON
-    const response = await fetch(
-      `${BASE_URL}/api/battle/rooms/${roomData.roomId}/ready`,
-      {
-        method: 'POST',
-        headers: getBasicHeaders(playerSession.id),
-        body: 'invalid json{',
-      }
+    const response = await joinRoomViaAPI(
+      BASE_URL,
+      roomData.roomId,
+      playerSession.id
     );
-
-    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect(response.status).toBe(200);
   });
 
-  test('should toggle ready status multiple times', async () => {
+  test('should handle idempotent join (rejoin same room)', async () => {
     const hostSession = await createTestSession('Host');
     createdSessionIds.push(hostSession.id);
 
@@ -280,22 +310,27 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
     const playerSession = await createTestSession('Player 1');
     createdSessionIds.push(playerSession.id);
 
-    await joinRoomViaAPI(BASE_URL, roomData.roomId, playerSession.id);
+    const response1 = await joinRoomViaAPI(
+      BASE_URL,
+      roomData.roomId,
+      playerSession.id
+    );
+    const data1 = await response1.json();
 
-    // Toggle multiple times
-    for (let i = 0; i < 3; i++) {
-      const ready = i % 2 === 0;
-      const response = await setReadyViaAPI(
-        BASE_URL,
-        roomData.roomId,
-        playerSession.id,
-        ready
-      );
-      expect(response.status).toBe(200);
-    }
+    expect(response1.status).toBe(200);
+
+    const response2 = await joinRoomViaAPI(
+      BASE_URL,
+      roomData.roomId,
+      playerSession.id
+    );
+    const data2 = await response2.json();
+
+    expect(response2.status).toBe(200);
+    expect(data2.participantId).toBe(data1.participantId);
   });
 
-  test('should allow multiple players to set ready independently', async () => {
+  test('should handle multiple players joining same room', async () => {
     const hostSession = await createTestSession('Host');
     createdSessionIds.push(hostSession.id);
 
@@ -312,7 +347,6 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
     );
     createdRoomIds.push(roomData.roomId);
 
-    // Create 3 players
     const players = await Promise.all([
       createTestSession('Player 1'),
       createTestSession('Player 2'),
@@ -321,91 +355,16 @@ describe('POST /api/battle/rooms/[roomId]/ready', () => {
 
     players.forEach(p => createdSessionIds.push(p.id));
 
-    // All join
-    for (const player of players) {
-      await joinRoomViaAPI(BASE_URL, roomData.roomId, player.id);
-    }
-
-    // Each sets ready status independently
-    const readyStates = [true, false, true];
-    const responses = await Promise.all(
-      players.map((p, i) =>
-        setReadyViaAPI(BASE_URL, roomData.roomId, p.id, readyStates[i])
-      )
+    const joinResponses = await Promise.all(
+      players.map(p => joinRoomViaAPI(BASE_URL, roomData.roomId, p.id))
     );
 
-    responses.forEach(r => expect(r.status).toBe(200));
-  });
+    const joinData = await Promise.all(joinResponses.map(r => r.json()));
 
-  test('should allow host to set ready', async () => {
-    const hostSession = await createTestSession('Host');
-    createdSessionIds.push(hostSession.id);
+    joinResponses.forEach(r => expect(r.status).toBe(200));
 
-    const roomData = await createRoomViaAPI(
-      BASE_URL,
-      {
-        hostDisplayName: 'Host',
-        language: 'en',
-        numQuestions: 5,
-        roundTimeSec: 30,
-      },
-      hostSession.id
-    );
-    createdRoomIds.push(roomData.roomId);
-
-    // Host joins room
-    await joinRoomViaAPI(BASE_URL, roomData.roomId, hostSession.id);
-
-    // Host sets ready
-    const response = await setReadyViaAPI(
-      BASE_URL,
-      roomData.roomId,
-      hostSession.id,
-      true
-    );
-    const data = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(data.ok).toBe(true);
-  });
-
-  test('should accept ready as boolean true/false', async () => {
-    const hostSession = await createTestSession('Host');
-    createdSessionIds.push(hostSession.id);
-
-    const roomData = await createRoomViaAPI(
-      BASE_URL,
-      {
-        hostDisplayName: 'Host',
-        language: 'en',
-        numQuestions: 5,
-        roundTimeSec: 30,
-      },
-      hostSession.id
-    );
-    createdRoomIds.push(roomData.roomId);
-
-    const playerSession = await createTestSession('Player 1');
-    createdSessionIds.push(playerSession.id);
-
-    await joinRoomViaAPI(BASE_URL, roomData.roomId, playerSession.id);
-
-    // Test with true
-    const response1 = await setReadyViaAPI(
-      BASE_URL,
-      roomData.roomId,
-      playerSession.id,
-      true
-    );
-    expect(response1.status).toBe(200);
-
-    // Test with false
-    const response2 = await setReadyViaAPI(
-      BASE_URL,
-      roomData.roomId,
-      playerSession.id,
-      false
-    );
-    expect(response2.status).toBe(200);
+    const participantIds = joinData.map(d => d.participantId);
+    const uniqueIds = new Set(participantIds);
+    expect(uniqueIds.size).toBe(3);
   });
 });
