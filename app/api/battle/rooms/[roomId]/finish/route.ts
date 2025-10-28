@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 import { z } from 'zod';
 
 import { publishBattleEvent } from '@/src/lib/client/realtime';
@@ -58,7 +59,7 @@ export async function POST(
       .select('id, display_name, total_score, is_host')
       .eq('room_id', roomId);
     if (pErr) {
-      console.error(pErr);
+      apiLogger.error(pErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -76,7 +77,7 @@ export async function POST(
       .update({ status: 'finished' })
       .eq('id', roomId);
     if (updErr) {
-      console.error(updErr);
+      apiLogger.error(updErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -89,7 +90,7 @@ export async function POST(
 
     return NextResponse.json({ ok: true, standings });
   } catch (e: unknown) {
-    console.error('Finish exception', e);
+    apiLogger.error('Finish exception', e);
     return createErrorResponse(e);
   }
 }

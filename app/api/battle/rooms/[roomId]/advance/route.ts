@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 
 import { publishBattleEvent } from '@/src/lib/client/realtime';
 import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
@@ -154,7 +155,7 @@ export async function POST(
       action: 'advanced',
     });
   } catch (error) {
-    console.error('Manual advance failed:', error);
+    apiLogger.error('Manual advance failed:', error);
     return createErrorResponse(error);
   }
 }

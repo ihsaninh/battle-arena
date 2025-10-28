@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z, ZodError, ZodSchema } from 'zod';
+import { apiLogger } from './logger';
 
 // Common validation schemas
 export const displayNameSchema = z
@@ -169,7 +170,7 @@ export async function withValidation<T>(
 
     return handler(validation.data, req);
   } catch (error) {
-    console.error('Validation middleware error:', error);
+    apiLogger.error('Validation middleware error:', error);
     return NextResponse.json(
       { error: 'Invalid JSON in request body' },
       { status: 400 }

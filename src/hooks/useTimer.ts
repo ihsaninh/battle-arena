@@ -3,6 +3,7 @@ import { useInterval } from 'usehooks-ts';
 
 import { useBattleStore } from '@/src/lib/store/battle-store';
 import type { StateResp } from '@/src/types/battle';
+import { timerLogger } from '@/src/lib/utils/logger';
 
 export function useTimer(
   state: StateResp | undefined,
@@ -46,7 +47,7 @@ export function useTimer(
       state.activeRound?.status === 'active' &&
       !isProgressing
     ) {
-      console.log('[TIMER] Auto-closing round due to timer expiration');
+      timerLogger.info('Auto-closing round due to timer expiration');
       autoCloseRound();
     }
   };

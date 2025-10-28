@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { BATTLE_SESSION_COOKIE } from '@/src/lib/database/session';
 import { supabaseAdmin } from '@/src/lib/database/supabase';
+import { apiLogger } from '@/src/lib/utils/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (fetchError && fetchError.code !== 'PGRST116') {
-      console.error('Error fetching existing session:', fetchError);
+      apiLogger.error('Error fetching existing session:', fetchError);
       return NextResponse.json(
         { error: 'Failed to check existing session' },
         { status: 500 }
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
           .eq('id', existingSession.id);
 
         if (updateError) {
-          console.error('Error updating session display name:', updateError);
+          apiLogger.error('Error updating session display name:', updateError);
           return NextResponse.json(
             { error: 'Failed to update session' },
             { status: 500 }
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (createError) {
-      console.error('Error creating session:', createError);
+      apiLogger.error('Error creating session:', createError);
       return NextResponse.json(
         { error: 'Failed to create session' },
         { status: 500 }
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     return res;
   } catch (error) {
-    console.error('Battle sessions API error:', error);
+    apiLogger.error('Battle sessions API error:', error);
     return NextResponse.json(
       { error: 'Failed to create session' },
       { status: 500 }

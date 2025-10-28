@@ -3,6 +3,8 @@
  * Provides consistent error handling across all battle API endpoints
  */
 
+import { apiLogger } from '../utils/logger';
+
 export interface ApiError {
   code: string;
   message: string;
@@ -211,7 +213,7 @@ export function createErrorResponse(error: ApiErrorResponse | Error | unknown) {
 
   // Handle generic errors
   const message = error instanceof Error ? error.message : 'Unknown error';
-  console.error('Unhandled API error:', error);
+  apiLogger.error('Unhandled API error:', error);
 
   return new Response(
     JSON.stringify({

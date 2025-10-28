@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useCreateRoom, useJoinRoom } from '@/src/hooks/useBattleQueries';
 import { useBattleStore } from '@/src/lib/store/battle-store';
 import { handleApiError } from '@/src/lib/utils/client-error-handler';
+import { hookLogger } from '@/src/lib/utils/logger';
 
 type GameMode = 'create' | 'join' | null;
 
@@ -121,7 +122,7 @@ export function useBattleLanding() {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch (err) {
-        console.error('Failed to copy:', err);
+        hookLogger.error('Failed to copy:', err);
       }
     }
   };

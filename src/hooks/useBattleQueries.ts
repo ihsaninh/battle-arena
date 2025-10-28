@@ -17,6 +17,7 @@ import {
 } from '@/src/lib/api/api';
 import { ensureSession } from '@/src/lib/database/session';
 import { handleApiError } from '@/src/lib/utils/client-error-handler';
+import { hookLogger } from '@/src/lib/utils/logger';
 
 // Query Keys
 export const battleQueryKeys = {
@@ -37,7 +38,10 @@ const showBattleNotification = (
   message: string,
   type?: 'error' | 'warning' | 'info'
 ) => {
-  console.log(`[${type?.toUpperCase() || 'ERROR'}] ${message}`);
+  const level = type || 'error';
+  if (level === 'error') hookLogger.error(message);
+  else if (level === 'warning') hookLogger.warn(message);
+  else hookLogger.info(message);
 };
 
 async function runWithBattleErrorHandling<T>(
@@ -96,7 +100,7 @@ function useBattleMutation<TData, TVariables, TContext = unknown>(
             queryClient.invalidateQueries({ queryKey });
           }
         } catch (err) {
-          console.error('[Battle Mutation] Failed to invalidate query', err);
+          hookLogger.error('Failed to invalidate query', err);
         }
       });
 
@@ -112,7 +116,7 @@ function useBattleMutation<TData, TVariables, TContext = unknown>(
     },
     onError: (error, variables, context) => {
       if (config.errorLabel) {
-        console.error(config.errorLabel, error);
+        hookLogger.error(config.errorLabel || 'Mutation error', error);
       }
       if (config.onError && context !== undefined) {
         (

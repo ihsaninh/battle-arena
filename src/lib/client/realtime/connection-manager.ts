@@ -2,6 +2,7 @@ import type { RealtimeChannel } from '@supabase/realtime-js';
 
 import { ConnectionInfo } from '@/src/types/realtime';
 import { supabaseBrowser } from '@/src/lib/database/supabase';
+import { connectionLogger } from '@/src/lib/utils/logger';
 
 import { ReconnectionStrategy } from './reconnection-strategy';
 
@@ -41,13 +42,13 @@ export class ConnectionManager {
     try {
       const sb = supabaseBrowser;
       if (!sb) {
-        console.error('Supabase browser client not available');
+        connectionLogger.error('Supabase browser client not available');
         return null;
       }
 
       // Check and enforce connection limits
       if (!this.enforceConnectionLimits()) {
-        console.error(
+        connectionLogger.error(
           'Connection limits enforced, cannot create new connection'
         );
         return null;
@@ -81,13 +82,13 @@ export class ConnectionManager {
       // Override unsubscribe to clean up our tracking
       this.overrideUnsubscribe(channel, channelId);
 
-      console.log(
-        `🔌 New connection established for room:${roomId}. Total active: ${this.activeConnections.size}`
+      connectionLogger.success(
+        `New connection established for room:${roomId}. Total active: ${this.activeConnections.size}`
       );
 
       return channel;
     } catch (err) {
-      console.error('Failed to create room channel:', err);
+      connectionLogger.error('Failed to create room channel:', err);
       return null;
     }
   }
@@ -138,7 +139,7 @@ export class ConnectionManager {
    */
   cleanupConnections() {
     const connections = Array.from(this.activeConnections.entries());
-    console.log(`🧹 Cleaning up ${connections.length} connections...`);
+    connectionLogger.info(`Cleaning up ${connections.length} connections...`);
 
     let successfullyCleaned = 0;
     connections.forEach(([channelId, conn]) => {
@@ -147,12 +148,15 @@ export class ConnectionManager {
         this.activeConnections.delete(channelId);
         successfullyCleaned++;
       } catch (err) {
-        console.error(`❌ Error cleaning up connection ${channelId}:`, err);
+        connectionLogger.error(
+          `Error cleaning up connection ${channelId}:`,
+          err
+        );
       }
     });
 
-    console.log(
-      `✅ Cleanup complete. Successfully cleaned: ${successfullyCleaned}/${connections.length}. Remaining connections: ${this.activeConnections.size}`
+    connectionLogger.success(
+      `Cleanup complete. Successfully cleaned: ${successfullyCleaned}/${connections.length}. Remaining connections: ${this.activeConnections.size}`
     );
   }
 
@@ -180,7 +184,10 @@ export class ConnectionManager {
       }
       return localStorage.getItem('user_id') || 'anonymous';
     } catch (err) {
-      console.warn('Error accessing localStorage, using anonymous ID:', err);
+      connectionLogger.warn(
+        'Error accessing localStorage, using anonymous ID:',
+        err
+      );
       return 'anonymous';
     }
   }
@@ -195,8 +202,8 @@ export class ConnectionManager {
       .sort((a, b) => a[1].timestamp - b[1].timestamp);
 
     if (userConns.length >= this.config.maxConnectionsPerUser) {
-      console.warn(
-        `⚠️ Connection limit reached for user ${userId}. Current: ${userConns.length}, Max: ${this.config.maxConnectionsPerUser}`
+      connectionLogger.warn(
+        `Connection limit reached for user ${userId}. Current: ${userConns.length}, Max: ${this.config.maxConnectionsPerUser}`
       );
 
       const excess = userConns.length - this.config.maxConnectionsPerUser + 1;
@@ -204,13 +211,13 @@ export class ConnectionManager {
 
       for (let i = 0; i < excess; i++) {
         const [channelId, conn] = userConns[i];
-        console.log(`🔄 Closing excess connection: ${channelId}`);
+        connectionLogger.info(`Closing excess connection: ${channelId}`);
         try {
           conn.channel.unsubscribe();
           this.activeConnections.delete(channelId);
           successfullyClosed++;
         } catch (err) {
-          console.error('Error closing excess connection:', err);
+          connectionLogger.error('Error closing excess connection:', err);
         }
       }
 
@@ -226,11 +233,14 @@ export class ConnectionManager {
    */
   private setupBasicEventHandlers(channel: RealtimeChannel, roomId: string) {
     channel.on('system', { event: '*' }, payload => {
-      console.log(`🔗 Channel system event for room:${roomId}:`, payload.type);
+      connectionLogger.debug(
+        `Channel system event for room:${roomId}:`,
+        payload.type
+      );
     });
 
     channel.on('system', { event: 'CHANNEL_ERROR' }, payload => {
-      console.error(`💥 Channel error for room:${roomId}:`, payload);
+      connectionLogger.error(`Channel error for room:${roomId}:`, payload);
     });
   }
 
@@ -242,8 +252,8 @@ export class ConnectionManager {
 
     channel.unsubscribe = async () => {
       this.activeConnections.delete(channelId);
-      console.log(
-        `🧹 Cleaned up connection for room:${channelId.replace(
+      connectionLogger.info(
+        `Cleaned up connection for room:${channelId.replace(
           'room:',
           ''
         )}. Active connections: ${this.activeConnections.size}`

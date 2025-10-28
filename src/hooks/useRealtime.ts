@@ -11,6 +11,7 @@ import {
 } from '@/src/lib/client/realtime';
 import type { StateResp } from '@/src/types/battle';
 import { BATTLE_SESSION_COOKIE } from '@/src/lib/database/session';
+import { presenceLogger, realtimeLogger } from '@/src/lib/utils/logger';
 
 export function useRealtime(
   roomId: string | undefined,
@@ -93,7 +94,7 @@ export function useRealtime(
 
     channelRef.current
       .track(presenceMetadata)
-      .catch(err => console.error('[PRESENCE] Metadata update failed', err));
+      .catch(err => presenceLogger.error('Metadata update failed', err));
   }, [presenceEnabled, presenceMetadata]);
 
   const presenceKey = presenceEnabled ? (sessionId ?? undefined) : undefined;
@@ -112,12 +113,9 @@ export function useRealtime(
       } catch (err) {
         const error = err as Error & { status?: number };
         if (typeof error?.status === 'number') {
-          console.warn(
-            `[PRESENCE] Ping failed with status ${error.status}`,
-            error
-          );
+          presenceLogger.warn(`Ping failed with status ${error.status}`, error);
         } else {
-          console.error('[PRESENCE] Ping error:', err);
+          presenceLogger.error('Ping error:', err);
         }
       }
     },
@@ -206,8 +204,8 @@ export function useRealtime(
           presencePing('online');
         })
         .catch(err => {
-          console.error(
-            '[ONLINE] Failed to refresh after regaining connection:',
+          realtimeLogger.error(
+            'Failed to refresh after regaining connection:',
             err
           );
         });
@@ -274,7 +272,7 @@ export function useRealtime(
       // Poll every 3 seconds in production waiting phase to catch missed participant joins
       if (timeSinceLastEvent > 3000) {
         refresh(true).catch(err => {
-          console.error('[PRODUCTION_POLL] Participant polling failed:', err);
+          realtimeLogger.error('Participant polling failed:', err);
         });
       }
     }
@@ -321,7 +319,7 @@ export function useRealtime(
 
     // Handle connection errors
     if (!ch) {
-      console.error(`❌ Failed to create channel for room:${roomId}`);
+      realtimeLogger.error(`Failed to create channel for room:${roomId}`);
       const errorMsg = 'Connection error. Please refresh the page.';
       addNotification(errorMsg);
       setConnectionState('disconnected');
@@ -365,19 +363,14 @@ export function useRealtime(
 
         if (timeSinceLastEvent > 15000 && timeSinceLastRefresh > 15000) {
           missedEventsCount++;
-          console.warn(
-            `[CONNECTION_HEALTH] Missed events for ${timeSinceLastEvent}ms, count: ${missedEventsCount}`
+          realtimeLogger.warn(
+            `Missed events for ${timeSinceLastEvent}ms, count: ${missedEventsCount}`
           );
 
           if (missedEventsCount >= 2) {
-            console.warn(
-              '[CONNECTION_HEALTH] Forcing refresh due to missed events'
-            );
+            realtimeLogger.warn('Forcing refresh due to missed events');
             refresh(true).catch(err => {
-              console.error(
-                '[CONNECTION_HEALTH] Health check refresh failed:',
-                err
-              );
+              realtimeLogger.error('Health check refresh failed:', err);
             });
             missedEventsCount = 0;
           }
@@ -397,7 +390,7 @@ export function useRealtime(
       errorCount++;
 
       if (errorCount >= maxErrors) {
-        console.error(`💥 Too many connection errors for room:${roomId}`);
+        realtimeLogger.error(`Too many connection errors for room:${roomId}`);
         addNotification('Connection unstable. Please refresh the page.');
         setConnectionState('disconnected');
         prevConnectionStateRef.current = 'disconnected';
@@ -421,17 +414,15 @@ export function useRealtime(
 
         // Immediate refresh for participant updates - critical for UI state
         refresh(true).catch(err => {
-          console.error('[PLAYER_JOINED] Refresh failed:', err);
+          realtimeLogger.error('Refresh failed after player joined:', err);
 
           // Production fallback: retry refresh after delay
           if (process.env.NODE_ENV === 'production') {
-            console.warn(
-              '[PLAYER_JOINED] Production fallback: retrying refresh in 2s'
-            );
+            realtimeLogger.warn('Production fallback: retrying refresh in 2s');
             setTimeout(() => {
               refresh(true).catch(retryErr => {
-                console.error(
-                  '[PLAYER_JOINED] Production fallback refresh also failed:',
+                realtimeLogger.error(
+                  'Production fallback refresh also failed:',
                   retryErr
                 );
               });
@@ -442,14 +433,9 @@ export function useRealtime(
         // Production safeguard: additional refresh after 3 seconds to ensure state is updated
         if (process.env.NODE_ENV === 'production') {
           playerJoinedTimeoutRef.current = setTimeout(() => {
-            console.warn(
-              '[PLAYER_JOINED] Production safeguard: additional refresh'
-            );
+            realtimeLogger.warn('Production safeguard: additional refresh');
             refresh(true).catch(err => {
-              console.error(
-                '[PLAYER_JOINED] Production safeguard refresh failed:',
-                err
-              );
+              realtimeLogger.error('Production safeguard refresh failed:', err);
             });
           }, 3000);
         }
@@ -519,7 +505,7 @@ export function useRealtime(
 
       ch.on('broadcast', { event: 'teams_assigned' }, () => {
         setLastEventTime(Date.now());
-        console.log('[REALTIME] Teams assigned, showing reveal animation...');
+        realtimeLogger.info('Teams assigned, showing reveal animation...');
 
         // Show team reveal animation and record timestamp
         const store = useBattleStore.getState();
@@ -544,18 +530,16 @@ export function useRealtime(
           if (elapsed < minDisplayTime) {
             // Delay hide to ensure minimum display time
             const remainingTime = minDisplayTime - elapsed;
-            console.log(
-              `[ROOM_STARTED] Delaying hide animation by ${remainingTime}ms`
+            realtimeLogger.debug(
+              `Delaying hide animation by ${remainingTime}ms`
             );
             setTimeout(() => {
-              console.log(
-                '[ROOM_STARTED] Hiding team reveal animation (delayed)'
-              );
+              realtimeLogger.info('Hiding team reveal animation (delayed)');
               useBattleStore.getState().setShowTeamReveal(false);
               useBattleStore.setState({ teamRevealShownAt: null });
             }, remainingTime);
           } else {
-            console.log('[ROOM_STARTED] Hiding team reveal animation');
+            realtimeLogger.info('Hiding team reveal animation');
             store.setShowTeamReveal(false);
             useBattleStore.setState({ teamRevealShownAt: null });
           }
@@ -580,8 +564,8 @@ export function useRealtime(
             currentState.gamePhase === 'playing' &&
             !currentState.state?.activeRound
           ) {
-            console.warn(
-              '[STUCK] First round not revealed, attempting recovery'
+            realtimeLogger.warn(
+              'First round not revealed, attempting recovery'
             );
             refresh(true);
 
@@ -592,7 +576,7 @@ export function useRealtime(
                 retryState.gamePhase === 'playing' &&
                 !retryState.state?.activeRound
               ) {
-                console.warn('[STUCK] Recovery failed, forcing refresh');
+                realtimeLogger.warn('Recovery failed, forcing refresh');
                 addNotification('Attempting to recover from stuck state...');
                 refresh(true);
               }
@@ -646,7 +630,7 @@ export function useRealtime(
             currentState.gamePhase === 'answering' &&
             !currentState.state?.activeRound?.question
           ) {
-            console.warn('[QUESTION_LOAD] Forcing refresh after delay');
+            realtimeLogger.warn('Forcing refresh after delay');
             refresh(true);
           }
         }, 1000);
@@ -710,8 +694,8 @@ export function useRealtime(
           // Immediate refresh + delayed refresh to ensure participant scores are updated
           refresh(true);
           setTimeout(() => {
-            console.log(
-              '[ROUND_CLOSED] Delayed refresh for updated participant scores'
+            realtimeLogger.debug(
+              'Delayed refresh for updated participant scores'
             );
             refresh(true);
           }, 500);
@@ -772,21 +756,21 @@ export function useRealtime(
             setConnectionState('connected');
           }
           if (process.env.NODE_ENV !== 'production') {
-            console.log(`✅ Successfully connected to room:${roomId}`);
+            realtimeLogger.success(`Successfully connected to room:${roomId}`);
           }
           errorCount = 0;
           if (presenceEnabled) {
             const metadata = latestPresenceMetadataRef.current;
             if (metadata) {
               ch.track(metadata).catch(trackErr => {
-                console.error('[PRESENCE] Track failed:', trackErr);
+                presenceLogger.error('Track failed:', trackErr);
               });
             }
           }
           presencePingRef.current?.('online');
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           isChannelSubscribedRef.current = false;
-          console.error(`❌ Connection error for room:${roomId}`, err);
+          realtimeLogger.error(`Connection error for room:${roomId}`, err);
           const isOnline =
             typeof navigator === 'undefined' ? true : navigator.onLine;
 
@@ -807,21 +791,24 @@ export function useRealtime(
         if (ch) {
           if (presenceEnabled && isChannelSubscribedRef.current) {
             ch.untrack().catch(untrackErr => {
-              console.warn('[PRESENCE] Failed to untrack presence', untrackErr);
+              presenceLogger.warn('Failed to untrack presence', untrackErr);
             });
           }
           ch.unsubscribe()
             .then(() => {
               const connectionStatsAfter = getConnectionStats();
               if (process.env.NODE_ENV !== 'production') {
-                console.log(
-                  `✅ Successfully unsubscribed from room:${roomId}`,
+                realtimeLogger.success(
+                  `Successfully unsubscribed from room:${roomId}`,
                   connectionStatsAfter
                 );
               }
             })
             .catch(err => {
-              console.error(`❌ Error unsubscribing from room:${roomId}`, err);
+              realtimeLogger.error(
+                `Error unsubscribing from room:${roomId}`,
+                err
+              );
             });
         }
         channelRef.current = null;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 
 import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
 import { getBattleSessionIdFromCookies } from '@/src/lib/database/session';
@@ -51,7 +52,7 @@ export async function GET(
       .eq('session_id', sessionId);
 
     if (answersErr) {
-      console.error('Failed to fetch user answers:', answersErr);
+      apiLogger.error('Failed to fetch user answers:', answersErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -63,7 +64,7 @@ export async function GET(
       .order('round_no', { ascending: true });
 
     if (roundsErr) {
-      console.error('Failed to fetch room rounds:', roundsErr);
+      apiLogger.error('Failed to fetch room rounds:', roundsErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -175,7 +176,7 @@ export async function GET(
       answers: userAnswers,
     });
   } catch (error) {
-    console.error('Get user answers exception:', error);
+    apiLogger.error('Get user answers exception:', error);
     return createErrorResponse(error);
   }
 }

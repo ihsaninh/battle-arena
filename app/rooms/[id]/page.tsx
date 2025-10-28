@@ -162,7 +162,6 @@ export default function BattleRoom() {
             teams={state?.teams || []}
             currentSessionId={state?.currentUser?.session_id}
             onComplete={() => {
-              console.log('[TEAM_REVEAL] Animation complete, hiding...');
               setShowTeamReveal(false);
             }}
           />

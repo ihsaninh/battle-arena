@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 
+import { componentLogger } from '@/src/lib/utils/logger';
+
 /**
  * TEMPORARY: Service Worker Cleanup Component
  *
@@ -30,19 +32,17 @@ export function ClientServiceWorkerCleanup() {
           return; // No SW to cleanup
         }
 
-        console.log(
-          '[SW Cleanup] Found service workers, initiating cleanup...'
-        );
+        componentLogger.info('Found service workers, initiating cleanup...');
 
         // Try to register our cleanup SW
         try {
           await navigator.serviceWorker.register('/sw.js');
-          console.log('[SW Cleanup] Cleanup service worker registered');
+          componentLogger.success('Cleanup service worker registered');
           isCleanedUp = true;
         } catch (registerError) {
           // If registration fails, manually unregister
-          console.warn(
-            '[SW Cleanup] Registration failed, manually unregistering...',
+          componentLogger.warn(
+            'Registration failed, manually unregistering...',
             registerError
           );
 
@@ -54,14 +54,14 @@ export function ClientServiceWorkerCleanup() {
           const cacheNames = await caches.keys();
           await Promise.all(cacheNames.map(name => caches.delete(name)));
 
-          console.log('[SW Cleanup] Manual cleanup completed');
+          componentLogger.success('Manual cleanup completed');
           isCleanedUp = true;
 
           // Reload page for fresh content
           window.location.reload();
         }
       } catch (error) {
-        console.error('[SW Cleanup] Error during cleanup:', error);
+        componentLogger.error('Error during cleanup:', error);
       }
     };
 

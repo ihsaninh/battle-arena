@@ -1,4 +1,5 @@
 import { getConnectionStats } from '../client/realtime';
+import { dbLogger } from '../utils/logger';
 
 // Connection monitoring utility
 class ConnectionMonitor {
@@ -8,7 +9,7 @@ class ConnectionMonitor {
 
   startMonitoring() {
     if (this.monitoringInterval) {
-      console.warn('Connection monitoring already started');
+      dbLogger.warn('Connection monitoring already started');
       return;
     }
 
@@ -16,13 +17,13 @@ class ConnectionMonitor {
       const stats = getConnectionStats();
 
       // Log regular statistics
-      console.log(
+      dbLogger.info(
         `📊 Connection Monitor - Total: ${stats.totalConnections}, User: ${stats.userConnections}`
       );
 
       // Alert on high connection count
       if (stats.totalConnections > this.highConnectionThreshold) {
-        console.warn(
+        dbLogger.warn(
           `⚠️ High connection count detected: ${stats.totalConnections}`
         );
         this.logDetailedStats(stats);
@@ -30,40 +31,38 @@ class ConnectionMonitor {
 
       // Alert on excessive connections per user
       if (stats.userConnections > stats.maxUserConnections * 0.8) {
-        console.warn(
+        dbLogger.warn(
           `⚠️ High user connection count: ${stats.userConnections}/${stats.maxUserConnections}`
         );
       }
     }, this.logInterval);
 
-    console.log('🔌 Connection monitoring started');
+    dbLogger.info('🔌 Connection monitoring started');
   }
 
   stopMonitoring() {
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
-      console.log('🔌 Connection monitoring stopped');
+      dbLogger.info('🔌 Connection monitoring stopped');
     }
   }
 
   private logDetailedStats(stats: ReturnType<typeof getConnectionStats>) {
-    console.group('🔍 Detailed Connection Stats');
-    console.log('Total connections:', stats.totalConnections);
-    console.log('User connections:', stats.userConnections);
-    console.log('Max user connections:', stats.maxUserConnections);
-    console.log('Connections by user:', stats.connectionsByUser);
-    console.groupEnd();
+    dbLogger.info('Total connections:', stats.totalConnections);
+    dbLogger.info('User connections:', stats.userConnections);
+    dbLogger.info('Max user connections:', stats.maxUserConnections);
+    dbLogger.info('Connections by user:', stats.connectionsByUser);
   }
 
   // Force cleanup of connections
   forceCleanup() {
-    console.log('🧹 Forcing connection cleanup');
+    dbLogger.info('🧹 Forcing connection cleanup');
     const statsBefore = getConnectionStats();
     // This would be implemented in the realtime module
-    console.log(`📊 Before cleanup - Total: ${statsBefore.totalConnections}`);
+    dbLogger.info(`📊 Before cleanup - Total: ${statsBefore.totalConnections}`);
     // Call cleanup function from realtime module
-    console.log('✅ Connection cleanup completed');
+    dbLogger.info('✅ Connection cleanup completed');
   }
 
   // Get current connection status

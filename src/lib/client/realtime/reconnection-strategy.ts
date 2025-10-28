@@ -1,5 +1,7 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 
+import { connectionLogger } from '@/src/lib/utils/logger';
+
 interface ReconnectionConfig {
   maxReconnectAttempts: number;
   minReconnectIntervalMs: number;
@@ -60,14 +62,14 @@ export class ReconnectionStrategy {
       }
 
       if (reconnectAttempts >= this.config.maxReconnectAttempts) {
-        console.error(
-          `💥 Max reconnection attempts (${this.config.maxReconnectAttempts}) reached for room:${roomId}`
+        connectionLogger.error(
+          `Max reconnection attempts (${this.config.maxReconnectAttempts}) reached for room:${roomId}`
         );
 
         circuitBreakerOpen = true;
         circuitBreakerTimeout = setTimeout(() => {
-          console.log(
-            `🔄 Circuit breaker closed for room:${roomId}, allowing reconnection attempts`
+          connectionLogger.info(
+            `Circuit breaker closed for room:${roomId}, allowing reconnection attempts`
           );
           circuitBreakerOpen = false;
           reconnectAttempts = 0;
@@ -80,21 +82,21 @@ export class ReconnectionStrategy {
       lastReconnectTime = now;
       reconnectAttempts++;
 
-      console.log(
-        `🔄 Attempting reconnection ${reconnectAttempts}/${this.config.maxReconnectAttempts} for room:${roomId}`
+      connectionLogger.info(
+        `Attempting reconnection ${reconnectAttempts}/${this.config.maxReconnectAttempts} for room:${roomId}`
       );
 
       channel.subscribe(status => {
         if (status === 'SUBSCRIBED') {
-          console.log(
-            `✅ Reconnected to room:${roomId} on attempt ${reconnectAttempts}`
+          connectionLogger.success(
+            `Reconnected to room:${roomId} on attempt ${reconnectAttempts}`
           );
           reconnectAttempts = 0;
           isReconnecting = false;
           onReconnect?.();
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error(
-            `❌ Reconnection attempt ${reconnectAttempts} failed for room:${roomId}`
+          connectionLogger.error(
+            `Reconnection attempt ${reconnectAttempts} failed for room:${roomId}`
           );
           isReconnecting = false;
 
@@ -110,7 +112,7 @@ export class ReconnectionStrategy {
     // Set up connection timeout
     connectionTimeout = setTimeout(() => {
       if (!isDestroyed) {
-        console.warn(`⏰ Connection timeout for room:${roomId}`);
+        connectionLogger.warn(`Connection timeout for room:${roomId}`);
         attemptReconnection();
       }
     }, this.config.connectionTimeoutMs);
@@ -119,8 +121,8 @@ export class ReconnectionStrategy {
     channel.on('system', { event: 'CHANNEL_ERROR' }, () => {
       if (isDestroyed) return;
 
-      console.warn(
-        `🔄 Channel error for room:${roomId}, attempting reconnection...`
+      connectionLogger.warn(
+        `Channel error for room:${roomId}, attempting reconnection...`
       );
 
       attemptReconnection();
@@ -128,7 +130,7 @@ export class ReconnectionStrategy {
 
     channel.on('system', { event: 'CLOSED' }, () => {
       if (isDestroyed) return;
-      console.log(`🔌 Connection closed for room:${roomId}`);
+      connectionLogger.info(`Connection closed for room:${roomId}`);
       if (connectionTimeout) {
         clearTimeout(connectionTimeout);
         connectionTimeout = null;

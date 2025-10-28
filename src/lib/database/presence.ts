@@ -1,6 +1,7 @@
 import { publishBattleEvent } from '@/src/lib/client/realtime';
 import { buildScoreboardDetails } from '@/src/lib/utils/scoreboard-utils';
 import { supabaseAdmin } from '@/src/lib/database/supabase';
+import { presenceLogger } from '../utils/logger';
 
 interface StatusChange {
   sessionId: string;
@@ -67,7 +68,7 @@ async function closeRoundAndAdvance(params: {
   );
 
   if (rpcError) {
-    console.error(
+    presenceLogger.error(
       '[PRESENCE] close_round_and_update_scores RPC failed',
       rpcError
     );

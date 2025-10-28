@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { battleApi, BattleSessionRequest } from '../api/api';
+import { dbLogger } from '../utils/logger';
 
 export const SESSION_COOKIE = 'quiz_session_id';
 export const BATTLE_SESSION_COOKIE = 'battle_session_id';
@@ -37,7 +38,7 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
       try {
         fingerprint = window.localStorage.getItem(storageKey);
       } catch (err) {
-        console.warn('[ensureSession] Unable to access localStorage', err);
+        dbLogger.warn('Unable to access localStorage', err);
       }
 
       if (!fingerprint && typeof document !== 'undefined') {
@@ -59,10 +60,7 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
         try {
           window.localStorage.setItem(storageKey, fingerprint);
         } catch (err) {
-          console.warn(
-            '[ensureSession] Failed to persist fingerprint to localStorage',
-            err
-          );
+          dbLogger.warn('Failed to persist fingerprint to localStorage', err);
         }
 
         if (typeof document !== 'undefined') {
@@ -84,8 +82,8 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
       try {
         window.localStorage.setItem(storageKey, fingerprint);
       } catch (err) {
-        console.warn(
-          '[ensureSession] Failed to persist fingerprint after session creation',
+        dbLogger.warn(
+          'Failed to persist fingerprint after session creation',
           err
         );
       }
@@ -99,7 +97,7 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
 
     return true;
   } catch (error) {
-    console.error('[ensureSession] Unexpected error', error);
+    dbLogger.error('Unexpected error in ensureSession', error);
     return false;
   }
 };

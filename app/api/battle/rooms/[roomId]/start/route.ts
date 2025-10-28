@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 import { z } from 'zod';
 
 import { publishBattleEvent } from '@/src/lib/client/realtime';
@@ -143,7 +144,7 @@ export async function POST(
         .order('team_order', { ascending: true });
 
       if (teamsErr || !teams || teams.length !== 2) {
-        console.error('[START_BATTLE] Teams not found for team mode room');
+        apiLogger.error('[START_BATTLE] Teams not found for team mode room');
         return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
       }
 
@@ -166,12 +167,12 @@ export async function POST(
           .eq('id', assignment.participant_id);
 
         if (assignErr) {
-          console.error('[START_BATTLE] Failed to assign team:', assignErr);
+          apiLogger.error('[START_BATTLE] Failed to assign team:', assignErr);
           return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
         }
       }
 
-      console.log(
+      apiLogger.info(
         `✅ Shuffled and assigned ${participantCount} players to 2 teams`
       );
     }
@@ -200,9 +201,9 @@ export async function POST(
             seed: `${roomId}-${Date.now()}`,
             difficulty: difficultyPreference,
           });
-          console.log(aiQs, 'generate');
+          apiLogger.info(aiQs, 'generate');
           if (aiQs.length > 0) {
-            console.log(aiQs, 'mcq');
+            apiLogger.info(aiQs, 'mcq');
             inserts = aiQs.map((q, idx) => ({
               id: `round-${roomId}-${idx + 1}`,
               room_id: roomId,
@@ -234,7 +235,7 @@ export async function POST(
           }
         }
       } catch (e) {
-        console.log(e);
+        apiLogger.info(e);
         aiError = (e as Error).message;
       }
     }
@@ -304,7 +305,10 @@ export async function POST(
 
     if (revealErr) {
       // Don't fail the entire start operation, just log the error
-      console.error('[START_BATTLE] Failed to reveal first round:', revealErr);
+      apiLogger.error(
+        '[START_BATTLE] Failed to reveal first round:',
+        revealErr
+      );
     } else {
       // Broadcast first round revealed immediately
       await publishBattleEvent({

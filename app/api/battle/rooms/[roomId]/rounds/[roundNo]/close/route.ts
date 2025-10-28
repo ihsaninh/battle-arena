@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 
 import { publishBattleEvent } from '@/src/lib/client/realtime';
 import { buildScoreboardDetails } from '@/src/lib/utils/scoreboard-utils';
@@ -78,7 +79,7 @@ export async function POST(
       );
 
       if (rpcError) {
-        console.error('[CLOSE_ROUND] RPC failed, falling back', rpcError);
+        apiLogger.error('[CLOSE_ROUND] RPC failed, falling back', rpcError);
       }
 
       if (rpcResult?.round_closed) {

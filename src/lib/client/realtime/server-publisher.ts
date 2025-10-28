@@ -1,6 +1,7 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 
 import { supabaseAdmin } from '@/src/lib/database/supabase';
+import { realtimeLogger } from '@/src/lib/utils/logger';
 
 import { getConnectionStats } from './client-connections';
 
@@ -41,12 +42,14 @@ export async function publishBattleEvent(params: {
         });
 
         updateChannelUsage(params.roomId);
-        console.log(`✅ Published ${params.event} to room:${params.roomId}`);
+        realtimeLogger.success(
+          `Published ${params.event} to room:${params.roomId}`
+        );
         return true;
       } catch (err) {
         retryCount++;
-        console.error(
-          `❌ publishBattleEvent failed (attempt ${retryCount}/${
+        realtimeLogger.error(
+          `publishBattleEvent failed (attempt ${retryCount}/${
             maxRetries + 1
           }):`,
           {
@@ -66,14 +69,17 @@ export async function publishBattleEvent(params: {
       }
     }
 
-    console.error(
-      `💥 publishBattleEvent failed after ${maxRetries + 1} attempts for ${
+    realtimeLogger.error(
+      `publishBattleEvent failed after ${maxRetries + 1} attempts for ${
         params.event
       }`
     );
 
     const connectionStats = getConnectionStats();
-    console.log(`📊 Connection stats at time of failure:`, connectionStats);
+    realtimeLogger.debug(
+      `Connection stats at time of failure:`,
+      connectionStats
+    );
     return false;
   };
 
@@ -145,12 +151,12 @@ function waitForSubscription(roomId: string, channel: RealtimeChannel) {
 
 function setupServerChannelTeardown(roomId: string, channel: RealtimeChannel) {
   channel.on('system', { event: 'CHANNEL_ERROR' }, payload => {
-    console.error(`💥 Server channel error for room:${roomId}:`, payload);
+    realtimeLogger.error(`Server channel error for room:${roomId}:`, payload);
     void dropServerChannel(roomId);
   });
 
   channel.on('system', { event: 'CLOSED' }, () => {
-    console.log(`🔌 Server channel closed for room:${roomId}`);
+    realtimeLogger.info(`Server channel closed for room:${roomId}`);
     void dropServerChannel(roomId);
   });
 }
@@ -164,8 +170,8 @@ async function dropServerChannel(roomId: string) {
   try {
     await state.channel.unsubscribe();
   } catch (err) {
-    console.warn(
-      `⚠️ Failed to unsubscribe server channel for room:${roomId}`,
+    realtimeLogger.warn(
+      `Failed to unsubscribe server channel for room:${roomId}`,
       err
     );
   }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 
 import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
 import { checkRateLimit, generalLimiter } from '@/src/lib/utils/rate-limit';
@@ -39,7 +40,7 @@ function trackServerConnection(roomId: string, sessionId: string) {
     }
   }
 
-  console.log(
+  apiLogger.info(
     `🖥️ Server connection tracked. Active connections: ${serverConnections.size}`
   );
 }
@@ -85,18 +86,18 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (sessionErr || !session) {
-      console.error(
+      apiLogger.error(
         'Session lookup error:',
         sessionErr,
         'for sessionId:',
         hostSessionId
       );
-      console.log(
+      apiLogger.info(
         `[DEBUG] RLS check: session lookup failed for ${hostSessionId}`
       );
       return createErrorResponse(ERROR_TYPES.INVALID_SESSION);
     }
-    console.log(
+    apiLogger.info(
       `[DEBUG] RLS check: session lookup succeeded for ${hostSessionId}`
     );
 
@@ -139,7 +140,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (roomErr) {
-      console.error('Create room error', roomErr);
+      apiLogger.error('Create room error', roomErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -169,13 +170,13 @@ export async function POST(req: NextRequest) {
         .insert(teams);
 
       if (teamsErr) {
-        console.error('Create teams error', teamsErr);
+        apiLogger.error('Create teams error', teamsErr);
         // Rollback room creation
         await supabase.from('battle_rooms').delete().eq('id', roomId);
         return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
       }
 
-      console.log(`✅ Created 2 teams for room ${roomId}`);
+      apiLogger.info(`✅ Created 2 teams for room ${roomId}`);
     }
 
     // Update connection tracking with actual room ID
@@ -184,7 +185,7 @@ export async function POST(req: NextRequest) {
     // Room created successfully - host will join manually
     return NextResponse.json({ roomId, roomCode });
   } catch (e: unknown) {
-    console.error('Create room exception', e);
+    apiLogger.error('Create room exception', e);
     return createErrorResponse(e);
   }
 }

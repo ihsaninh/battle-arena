@@ -1,5 +1,7 @@
 'use client';
 
+import { componentLogger } from '@/src/lib/utils/logger';
+
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import {
@@ -120,7 +122,7 @@ export function JoinRoomForm({
 
       setRoomDetails(normalizeRoomDetails(availability, joinRoomId.trim()));
     } catch (error) {
-      console.error('Error checking room:', error);
+      componentLogger.error('Error checking room:', error);
       const err = error as Error & { message?: string };
       setCheckError(err?.message || 'Failed to check room. Please try again.');
     } finally {

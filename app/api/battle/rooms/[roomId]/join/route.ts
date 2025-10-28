@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 import { z } from 'zod';
 
 import { publishBattleEvent } from '@/src/lib/client/realtime';
@@ -141,7 +142,7 @@ export async function POST(
 
         return NextResponse.json({ participantId: existing?.id });
       }
-      console.error('Join room error', joinErr);
+      apiLogger.error('Join room error', joinErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -157,7 +158,7 @@ export async function POST(
       roomId: room.id,
     });
   } catch (e: unknown) {
-    console.error('Join room exception', e);
+    apiLogger.error('Join room exception', e);
     return createErrorResponse(e);
   }
 }

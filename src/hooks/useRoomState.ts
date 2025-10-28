@@ -10,6 +10,7 @@ import {
 import { useBattleStore } from '@/src/lib/store/battle-store';
 import type { AnswerStatus, GamePhase, StateResp } from '@/src/types/battle';
 import { BATTLE_SESSION_COOKIE } from '@/src/lib/database/session';
+import { syncLogger, pollLogger } from '@/src/lib/utils/logger';
 
 // Extend Window interface to include custom properties
 declare global {
@@ -67,7 +68,7 @@ function validateStateSync(state: StateResp, gamePhase: GamePhase): boolean {
 
   // Check for phase mismatch
   if (expectedPhase !== gamePhase) {
-    console.warn('[SYNC] Phase mismatch detected:', {
+    syncLogger.warn('Phase mismatch detected:', {
       expected: expectedPhase,
       current: gamePhase,
       state: state.room?.status,
@@ -77,7 +78,7 @@ function validateStateSync(state: StateResp, gamePhase: GamePhase): boolean {
 
   // Check for state drift using checksum
   if (storedChecksum && storedChecksum !== currentChecksum) {
-    console.warn('[SYNC] State drift detected:', {
+    syncLogger.warn('State drift detected:', {
       stored: storedChecksum,
       current: currentChecksum,
     });
@@ -88,7 +89,7 @@ function validateStateSync(state: StateResp, gamePhase: GamePhase): boolean {
 }
 
 function recoverFromStateDesync(roomId: string, refresh: () => Promise<void>) {
-  console.log('[SYNC] Initiating state recovery for room:', roomId);
+  syncLogger.info('Initiating state recovery for room:', roomId);
 
   // Clear local state
   window.battleStateChecksum = undefined;
@@ -97,7 +98,7 @@ function recoverFromStateDesync(roomId: string, refresh: () => Promise<void>) {
   // Force refresh from server
   setTimeout(() => {
     refresh().catch(err => {
-      console.error('[SYNC] Recovery refresh failed:', err);
+      syncLogger.error('Recovery refresh failed:', err);
     });
   }, 1000);
 }
@@ -178,13 +179,13 @@ export function useBattleRoomState(): {
 
       // Prevent multiple simultaneous refresh requests
       if (refreshInProgress.current) {
-        console.log('[POLL] Refresh already in progress, skipping');
+        pollLogger.debug('Refresh already in progress, skipping');
         return;
       }
 
       // Less aggressive throttling for participant updates (unless forced)
       if (!force && now - lastRefreshTime.current < 500) {
-        console.log('[POLL] Refresh throttled, too frequent');
+        pollLogger.debug('Refresh throttled, too frequent');
         return;
       }
 
@@ -192,7 +193,7 @@ export function useBattleRoomState(): {
       lastRefreshTime.current = now;
 
       try {
-        console.log('[POLL] Executing refresh', force ? '(forced)' : '');
+        pollLogger.debug('Executing refresh', force ? '(forced)' : '');
         await refreshBattleData();
         useBattleStore.getState().setLastEventTime(now);
 
@@ -204,7 +205,7 @@ export function useBattleRoomState(): {
             useBattleStore.getState().gamePhase
           );
           if (!isValid) {
-            console.warn(
+            syncLogger.warn(
               '[SYNC] State validation failed after refresh, attempting recovery'
             );
             // Don't call recoverFromStateDesync here to avoid infinite loop
@@ -212,7 +213,7 @@ export function useBattleRoomState(): {
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Unknown error';
-        console.error('[SYNC] Refresh error:', message);
+        syncLogger.error('Refresh error:', message);
         useBattleStore.getState().addNotification(`Refresh error: ${message}`);
 
         // Trigger recovery on refresh failure
@@ -228,7 +229,7 @@ export function useBattleRoomState(): {
 
   // Manual state recovery function for user-triggered sync
   const forceStateSync = async () => {
-    console.log('[SYNC] Manual state sync requested');
+    syncLogger.info('Manual state sync requested');
     useBattleStore.getState().addNotification('Syncing with server...');
 
     // Clear local state cache
@@ -243,7 +244,7 @@ export function useBattleRoomState(): {
         .getState()
         .addNotification('State synchronized successfully');
     } catch (err) {
-      console.error('[SYNC] Manual sync failed:', err);
+      syncLogger.error('Manual sync failed:', err);
       useBattleStore
         .getState()
         .addNotification('Sync failed, please refresh the page');
@@ -275,7 +276,7 @@ export function useBattleRoomState(): {
       const serverGamePhase = determineGamePhaseFromServerState(state);
       const currentGamePhase = useBattleStore.getState().gamePhase;
       if (serverGamePhase !== currentGamePhase) {
-        console.warn('[SYNC] Phase sync triggered:', {
+        syncLogger.warn('[SYNC] Phase sync triggered:', {
           from: currentGamePhase,
           to: serverGamePhase,
           reason: 'server_state_update',
@@ -285,7 +286,7 @@ export function useBattleRoomState(): {
 
       // Validate state synchronization
       if (!validateStateSync(state, currentGamePhase)) {
-        console.error('[SYNC] State desync detected, initiating recovery');
+        syncLogger.error('State desync detected, initiating recovery');
         recoverFromStateDesync(roomId || '', refresh);
       }
 
@@ -393,7 +394,7 @@ export function useBattleRoomState(): {
 
       // Wait at least 3 seconds after last event before starting gentle polling
       if (timeSinceLastEvent > 3000) {
-        console.log(
+        syncLogger.info(
           '[SYNC] Question missing in answering phase, starting gentle polling'
         );
         const interval = setInterval(() => {

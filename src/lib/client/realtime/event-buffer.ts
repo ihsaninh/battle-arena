@@ -1,3 +1,4 @@
+import { realtimeLogger } from '@/src/lib/utils/logger';
 import { BattleEventListener } from '@/src/types/realtime';
 
 export interface BufferedEvent {
@@ -47,8 +48,8 @@ export class EventBuffer {
 
     // Handle buffer overflow
     if (roomBuffer.length >= this.config.maxBufferSize) {
-      console.warn(
-        `[BUFFER] Buffer overflow for room ${roomId}, dropping oldest event`
+      realtimeLogger.warn(
+        `Buffer overflow for room ${roomId}, dropping oldest event`
       );
       roomBuffer.shift();
     }
@@ -176,8 +177,8 @@ export class EventBuffer {
       try {
         listener(event.event, event.payload);
       } catch (err) {
-        console.error(
-          `[BUFFER] Error in event listener for ${event.event}:`,
+        realtimeLogger.error(
+          `Error in event listener for ${event.event}:`,
           err
         );
       }

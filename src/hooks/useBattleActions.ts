@@ -1,5 +1,7 @@
 import { useRef } from 'react';
 
+import { submitLogger } from '@/src/lib/utils/logger';
+
 import {
   useAdvanceFromScoreboard,
   useCloseRound,
@@ -190,14 +192,14 @@ export function useBattleActions(
 
     // Prevent multiple simultaneous submissions
     if (submitInProgress.current) {
-      console.log('[SUBMIT] Submission already in progress, skipping');
+      submitLogger.debug('Submission already in progress, skipping');
       return;
     }
 
     // Throttle submissions to prevent spam (increased from 1s to 3s)
     const now = Date.now();
     if (now - lastSubmitTime.current < 3000) {
-      console.log('[SUBMIT] Submission throttled, too frequent');
+      submitLogger.debug('Submission throttled, too frequent');
       addNotification('Please wait before submitting again');
       return;
     }
@@ -234,7 +236,7 @@ export function useBattleActions(
       await refresh();
     } catch (err) {
       // Rollback optimistic updates on failure
-      console.error('[SUBMIT] Answer submission failed, rolling back:', err);
+      submitLogger.error('Answer submission failed, rolling back:', err);
       setHasSubmitted(originalHasSubmitted);
       setAnswer(originalAnswer);
       setSelectedChoiceId(originalSelectedChoiceId);

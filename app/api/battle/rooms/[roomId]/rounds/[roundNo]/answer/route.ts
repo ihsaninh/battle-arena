@@ -1,4 +1,5 @@
 import { after, NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 import { z } from 'zod';
 
 import { publishBattleEvent } from '@/src/lib/client/realtime';
@@ -51,7 +52,7 @@ export async function POST(
       round.deadline_at &&
       Date.now() > new Date(round.deadline_at).getTime() + GRACE_MS
     ) {
-      console.log(
+      apiLogger.info(
         `[DEBUG] Deadline check failed: client_time=${Date.now()}, server_deadline=${new Date(
           round.deadline_at
         ).getTime()}, grace=${GRACE_MS}`
@@ -107,7 +108,7 @@ export async function POST(
         : Date.now();
       const now = Date.now();
       const timeMs = Math.max(0, now - revealedAt);
-      console.log(
+      apiLogger.info(
         `[DEBUG] Time calculation: revealedAt=${revealedAt}, now=${now}, timeMs=${timeMs}`
       );
 
@@ -144,7 +145,7 @@ export async function POST(
             { status: 409 }
           );
         }
-        console.error('Answer insert error:', ansErr);
+        apiLogger.error('Answer insert error:', ansErr);
         return NextResponse.json(
           { error: 'Failed to store answer' },
           { status: 500 }
@@ -272,7 +273,7 @@ async function checkAndAutoAdvanceRound(
     );
 
     if (rpcError) {
-      console.error('[DEBUG] RPC error in auto-advance:', rpcError);
+      apiLogger.error('[DEBUG] RPC error in auto-advance:', rpcError);
       // Fallback to original logic if RPC fails
       return await checkAndAutoAdvanceRoundFallback(roomId, roundId, roundNo);
     }
@@ -337,7 +338,7 @@ async function checkAndAutoAdvanceRound(
       },
     });
   } catch (error) {
-    console.error('[DEBUG] Error in checkAndAutoAdvanceRound:', error);
+    apiLogger.error('[DEBUG] Error in checkAndAutoAdvanceRound:', error);
   }
 }
 
@@ -519,7 +520,7 @@ async function updateParticipantScoreAtomic(
         await new Promise(resolve => setTimeout(resolve, 50 * (attempt + 1)));
       }
     } catch (error) {
-      console.error(
+      apiLogger.error(
         `[DEBUG] Score update attempt ${attempt + 1} failed:`,
         error
       );
@@ -529,7 +530,7 @@ async function updateParticipantScoreAtomic(
     }
   }
 
-  console.error(
+  apiLogger.error(
     `[DEBUG] Failed to update score for session ${sessionId} after ${maxRetries} attempts`
   );
 }

@@ -3,6 +3,7 @@
  */
 
 import { ApiError } from '../api/api-errors';
+import { apiLogger } from './logger';
 
 export interface ClientError {
   code: string;
@@ -134,8 +135,7 @@ export function handleApiError(
     showNotification(message, notificationType);
   }
 
-  // Log error for debugging
-  console.error('[API Error]', {
+  apiLogger.error('API Error', {
     code: clientError.code,
     message: clientError.message,
     details: clientError.details,
@@ -170,8 +170,8 @@ export function createRetryFunction<T>(
 
         if (attempt < maxRetries) {
           const delay = baseDelay * Math.pow(2, attempt);
-          console.log(
-            `[Retry] Attempt ${attempt + 1}/${
+          apiLogger.debug(
+            `Retry attempt ${attempt + 1}/${
               maxRetries + 1
             } failed, retrying in ${delay}ms`
           );

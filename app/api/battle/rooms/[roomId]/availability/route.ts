@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 
 import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
 import { supabaseAdmin } from '@/src/lib/database/supabase';
@@ -109,7 +110,7 @@ export async function GET(
       },
     });
   } catch (e: unknown) {
-    console.error('Room availability exception', e);
+    apiLogger.error('Room availability exception', e);
     return createErrorResponse(e);
   }
 }

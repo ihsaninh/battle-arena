@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 
 import { publishBattleEvent } from '@/src/lib/client/realtime';
 import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
@@ -72,7 +73,7 @@ export async function POST(
       .eq('round_no', Number(roundNo));
 
     if (updErr) {
-      console.error(updErr);
+      apiLogger.error(updErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -93,7 +94,7 @@ export async function POST(
       deadlineAt: deadline.toISOString(),
     });
   } catch (e: unknown) {
-    console.error('Reveal round exception', e);
+    apiLogger.error('Reveal round exception', e);
     return createErrorResponse(e);
   }
 }

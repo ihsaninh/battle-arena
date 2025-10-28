@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 
 import { publishBattleEvent } from '@/src/lib/client/realtime';
 import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
@@ -125,7 +126,7 @@ export async function GET(
             },
           });
         } catch (err) {
-          console.error(
+          apiLogger.error(
             'Failed to publish all_participants_answered event:',
             err
           );
@@ -141,7 +142,7 @@ export async function GET(
       allAnswered, // Add this flag for client-side handling
     });
   } catch (error) {
-    console.error('Get answer status exception:', error);
+    apiLogger.error('Get answer status exception:', error);
     return createErrorResponse(error);
   }
 }

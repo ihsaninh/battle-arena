@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger } from '@/src/lib/utils/logger';
 
 import { createErrorResponse, ERROR_TYPES } from '@/src/lib/api/api-errors';
 import { supabaseAdmin } from '@/src/lib/database/supabase';
@@ -17,7 +18,7 @@ export async function GET(
       .select('id, session_id, display_name, total_score, team_id')
       .eq('room_id', roomId);
     if (pErr) {
-      console.error(pErr);
+      apiLogger.error(pErr);
       return createErrorResponse(ERROR_TYPES.INTERNAL_ERROR);
     }
 
@@ -59,7 +60,7 @@ export async function GET(
 
     return NextResponse.json({ scoreboard: board });
   } catch (e) {
-    console.error('Scoreboard exception', e);
+    apiLogger.error('Scoreboard exception', e);
     return createErrorResponse(e);
   }
 }
