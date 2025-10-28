@@ -31,7 +31,9 @@ export function useBattleResult() {
   // Show confetti when results load
   useEffect(() => {
     if (results && !loading) {
-      setTimeout(() => setShowConfetti(true), 300);
+      const timer = setTimeout(() => setShowConfetti(true), 300);
+
+      return () => clearTimeout(timer);
     }
   }, [results, loading]);
 

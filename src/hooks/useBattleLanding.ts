@@ -1,5 +1,5 @@
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useCreateRoom, useJoinRoom } from '@/src/hooks/useBattleQueries';
 import { useBattleStore } from '@/src/lib/store/battle-store';
@@ -120,12 +120,19 @@ export function useBattleLanding() {
         const fullUrl = `${window.location.origin}/join?roomCode=${createdRoomCode}`;
         await navigator.clipboard.writeText(fullUrl);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
       } catch (err) {
         hookLogger.error('Failed to copy:', err);
       }
     }
   };
+
+  // Auto-reset copied state after 2 seconds with proper cleanup
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
 
   return {
     // State values

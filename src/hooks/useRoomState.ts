@@ -95,7 +95,8 @@ function recoverFromStateDesync(roomId: string, refresh: () => Promise<void>) {
   window.battleStateChecksum = undefined;
   window.lastEventSequence = undefined;
 
-  // Force refresh from server
+  // Force refresh from server (note: can't cleanup global function timer)
+  // This is intentional as it's a one-time recovery operation
   setTimeout(() => {
     refresh().catch(err => {
       syncLogger.error('Recovery refresh failed:', err);
@@ -216,7 +217,8 @@ export function useBattleRoomState(): {
         syncLogger.error('Refresh error:', message);
         useBattleStore.getState().addNotification(`Refresh error: ${message}`);
 
-        // Trigger recovery on refresh failure
+        // Trigger recovery on refresh failure (note: can't cleanup callback timer)
+        // This is intentional as it's an error recovery mechanism
         if (roomId) {
           setTimeout(() => recoverFromStateDesync(roomId, refresh), 2000);
         }
@@ -300,6 +302,7 @@ export function useBattleRoomState(): {
         if (prevRoundNo !== null && lastValidRound !== null) {
           if (currentRoundNo < lastValidRound) {
             // Force refresh to get correct server state
+            // Note: Intentionally not tracking this timer - one-time round validation
             setTimeout(() => {
               refresh();
             }, 500);

@@ -417,6 +417,8 @@ export function useRealtime(
           realtimeLogger.error('Refresh failed after player joined:', err);
 
           // Production fallback: retry refresh after delay
+          // Note: Intentionally not tracking this timer as it's an error recovery
+          // mechanism and component unmount during this operation is acceptable
           if (process.env.NODE_ENV === 'production') {
             realtimeLogger.warn('Production fallback: retrying refresh in 2s');
             setTimeout(() => {
