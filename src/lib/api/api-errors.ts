@@ -3,6 +3,7 @@
  * Provides consistent error handling across all battle API endpoints
  */
 
+import env from '@/src/lib/config/env';
 import { apiLogger } from '../utils/logger';
 
 export interface ApiError {
@@ -221,7 +222,7 @@ export function createErrorResponse(error: ApiErrorResponse | Error | unknown) {
         code: 'INTERNAL_ERROR',
         message: 'An unexpected error occurred',
         details:
-          process.env.NODE_ENV === 'development'
+          env.NODE_ENV === 'development'
             ? { originalMessage: message }
             : undefined,
         retryable: true,

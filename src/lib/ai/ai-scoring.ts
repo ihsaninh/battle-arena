@@ -470,7 +470,12 @@ function generateFallbackScore(
 
 // Helper function to validate environment
 export function isAIAvailable(): boolean {
-  return !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  try {
+    const env = require('@/src/lib/config/env').default;
+    return !!env.GOOGLE_GENERATIVE_AI_API_KEY;
+  } catch {
+    return false;
+  }
 }
 
 // Helper function to clear scoring cache (useful for testing or memory management)

@@ -1,7 +1,9 @@
 import { createConsola } from 'consola';
 
-const isDevelopment = process.env.NODE_ENV === 'development';
-const isTest = process.env.NODE_ENV === 'test';
+import env from '@/src/lib/config/env';
+
+const isDevelopment = env.NODE_ENV === 'development';
+const isTest = env.NODE_ENV === 'test';
 
 export const logger = createConsola({
   level: isDevelopment ? 4 : isTest ? 0 : 3,
