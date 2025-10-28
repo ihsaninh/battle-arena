@@ -4,29 +4,50 @@ import { BATTLE_SESSION_COOKIE } from '@/src/lib/database/session';
 import { supabaseAdmin } from '@/src/lib/database/supabase';
 import { apiLogger } from '@/src/lib/utils/logger';
 
+const MAX_DISPLAY_NAME_LENGTH = 100;
+
+const generateDefaultDisplayName = () =>
+  `Player ${Math.floor(1000 + Math.random() * 9000)}`;
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { display_name, fingerprint_hash } = body;
+    let body: any;
 
-    if (!display_name) {
+    try {
+      body = await request.json();
+    } catch (error) {
+      apiLogger.warn('Invalid JSON payload for battle session', error);
       return NextResponse.json(
-        { error: 'Display name is required' },
+        { error: 'Invalid JSON payload' },
         { status: 400 }
       );
     }
 
-    // Generate fingerprint if not provided
-    let fingerprintHash = fingerprint_hash;
+    const rawDisplayName =
+      typeof body?.display_name === 'string' ? body.display_name.trim() : '';
+    const displayName = rawDisplayName || generateDefaultDisplayName();
+
+    if (displayName.length > MAX_DISPLAY_NAME_LENGTH) {
+      return NextResponse.json(
+        {
+          error: `Display name must be ${MAX_DISPLAY_NAME_LENGTH} characters or less`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const normalizedDisplayName = displayName;
+
+    let fingerprintHash =
+      typeof body?.fingerprint_hash === 'string' ? body.fingerprint_hash : null;
     if (!fingerprintHash) {
-      fingerprintHash = `fp-${display_name
+      fingerprintHash = `fp-${normalizedDisplayName
         .toLowerCase()
         .replace(/\s+/g, '-')}-${Date.now()}`;
     }
 
     const supabase = supabaseAdmin();
 
-    // Check if session already exists with this fingerprint
     const { data: existingSession, error: fetchError } = await supabase
       .from('battle_sessions')
       .select('*')
@@ -42,12 +63,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (existingSession) {
-      // Update display name if changed
-      if (existingSession.display_name !== display_name) {
+      if (existingSession.display_name !== normalizedDisplayName) {
         const { error: updateError } = await supabase
           .from('battle_sessions')
           .update({
-            display_name,
+            display_name: normalizedDisplayName,
             last_active_at: new Date().toISOString(),
           })
           .eq('id', existingSession.id);
@@ -60,9 +80,8 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        existingSession.display_name = display_name;
+        existingSession.display_name = normalizedDisplayName;
       } else {
-        // Just update last_active_at
         await supabase
           .from('battle_sessions')
           .update({ last_active_at: new Date().toISOString() })
@@ -79,13 +98,12 @@ export async function POST(request: NextRequest) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 60 * 60 * 24 * 30, // 30 days
+        maxAge: 60 * 60 * 24 * 30,
       });
 
       return res;
     }
 
-    // Create new session
     const sessionId = `battle-session-${Date.now()}-${Math.random()
       .toString(36)
       .substring(2)}`;
@@ -94,7 +112,7 @@ export async function POST(request: NextRequest) {
       .from('battle_sessions')
       .insert({
         id: sessionId,
-        display_name,
+        display_name: normalizedDisplayName,
         fingerprint_hash: fingerprintHash,
         created_at: new Date().toISOString(),
         last_active_at: new Date().toISOString(),
@@ -115,13 +133,12 @@ export async function POST(request: NextRequest) {
       ...newSession,
     });
 
-    // Set HttpOnly cookie for session binding
     res.cookies.set(BATTLE_SESSION_COOKIE, newSession.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
     });
 
     return res;
