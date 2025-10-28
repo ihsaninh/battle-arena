@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { TIME_MS, TIMEOUTS } from '@/src/lib/constants/time';
+
 // Simple in-memory rate limiter
 // In production, consider using Redis or a more robust solution
 interface RateLimitEntry {
@@ -12,7 +14,7 @@ class RateLimiter {
   private cleanupInterval: NodeJS.Timeout;
 
   constructor(
-    private windowMs: number = 60000,
+    private windowMs: number = TIME_MS.ONE_MINUTE,
     private maxRequests: number = 10
   ) {
     // Clean up expired entries every 5 minutes
@@ -23,7 +25,7 @@ class RateLimiter {
           this.store.delete(key);
         }
       }
-    }, 300000);
+    }, TIME_MS.FIVE_MINUTES);
   }
 
   isRateLimited(identifier: string): boolean {
@@ -67,9 +69,9 @@ class RateLimiter {
 }
 
 // Different rate limiters for different endpoints
-export const generalLimiter = new RateLimiter(60000, 30); // 30 requests per minute
-export const battleActionLimiter = new RateLimiter(10000, 5); // 5 battle actions per 10 seconds
-export const answerSubmitLimiter = new RateLimiter(10000, 5); // 5 answer submissions per 10 seconds
+export const generalLimiter = new RateLimiter(TIME_MS.ONE_MINUTE, 30); // 30 requests per minute
+export const battleActionLimiter = new RateLimiter(TIME_MS.TEN_SECONDS, 5); // 5 battle actions per 10 seconds
+export const answerSubmitLimiter = new RateLimiter(TIME_MS.TEN_SECONDS, 5); // 5 answer submissions per 10 seconds
 
 export function checkRateLimit(
   req: NextRequest,

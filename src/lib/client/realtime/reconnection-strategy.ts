@@ -1,5 +1,6 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 
+import { TIMEOUTS } from '@/src/lib/constants/time';
 import { connectionLogger } from '@/src/lib/utils/logger';
 
 interface ReconnectionConfig {
@@ -21,9 +22,9 @@ export class ReconnectionStrategy {
     this.config = {
       maxReconnectAttempts: 3,
       minReconnectIntervalMs: 5000,
-      maxReconnectDelayMs: 30000,
-      circuitBreakerDurationMs: 60000,
-      connectionTimeoutMs: 10000,
+      maxReconnectDelayMs: TIMEOUTS.MAX_RECONNECTION_DELAY,
+      circuitBreakerDurationMs: TIMEOUTS.CIRCUIT_BREAKER_DURATION,
+      connectionTimeoutMs: TIMEOUTS.CONNECTION_TIMEOUT,
       ...options.config,
     };
   }

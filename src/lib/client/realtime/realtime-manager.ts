@@ -1,5 +1,6 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 
+import { TIMEOUTS } from '@/src/lib/constants/time';
 import type { BattleEventListener } from '@/src/types/realtime';
 
 import { connectionManager } from './connection-manager';
@@ -30,7 +31,7 @@ export class RealtimeManager {
       enableReconnection: true,
       enableEventBuffer: true,
       maxConnectionsPerUser: 3,
-      connectionTimeoutMs: 10000,
+      connectionTimeoutMs: TIMEOUTS.CONNECTION_TIMEOUT,
       maxBufferSize: 50,
       processingDelayMs: 100,
       ...options.config,

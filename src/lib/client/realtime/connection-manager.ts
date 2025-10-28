@@ -1,5 +1,6 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 
+import { TIMEOUTS } from '@/src/lib/constants/time';
 import { ConnectionInfo } from '@/src/types/realtime';
 import { supabaseBrowser } from '@/src/lib/database/supabase';
 import { connectionLogger } from '@/src/lib/utils/logger';
@@ -24,7 +25,7 @@ export class ConnectionManager {
   constructor(options: ConnectionManagerOptions = {}) {
     this.config = {
       maxConnectionsPerUser: 3,
-      connectionTimeoutMs: 10000,
+      connectionTimeoutMs: TIMEOUTS.CONNECTION_TIMEOUT,
       enableReconnection: true,
       ...options.config,
     };
@@ -175,17 +176,18 @@ export class ConnectionManager {
   }
 
   /**
-   * Gets the current user ID
+   * Gets the current user ID (SSR-safe)
    */
   private getUserId(): string {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return 'server';
+    }
+
     try {
-      if (typeof window === 'undefined' || !window.localStorage) {
-        return 'server';
-      }
       return localStorage.getItem('user_id') || 'anonymous';
     } catch (err) {
       connectionLogger.warn(
-        'Error accessing localStorage, using anonymous ID:',
+        'localStorage access denied, using anonymous ID:',
         err
       );
       return 'anonymous';

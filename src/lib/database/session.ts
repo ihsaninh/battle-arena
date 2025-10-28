@@ -34,11 +34,11 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
     const cookieKey = 'battle_session_fp';
     let fingerprint: string | null = null;
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && window.localStorage) {
       try {
         fingerprint = window.localStorage.getItem(storageKey);
       } catch (err) {
-        dbLogger.warn('Unable to access localStorage', err);
+        dbLogger.warn('localStorage access denied', err);
       }
 
       if (!fingerprint && typeof document !== 'undefined') {
@@ -57,10 +57,12 @@ export const ensureSession = async (displayName: string): Promise<boolean> => {
             : `gen-${Math.random().toString(36).slice(2)}`;
         fingerprint = `fp-${random}`;
 
-        try {
-          window.localStorage.setItem(storageKey, fingerprint);
-        } catch (err) {
-          dbLogger.warn('Failed to persist fingerprint to localStorage', err);
+        if (window.localStorage) {
+          try {
+            window.localStorage.setItem(storageKey, fingerprint);
+          } catch (err) {
+            dbLogger.warn('Failed to persist fingerprint to localStorage', err);
+          }
         }
 
         if (typeof document !== 'undefined') {

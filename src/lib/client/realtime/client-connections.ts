@@ -1,5 +1,6 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 
+import { TIMEOUTS } from '@/src/lib/constants/time';
 import { ConnectionInfo } from '@/src/types/realtime';
 import { supabaseBrowser } from '@/src/lib/database/supabase';
 import { connectionLogger } from '@/src/lib/utils/logger';
@@ -10,8 +11,16 @@ const activeConnections = new Map<string, ConnectionInfo>();
 const MAX_CONNECTIONS_PER_USER = 3;
 
 function getUserId(): string {
-  if (typeof window === 'undefined') return 'server';
-  return localStorage.getItem('user_id') || 'anonymous';
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return 'server';
+  }
+
+  try {
+    return localStorage.getItem('user_id') || 'anonymous';
+  } catch (err) {
+    connectionLogger.warn('localStorage access denied:', err);
+    return 'anonymous';
+  }
 }
 
 export function createRoomChannel(
@@ -132,11 +141,11 @@ export function createEnhancedRoomChannel(
   let isReconnecting = false;
   let lastReconnectTime = 0;
   const minReconnectInterval = 5000;
-  const maxReconnectDelay = 30000;
+  const maxReconnectDelay = TIMEOUTS.MAX_RECONNECTION_DELAY;
 
   let circuitBreakerOpen = false;
   let circuitBreakerTimeout: NodeJS.Timeout | null = null;
-  const circuitBreakerDuration = 60000;
+  const circuitBreakerDuration = TIMEOUTS.CIRCUIT_BREAKER_DURATION;
 
   const attemptReconnection = () => {
     if (isDestroyed || isReconnecting || circuitBreakerOpen) {
